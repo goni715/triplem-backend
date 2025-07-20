@@ -8,19 +8,10 @@ import config from "../../config";
 import sendEmailUtility from "../../utils/sendEmailUtility";
 import hashedPassword from "../../utils/hashedPassword";
 import mongoose, { Types } from "mongoose";
-import RestaurantModel from "../Restaurant/restaurant.model";
-import SocialMediaModel from "../SocialMedia/socialMedia.model";
-import OtpModel from "../Otp/otp.model";
 import verifyToken from "../../utils/verifyToken";
 import { isJWTIssuedBeforePassChanged } from "../../utils/isJWTIssuedBeforePassChanged";
-import MenuModel from "../Menu/menu.model";
-import FavouriteModel from "../Favourite/favourite.model";
-import ReviewModel from "../Review/review.model";
-import MenuReviewModel from "../MenuReview/menuReview.model";
-import ScheduleModel from "../Schedule/schedule.model";
-import { OAuth2Client } from "google-auth-library";
-import appleSignin from 'apple-signin-auth';
 import { v4 as uuidv4 } from 'uuid';
+import OtpModel from "../Otp/otp.model";
 
 
 

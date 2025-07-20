@@ -16,7 +16,7 @@ const createUserService = async (req:Request, payload: IUser) => {
       throw new AppError(409, 'Email is already existed')
   }
         
-  if (req.file) {
+  if (req?.file) {
      payload.profileImg = await uploadImage(req);
   }
 
