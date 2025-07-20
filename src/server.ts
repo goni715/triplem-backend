@@ -1,7 +1,7 @@
-import config from "./app/config";
 import { Server } from "http";
 import dbConnect from "./app/utils/dbConnect";
-import seedSuperAdmin from "./app/db";
+import app from "./app";
+import config from "./app/config";
 
 let server: Server;
 
@@ -11,7 +11,6 @@ const port = config.port || 9090;
 async function main() {
     try {
       await dbConnect();
-      await seedSuperAdmin();
       server = app.listen(port, () => {
         console.log(`Example app listening on port ${port}`);
       });
