@@ -7,8 +7,6 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import bodyParser from "body-parser";
 import cookieParser from 'cookie-parser';
 import path from "path";
-import { xssSanitizer } from "./app/middlewares/xssSanitizer";
-import hpp from "hpp";
 
 
 const app: Application = express();
