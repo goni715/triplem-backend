@@ -3,6 +3,17 @@ import { z } from "zod";
 
 
 
+export const resendVerifyEmailSchema = z.object({
+  email: z
+    .string({
+      invalid_type_error: "email must be string",
+      required_error: "email is required",
+    })
+    .email({
+      message: "Invalid email address",
+    })
+});
+
 
 export const loginValidationSchema = z.object({
   email: z

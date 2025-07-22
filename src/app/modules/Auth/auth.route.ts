@@ -9,6 +9,7 @@ import {
   forgotPassVerifyOtpSchema,
   loginValidationSchema,
   refreshTokenValidationSchema,
+  resendVerifyEmailSchema,
 } from "./auth.validation";
 import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
@@ -23,7 +24,13 @@ router.post(
   AuthController.registerUser
 );
 
-router.get("/verify-email/:token", AuthController.verifyEmail)
+router.get("/verify-email", AuthController.verifyEmail);
+
+router.post(
+  "/resend-verify-email",
+  validationMiddleware(resendVerifyEmailSchema),
+  AuthController.resendVerifyEmail
+);
 
 router.post(
   "/login",

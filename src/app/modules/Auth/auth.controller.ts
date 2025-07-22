@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, registerUserService, socialLoginService, verifyEmailService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, registerUserService, resendVerifyEmailService, socialLoginService, verifyEmailService } from "./auth.service";
 
 
 const registerUser = catchAsync(async (req, res) => {
@@ -16,12 +16,24 @@ const registerUser = catchAsync(async (req, res) => {
 
 
 const verifyEmail = catchAsync(async (req, res) => {
-  const token = req.params.token;
-  const result = await verifyEmailService(token);
+  const token = req.query.token;
+  const result = await verifyEmailService(token as string);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "Email is verified successfully",
+    data: result
+  })
+});
+
+
+const resendVerifyEmail = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await resendVerifyEmailService(email);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Verification email resent. Please check your inbox.",
     data: result
   })
 });
@@ -215,6 +227,7 @@ const socialLogin = catchAsync(async (req, res) => {
  const AuthController = {
   registerUser,
   verifyEmail,
+  resendVerifyEmail,
   loginUser,
   loginOwner,
   loginSuperAdmin,

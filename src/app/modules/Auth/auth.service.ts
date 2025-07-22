@@ -60,6 +60,7 @@ const registerUserService = async (reqBody: IUser) => {
   }
 }
 
+
 const verifyEmailService = async (token: string) => {
   if (!token) {
     throw new ApiError(400, "Verification Token is required");
@@ -87,6 +88,26 @@ const verifyEmailService = async (token: string) => {
   }
 }
 
+
+const resendVerifyEmailService = async (email: string) => {
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new AppError(404, `Couldn't find this email address`);
+  }
+
+  //check if user is already verified
+  if (user?.isVerified) {
+    throw new ApiError(409, "This Email address is already verified");
+  }
+
+  const newToken = jwt.sign({ email }, config.jwt_verify_email_secret as Secret, { expiresIn: config.jwt_verify_email_expires_in as TExpiresIn });
+  //update existingUser
+  await UserModel.updateOne({ email }, { verificationToken: newToken });
+  //send verification email
+  await sendVerificationEmail(email, user.fullName, newToken);
+  return null;
+}
+
 const loginUserService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select(
     "+password"
@@ -94,6 +115,11 @@ const loginUserService = async (payload: ILoginUser) => {
   if (!user) {
     throw new AppError(404, `Couldn't find this email address`);
   }
+
+ //check email is not verified
+ if(!user?.isVerified){
+  throw new ApiError(403, "Please verify your email");
+ }
 
   //check user is blocked
   if (user.status === "blocked") {
@@ -577,6 +603,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 export {
   registerUserService,
   verifyEmailService,
+  resendVerifyEmailService,
   loginUserService,
   loginOwnerService,
   loginSuperAdminService,
