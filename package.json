@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
-    "error": "node --trace-warnings"
+    "create:module": "node create-module.mjs"
   },
   "keywords": [],
   "author": "",

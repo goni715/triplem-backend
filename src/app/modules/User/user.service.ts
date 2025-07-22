@@ -149,7 +149,7 @@ const getMeForSuperAdminService = async (userId: string) => {
 
 
 const getMeService = async (userId: string) => {
-  const user = await UserModel.findById(userId);
+  const user = await UserModel.findById(userId).select("fullName email phone");
   if(!user){
     throw new AppError(404, "No User Found");
   }
