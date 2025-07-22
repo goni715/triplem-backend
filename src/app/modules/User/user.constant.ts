@@ -2,9 +2,8 @@
 
 export const UserRole = {
     user: 'user',
-    owner: 'owner',
     super_admin: 'super_admin',
-    administrator: "administrator"
+    admin: "admin"
 } as const;
 
 

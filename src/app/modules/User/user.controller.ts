@@ -63,7 +63,7 @@ const getMe = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "My Information is retrieved successfully",
+    message: "My Profile is retrieved successfully",
     data: result
   });
 });
@@ -72,7 +72,7 @@ const getMe = catchAsync(async (req, res) => {
 
 const editMyProfile = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await editMyProfileService(req, loginUserId as string, req.body);
+  const result = await editMyProfileService(loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,

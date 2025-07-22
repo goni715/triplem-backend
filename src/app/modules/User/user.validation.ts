@@ -34,8 +34,16 @@ export const createUserValidationSchema = z.object({
 
 
 export const updateProfileValidationSchema = z.object({
-  fullName: z.string().optional(),
+  fullName: z.string({
+    invalid_type_error: "Full Name must be string",
+    required_error: "full Name is required",
+  })
+    .trim()
+    .regex(fullNameRegex, {
+      message:
+        "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
+    }).optional(),
   phone: z.string().optional(),
-  address: z.string().optional()
 });
+
 

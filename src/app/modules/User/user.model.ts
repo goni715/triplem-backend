@@ -45,10 +45,6 @@ const userSchema = new Schema<IUser>({
         enum: ['blocked', 'unblocked'],
         default: 'unblocked'
     },
-    profileImg: {
-        type: String,
-        default: ''
-    },
 }, {
     timestamps: true,
     versionKey: false

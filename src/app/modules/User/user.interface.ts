@@ -11,7 +11,6 @@ export interface IUser {
   passwordChangedAt?: Date;
   role: "user" | "admin" | "super_admin";
   status: "blocked" | "unblocked";
-  profileImg?: string
 }
 
 

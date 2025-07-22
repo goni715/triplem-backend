@@ -156,17 +156,12 @@ const getMeService = async (userId: string) => {
   return user;
 }
 
-const editMyProfileService = async (req:Request, loginUserId: string, payload: Partial<IUser>) => {
-  //upload the image
-  if(req.file) {
-    payload.profileImg = await uploadImage(req);
-  }
 
+const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>) => {
   const result = UserModel.updateOne(
     { _id: loginUserId },
     payload
   )
-
   return result;
 }
 

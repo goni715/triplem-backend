@@ -41,7 +41,7 @@ const resendVerifyEmail = catchAsync(async (req, res) => {
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await loginUserService(req.body);
-  const { role, accessToken, refreshToken } = result;
+  const { accessToken, refreshToken } = result;
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,  // Prevents client-side access to the cookie (more secure)
@@ -55,7 +55,6 @@ const loginUser = catchAsync(async (req, res) => {
     success: true,
     message: "Login Success",
     data: {
-      role,
       accessToken,
       refreshToken
     }
