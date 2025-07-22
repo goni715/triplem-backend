@@ -2,35 +2,31 @@ import express from 'express';
 import ShippingController from './Shipping.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createShippingValidationSchema, updateShippingValidationSchema } from './Shipping.validation';
+import AuthMiddleware from '../../middlewares/AuthMiddleware';
+import { UserRole } from '../User/user.constant';
 
 const router = express.Router();
 
 router.post(
   '/create-shipping',
+  AuthMiddleware(UserRole.user),
   validationMiddleware(createShippingValidationSchema),
   ShippingController.createShipping,
 );
 
 router.get(
-  '/get-single-shipping/:shippingId',
-  ShippingController.getSingleShipping,
+  '/get-shipping-address',
+  AuthMiddleware(UserRole.user),
+  ShippingController.getShippingAddress,
 );
 
 router.patch(
-  '/update-shipping/:shippingId',
+  '/update-shipping',
+  AuthMiddleware(UserRole.user),
   validationMiddleware(updateShippingValidationSchema),
   ShippingController.updateShipping,
 );
 
-router.delete(
-  '/delete-shipping/:shippingId',
-  ShippingController.deleteShipping,
-);
-
-router.get(
-  '/get-all-shippings',
-  ShippingController.getAllShippings,
-);
 
 const ShippingRoutes = router;
 export default ShippingRoutes;

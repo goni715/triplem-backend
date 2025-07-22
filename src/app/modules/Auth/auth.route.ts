@@ -39,15 +39,9 @@ router.post(
 );
 
 router.post(
-  "/login-owner",
+  "/login-admin",
   validationMiddleware(loginValidationSchema),
-  AuthController.loginOwner
-);
-
-router.post(
-  "/login-super-admin",
-  validationMiddleware(loginValidationSchema),
-  AuthController.loginSuperAdmin
+  AuthController.loginAdmin
 );
 
 //forgot-password

@@ -60,7 +60,6 @@ const registerUserService = async (reqBody: IUser) => {
   }
 }
 
-
 const verifyEmailService = async (token: string) => {
   if (!token) {
     throw new ApiError(400, "Verification Token is required");
@@ -156,45 +155,17 @@ const loginUserService = async (payload: ILoginUser) => {
   };
 }
 
-const loginOwnerService = async (payload: ILoginUser) => {
+
+
+const loginAdminService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select('+password');
   if (!user) {
     throw new AppError(404, `Couldn't find this email address`);
   }
 
-  //check user is blocked
-  if (user.status === "blocked") {
-    throw new AppError(403, "Your account is blocked !")
-  }
-
-  //check you are not admin
-  if (user.role !== "user") {
-    throw new AppError(400, `Sorry! You are not Owner`);
-  }
-
-  //check password
-  const isPasswordMatch = await checkPassword(payload.password, user.password);
-  if (!isPasswordMatch) {
-    throw new AppError(400, 'Password is not correct');
-  }
-
-
-
-  //create accessToken
-  const accessToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_access_secret as Secret, config.jwt_access_expires_in as TExpiresIn);
-  //create refreshToken
-  const refreshToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_refresh_secret as Secret, config.jwt_refresh_expires_in as TExpiresIn);
-
-  return {
-    accessToken,
-    refreshToken
-  }
-}
-
-const loginSuperAdminService = async (payload: ILoginUser) => {
-  const user = await UserModel.findOne({ email: payload.email }).select('+password');
-  if (!user) {
-    throw new AppError(404, `Couldn't find this email address`);
+  //check email is not verified
+  if (!user?.isVerified) {
+    throw new ApiError(403, "Please verify your email");
   }
 
   //check user is blocked
@@ -204,7 +175,7 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
 
   //check you are not super_admin or administrator
   if ((user.role !== "admin") && (user.role !== "super_admin")) {
-    throw new AppError(400, `Sorry! You are not 'super_admin' or 'administrator'`);
+    throw new AppError(400, `Sorry! You are not 'super_admin' or 'admin'`);
   }
 
   //check password
@@ -212,7 +183,6 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
   if (!isPasswordMatch) {
     throw new AppError(400, 'Password is not correct');
   }
-
 
 
   //create accessToken
@@ -223,7 +193,7 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
   return {
     accessToken,
     refreshToken,
-    message: `${user.role} is logged in successfully`
+    message: `${user.role} login success`
   }
 }
 
@@ -293,7 +263,6 @@ const forgotPassVerifyOtpService = async (payload: IVerifyOTp) => {
 
   return null;
 };
-
 
 
 //step-03
@@ -530,84 +499,12 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 };
 
 
-// const oAuthLoginService = async (payload: OAuth) => {
-//     const { provider, idToken } = payload;
-
-//     //client for google signin
-//     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-//     let email, fullName;
-
-//     try{
-
-//     if(provider === "google"){
-//         const ticket = await client.verifyIdToken({
-//             idToken,
-//             audience: process.env.GOOGLE_CLIENT_ID,
-//           });
-
-//           const payload = ticket.getPayload();
-//           email = payload?.email;
-//           fullName = payload?.name;
-//     }
-//     else if(provider === "apple"){
-//         const payload = await appleSignin.verifyIdToken(idToken, {
-//             audience: process.env.APPLE_CLIENT_ID,
-//             ignoreExpiration: true,
-//           });
-
-//           email = payload.email;
-//           fullName = payload.name || "Apple User"; // Property 'name' does not exist on type 'AppleIdTokenType'.
-//     }
-//     else{
-//         throw new AppError(400, "Unsupported provider")
-//     }
-
-
-//     let user = await UserModel.findOne({ email });
-//     if(!user){
-//       user = await UserModel.create({
-//         fullName,
-//         email,
-//         phone: '12345678',
-//         password: 'social-login-placeholder',
-//         role: 'user'
-//       })
-//     }
-
-
-//   //create accessToken
-//   const accessToken = createToken(
-//     { email: user.email, id: String(user._id), role: user.role },
-//     config.jwt_access_secret as Secret,
-//     config.jwt_access_expires_in as TExpiresIn
-//   );
-
-//    //create refreshToken
-//    const refreshToken = createToken(
-//     { email: user.email, id: String(user._id), role: user.role },
-//     config.jwt_refresh_secret as Secret,
-//     config.jwt_refresh_expires_in as TExpiresIn
-//   );
-
-//   return {
-//     accessToken,
-//     role: user.role,
-//     refreshToken,
-//   };
-
-//   }catch(err:any){
-//     throw new Error(err)
-//   }
-// }
-
 export {
   registerUserService,
   verifyEmailService,
   resendVerifyEmailService,
   loginUserService,
-  loginOwnerService,
-  loginSuperAdminService,
+  loginAdminService,
   forgotPassSendOtpService,
   forgotPassVerifyOtpService,
   forgotPassCreateNewPassService,

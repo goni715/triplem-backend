@@ -1,133 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ShippingSearchableFields } from './Shipping.constant';
-import mongoose from 'mongoose';
-import { IShipping, TShippingQuery } from './Shipping.interface';
+import { IShipping } from './Shipping.interface';
 import ShippingModel from './Shipping.model';
-import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import ApiError from '../../errors/ApiError';
 
 const createShippingService = async (
   loginUserId: string,
   payload: IShipping,
 ) => {
+  //check shipping information
+  const shipping = await ShippingModel.findOne({ userId: loginUserId });
+  if(shipping){
+    throw new ApiError(409, "You have already set shipping information");
+  }
   
-  const result = await ShippingModel.create(payload);
+  const result = await ShippingModel.create({
+    ...payload,
+    userId: loginUserId
+  });
   return result;
 };
 
-const getAllShippingsService = async (query: TShippingQuery) => {
-  const {
-    searchTerm, 
-    page = 1, 
-    limit = 10, 
-    sortOrder = "desc",
-    sortBy = "createdAt", 
-    ...filters  // Any additional filters
-  } = query;
 
-  // 2. Set up pagination
-  const skip = (Number(page) - 1) * Number(limit);
-
-  //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
-
-  //4. setup searching
-  let searchQuery = {};
-  if (searchTerm) {
-    searchQuery = makeSearchQuery(searchTerm, ShippingSearchableFields);
-  }
-
-  //5 setup filters
-  let filterQuery = {};
-  if (filters) {
-    filterQuery = makeFilterQuery(filters);
-  }
-  const result = await ShippingModel.aggregate([
-    {
-      $match: {
-        ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
-      },
-    },
-    { $sort: { [sortBy]: sortDirection } }, 
-    { $skip: skip }, 
-    { $limit: Number(limit) }, 
-  ]);
-
-     // total count
-  const totalReviewResult = await ShippingModel.aggregate([
-    {
-      $match: {
-        ...searchQuery,
-        ...filterQuery
-      }
-    },
-    { $count: "totalCount" }
-  ])
-
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
-  const totalPages = Math.ceil(totalCount / Number(limit));
-
-return {
-  meta: {
-    page: Number(page), //currentPage
-    limit: Number(limit),
-    totalPages,
-    total: totalCount,
-  },
-  data: result,
-};
-};
-
-const getSingleShippingService = async (shippingId: string) => {
-  const result = await ShippingModel.findById(shippingId);
+const getShippingAddressService = async (loginUserId: string,) => {
+  const result = await ShippingModel.findOne({ userId: loginUserId }).select("streetAddress state city zipCode -_id");
   if (!result) {
-    throw new AppError(404, 'Shipping Not Found');
+    throw new ApiError(404, "Shipping not found");
   }
-
   return result;
 };
 
-const updateShippingService = async (shippingId: string, payload: any) => {
- 
-  const shipping = await ShippingModel.findById(shippingId);
+
+const updateShippingService = async (loginUserId: string, payload: any) => {
+  //check shipping information
+  const shipping = await ShippingModel.findOne({ userId: loginUserId });
   if(!shipping){
-    throw new AppError(404, "Shipping Not Found");
+    throw new ApiError(404, "Shipping not found");
   }
   const result = await ShippingModel.updateOne(
-    { _id: shippingId },
+    { userId: loginUserId },
     payload,
+    { runValidators: true}
   );
 
   return result;
 };
 
-const deleteShippingService = async (shippingId: string) => {
-  const shipping = await ShippingModel.findById(shippingId);
-  if(!shipping){
-    throw new AppError(404, "Shipping Not Found");
-  }
-  const result = await ShippingModel.deleteOne({ _id:moduleName.toLowerCase()}Id });
-  return result;
-};
+
+
 
 export {
   createShippingService,
-  getAllShippingsService,
-  getSingleShippingService,
+  getShippingAddressService,
   updateShippingService,
-  deleteShippingService,
 };

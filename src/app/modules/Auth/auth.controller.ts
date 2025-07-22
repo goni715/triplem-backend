@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, registerUserService, resendVerifyEmailService, socialLoginService, verifyEmailService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginAdminService, loginUserService, refreshTokenService, registerUserService, resendVerifyEmailService, socialLoginService, verifyEmailService } from "./auth.service";
 
 
 const registerUser = catchAsync(async (req, res) => {
@@ -84,8 +84,8 @@ const loginOwner = catchAsync(async (req, res) => {
  })
 
 
-const loginSuperAdmin = catchAsync(async (req, res) => {
-  const result = await loginSuperAdminService(req.body);
+const loginAdmin = catchAsync(async (req, res) => {
+  const result = await loginAdminService(req.body);
   const { accessToken, refreshToken, message} = result;
   
   res.cookie("refreshToken", refreshToken, {
@@ -229,7 +229,7 @@ const socialLogin = catchAsync(async (req, res) => {
   resendVerifyEmail,
   loginUser,
   loginOwner,
-  loginSuperAdmin,
+  loginAdmin,
   forgotPassSendOtp,
   forgotPassVerifyOtp,
   forgotPassCreateNewPass,

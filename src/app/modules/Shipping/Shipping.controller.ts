@@ -1,10 +1,10 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createShippingService, getSingleShippingService, getAllShippingsService, updateShippingService, deleteShippingService } from './Shipping.service';
+import { createShippingService, updateShippingService, getShippingAddressService } from './Shipping.service';
 
 const createShipping = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createShippingService(loginUserId, req.body);
+  const result = await createShippingService(loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 201,
@@ -14,59 +14,36 @@ const createShipping = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleShipping = catchAsync(async (req, res) => {
-  const { shippingId } = req.params;
-  const result = await getSingleShippingService(shippingId);
+const getShippingAddress = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getShippingAddressService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Shipping is retrieved successfully',
+    message: 'Shipping Address is retrieved successfully',
     data: result,
   });
 });
 
-const getAllShippings = catchAsync(async (req, res) => {
-  const result = await getAllShippingsService(req.query);
 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Shippings are retrieved successfully',
-    meta: result.meta,
-    data: result.data,
-  });
-});
 
 const updateShipping = catchAsync(async (req, res) => {
-  const { shippingId } = req.params;
-  const result = await updateShippingService(shippingId, req.body);
+  const loginUserId = req.headers.id;
+  const result = await updateShippingService(loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Shipping is updated successfully',
+    message: 'Shipping Address is updated successfully',
     data: result,
   });
 });
 
-const deleteShipping = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteShippingService(id);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Shipping is deleted successfully',
-    data: result,
-  });
-});
 
 const ShippingController = {
   createShipping,
-  getSingleShipping,
-  getAllShippings,
+  getShippingAddress,
   updateShipping,
-  deleteShipping,
 };
 export default ShippingController;

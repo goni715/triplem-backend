@@ -33,7 +33,6 @@ const createUserService = async (req:Request, payload: IUser) => {
 
 
 const getUsersService = async (query: TUserQuery) => {
-  const ObjectId = Types.ObjectId;
   // 1. Extract query parameters
   const {
     searchTerm, 
@@ -79,10 +78,7 @@ const getUsersService = async (query: TUserQuery) => {
         phone: 1,
         gender:1,
         role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        status: 1
       },
     },
     { $sort: { [sortBy]: sortDirection } }, 
@@ -160,7 +156,8 @@ const getMeService = async (userId: string) => {
 const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>) => {
   const result = UserModel.updateOne(
     { _id: loginUserId },
-    payload
+    payload,
+    { runValidators: true }
   )
   return result;
 }
