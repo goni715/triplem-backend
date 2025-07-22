@@ -45,7 +45,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.socialLoginService = exports.refreshTokenService = exports.deleteMyAccountService = exports.changeStatusService = exports.changePasswordService = exports.forgotPassCreateNewPassService = exports.forgotPassVerifyOtpService = exports.forgotPassSendOtpService = exports.loginSuperAdminService = exports.loginOwnerService = exports.loginUserService = exports.registerUserService = void 0;
+exports.socialLoginService = exports.refreshTokenService = exports.deleteMyAccountService = exports.changeStatusService = exports.changePasswordService = exports.forgotPassCreateNewPassService = exports.forgotPassVerifyOtpService = exports.forgotPassSendOtpService = exports.loginSuperAdminService = exports.loginOwnerService = exports.loginUserService = exports.resendVerifyEmailService = exports.verifyEmailService = exports.registerUserService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const checkPassword_1 = __importDefault(require("../../utils/checkPassword"));
 const user_model_1 = __importDefault(require("../User/user.model"));
@@ -60,8 +60,9 @@ const uuid_1 = require("uuid");
 const otp_model_1 = __importDefault(require("../Otp/otp.model"));
 const ApiError_2 = __importDefault(require("../../errors/ApiError"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const sendVerificationEmail_1 = __importDefault(require("../../utils/sendVerificationEmail"));
 const registerUserService = (reqBody) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email } = reqBody;
+    const { email, fullName, password } = reqBody;
     //check email
     const existingUser = yield user_model_1.default.findOne({ email });
     //User already exists and verified
@@ -70,17 +71,79 @@ const registerUserService = (reqBody) => __awaiter(void 0, void 0, void 0, funct
     }
     //User exists but not verified → resend verification
     if (existingUser && !existingUser.isVerified) {
-        throw new ApiError_2.default(409, "Email is already existed");
+        const newToken = jsonwebtoken_1.default.sign({ email }, config_1.default.jwt_verify_email_secret, { expiresIn: config_1.default.jwt_verify_email_expires_in });
+        //update existingUser
+        yield user_model_1.default.updateOne({ email }, { verificationToken: newToken });
+        //send verification email
+        yield (0, sendVerificationEmail_1.default)(email, fullName, newToken);
+        return {
+            message: "Verification email resent. Please check your inbox."
+        };
     }
     //No user exists → create new one
     const verificationToken = jsonwebtoken_1.default.sign({ email }, config_1.default.jwt_verify_email_secret, { expiresIn: config_1.default.jwt_verify_email_expires_in });
-    return reqBody;
+    //create new user
+    yield user_model_1.default.create({
+        fullName,
+        email,
+        password,
+        verificationToken
+    });
+    //send verification email
+    yield (0, sendVerificationEmail_1.default)(email, fullName, verificationToken);
+    return {
+        message: "Please check your email to verify"
+    };
 });
 exports.registerUserService = registerUserService;
+const verifyEmailService = (token) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!token) {
+        throw new ApiError_2.default(400, "Verification Token is required");
+    }
+    try {
+        const payload = (0, verifyToken_1.default)(token, config_1.default.jwt_verify_email_secret);
+        const user = yield user_model_1.default.findOne({ email: payload.email });
+        if (!user || user.verificationToken !== token) {
+            throw new ApiError_2.default(400, "Invalid or expired token");
+        }
+        //user is alreay verified
+        if (user === null || user === void 0 ? void 0 : user.isVerified) {
+            throw new ApiError_2.default(409, "This Email is already verified");
+        }
+        //update the user 
+        yield user_model_1.default.updateOne({ email: user === null || user === void 0 ? void 0 : user.email }, { isVerified: true, verificationToken: '' });
+        return null;
+    }
+    catch (_a) {
+        throw new ApiError_2.default(400, "Invalid or expired token");
+    }
+});
+exports.verifyEmailService = verifyEmailService;
+const resendVerifyEmailService = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.default.findOne({ email });
+    if (!user) {
+        throw new ApiError_1.default(404, `Couldn't find this email address`);
+    }
+    //check if user is already verified
+    if (user === null || user === void 0 ? void 0 : user.isVerified) {
+        throw new ApiError_2.default(409, "This Email address is already verified");
+    }
+    const newToken = jsonwebtoken_1.default.sign({ email }, config_1.default.jwt_verify_email_secret, { expiresIn: config_1.default.jwt_verify_email_expires_in });
+    //update existingUser
+    yield user_model_1.default.updateOne({ email }, { verificationToken: newToken });
+    //send verification email
+    yield (0, sendVerificationEmail_1.default)(email, user.fullName, newToken);
+    return null;
+});
+exports.resendVerifyEmailService = resendVerifyEmailService;
 const loginUserService = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.default.findOne({ email: payload.email }).select("+password");
     if (!user) {
         throw new ApiError_1.default(404, `Couldn't find this email address`);
+    }
+    //check email is not verified
+    if (!(user === null || user === void 0 ? void 0 : user.isVerified)) {
+        throw new ApiError_2.default(403, "Please verify your email");
     }
     //check user is blocked
     if (user.status === "blocked") {
@@ -144,7 +207,7 @@ const loginSuperAdminService = (payload) => __awaiter(void 0, void 0, void 0, fu
         throw new ApiError_1.default(403, "Your account is blocked !");
     }
     //check you are not super_admin or administrator
-    if ((user.role !== "administrator") && (user.role !== "super_admin")) {
+    if ((user.role !== "admin") && (user.role !== "super_admin")) {
         throw new ApiError_1.default(400, `Sorry! You are not 'super_admin' or 'administrator'`);
     }
     //check password
@@ -170,22 +233,25 @@ const forgotPassSendOtpService = (email) => __awaiter(void 0, void 0, void 0, fu
     if (!user) {
         throw new ApiError_1.default(404, `Couldn't find this email address`);
     }
+    //check email is not verified
+    if (!(user === null || user === void 0 ? void 0 : user.isVerified)) {
+        throw new ApiError_2.default(403, "Your account is not verified");
+    }
     //check user is blocked
     if (user.status === "blocked") {
         throw new ApiError_1.default(403, "Your account is blocked !");
     }
-    const otp = Math.floor(1000 + Math.random() * 9000);
+    const otp = Math.floor(100000 + Math.random() * 9000);
     //insert the otp
     yield otp_model_1.default.create({ email, otp });
     //send otp to the email address
-    yield (0, sendEmailUtility_1.default)(email, String(otp));
+    yield (0, sendEmailUtility_1.default)(email, user === null || user === void 0 ? void 0 : user.fullName, String(otp));
     return null;
 });
 exports.forgotPassSendOtpService = forgotPassSendOtpService;
 //step-02
 const forgotPassVerifyOtpService = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, otp } = payload;
-    console.log(Object.assign({}, payload));
     const user = yield user_model_1.default.findOne({ email });
     if (!user) {
         throw new ApiError_1.default(404, `Couldn't find this email address`);

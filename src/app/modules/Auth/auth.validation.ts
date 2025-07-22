@@ -60,7 +60,7 @@ export const forgotPassVerifyOtpSchema = z.object({
     .string({
       required_error: "Otp is required",
     })
-    .regex(/^\d{4}$/, "Otp must be a 6-digit number")
+    .regex(/^\d{6}$/, "Otp must be a 6-digit number")
     .trim(),
 });
 
@@ -78,7 +78,7 @@ export const forgotPassCreateNewPassSchema = z.object({
     .string({
       required_error: "Otp is required",
     })
-    .regex(/^\d{4}$/, "Otp must be a 6-digit number")
+    .regex(/^\d{6}$/, "Otp must be a 6-digit number")
     .trim(),
   password: z
     .string({

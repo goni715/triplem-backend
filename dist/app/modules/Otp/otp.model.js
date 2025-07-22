@@ -11,8 +11,8 @@ const OtpSchema = new mongoose_1.Schema({
         type: String,
         required: [true, "otp is required"],
         trim: true,
-        maxlength: 4,
-        minlength: 4
+        maxlength: 6,
+        minlength: 6
     },
     status: {
         type: Number,

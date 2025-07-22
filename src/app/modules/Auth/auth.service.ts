@@ -237,18 +237,23 @@ const forgotPassSendOtpService = async (email: string) => {
     throw new AppError(404, `Couldn't find this email address`);
   }
 
+  //check email is not verified
+  if (!user?.isVerified) {
+    throw new ApiError(403, "Your account is not verified");
+  }
+
   //check user is blocked
   if (user.status === "blocked") {
     throw new AppError(403, "Your account is blocked !");
   }
 
-  const otp = Math.floor(1000 + Math.random() * 9000);
+  const otp = Math.floor(100000 + Math.random() * 9000);
 
   //insert the otp
   await OtpModel.create({ email, otp });
 
   //send otp to the email address
-  await sendEmailUtility(email, String(otp));
+  await sendEmailUtility(email, user?.fullName, String(otp));
   return null;
 };
 
@@ -257,9 +262,6 @@ const forgotPassSendOtpService = async (email: string) => {
 const forgotPassVerifyOtpService = async (payload: IVerifyOTp) => {
   const { email, otp } = payload;
 
-  console.log({
-    ...payload
-  });
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, `Couldn't find this email address`);

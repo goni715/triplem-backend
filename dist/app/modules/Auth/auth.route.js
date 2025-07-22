@@ -13,6 +13,8 @@ const auth_controller_1 = __importDefault(require("./auth.controller"));
 const user_validation_1 = require("../User/user.validation");
 const router = express_1.default.Router();
 router.post("/register", (0, validationMiddleware_1.default)(user_validation_1.createUserValidationSchema), auth_controller_1.default.registerUser);
+router.get("/verify-email", auth_controller_1.default.verifyEmail);
+router.post("/resend-verify-email", (0, validationMiddleware_1.default)(auth_validation_1.resendVerifyEmailSchema), auth_controller_1.default.resendVerifyEmail);
 router.post("/login", (0, validationMiddleware_1.default)(auth_validation_1.loginValidationSchema), auth_controller_1.default.loginUser);
 router.post("/login-owner", (0, validationMiddleware_1.default)(auth_validation_1.loginValidationSchema), auth_controller_1.default.loginOwner);
 router.post("/login-super-admin", (0, validationMiddleware_1.default)(auth_validation_1.loginValidationSchema), auth_controller_1.default.loginSuperAdmin);

@@ -1,7 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshTokenValidationSchema = exports.deleteAccountValidationSchema = exports.changeStatusValidationSchema = exports.changePasswordSchema = exports.forgotPassCreateNewPassSchema = exports.forgotPassVerifyOtpSchema = exports.forgotPassSendOtpSchema = exports.loginValidationSchema = void 0;
+exports.refreshTokenValidationSchema = exports.deleteAccountValidationSchema = exports.changeStatusValidationSchema = exports.changePasswordSchema = exports.forgotPassCreateNewPassSchema = exports.forgotPassVerifyOtpSchema = exports.forgotPassSendOtpSchema = exports.loginValidationSchema = exports.resendVerifyEmailSchema = void 0;
 const zod_1 = require("zod");
+exports.resendVerifyEmailSchema = zod_1.z.object({
+    email: zod_1.z
+        .string({
+        invalid_type_error: "email must be string",
+        required_error: "email is required",
+    })
+        .email({
+        message: "Invalid email address",
+    })
+});
 exports.loginValidationSchema = zod_1.z.object({
     email: zod_1.z
         .string({
@@ -45,7 +55,7 @@ exports.forgotPassVerifyOtpSchema = zod_1.z.object({
         .string({
         required_error: "Otp is required",
     })
-        .regex(/^\d{4}$/, "Otp must be a 6-digit number")
+        .regex(/^\d{6}$/, "Otp must be a 6-digit number")
         .trim(),
 });
 exports.forgotPassCreateNewPassSchema = zod_1.z.object({
@@ -62,7 +72,7 @@ exports.forgotPassCreateNewPassSchema = zod_1.z.object({
         .string({
         required_error: "Otp is required",
     })
-        .regex(/^\d{4}$/, "Otp must be a 6-digit number")
+        .regex(/^\d{6}$/, "Otp must be a 6-digit number")
         .trim(),
     password: zod_1.z
         .string({

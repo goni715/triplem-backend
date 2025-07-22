@@ -21,7 +21,27 @@ const registerUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Verification email sent",
+        message: result.message,
+        data: null
+    });
+}));
+const verifyEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = req.query.token;
+    const result = yield (0, auth_service_1.verifyEmailService)(token);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Email is verified successfully",
+        data: result
+    });
+}));
+const resendVerifyEmail = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    const result = yield (0, auth_service_1.resendVerifyEmailService)(email);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Verification email resent. Please check your inbox.",
         data: result
     });
 }));
@@ -177,6 +197,8 @@ const socialLogin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
 }));
 const AuthController = {
     registerUser,
+    verifyEmail,
+    resendVerifyEmail,
     loginUser,
     loginOwner,
     loginSuperAdmin,
