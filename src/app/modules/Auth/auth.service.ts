@@ -12,9 +12,80 @@ import verifyToken from "../../utils/verifyToken";
 import { isJWTIssuedBeforePassChanged } from "../../utils/isJWTIssuedBeforePassChanged";
 import { v4 as uuidv4 } from 'uuid';
 import OtpModel from "../Otp/otp.model";
+import { IUser } from "../User/user.interface";
+import ApiError from "../../errors/ApiError";
+import jwt from "jsonwebtoken";
+import sendVerificationEmail from "../../utils/sendVerificationEmail";
 
 
+const registerUserService = async (reqBody: IUser) => {
+  const { email, fullName, password } = reqBody;
 
+  //check email
+  const existingUser = await UserModel.findOne({ email });
+
+  //User already exists and verified
+  if (existingUser && existingUser.isVerified) {
+    throw new ApiError(409, "Email is already existed");
+  }
+
+  //User exists but not verified → resend verification
+  if (existingUser && !existingUser.isVerified) {
+    const newToken = jwt.sign({ email }, config.jwt_verify_email_secret as Secret, { expiresIn: config.jwt_verify_email_expires_in as TExpiresIn });
+    //update existingUser
+    await UserModel.updateOne({ email }, { verificationToken: newToken });
+    //send verification email
+    await sendVerificationEmail(email, fullName, newToken);
+    return {
+      message: "Verification email resent. Please check your inbox."
+    }
+  }
+
+  //No user exists → create new one
+  const verificationToken = jwt.sign({ email }, config.jwt_verify_email_secret as Secret, { expiresIn: config.jwt_verify_email_expires_in as TExpiresIn });
+
+  //create new user
+  await UserModel.create({
+    fullName,
+    email,
+    password,
+    verificationToken
+  });
+
+  //send verification email
+  await sendVerificationEmail(email, fullName, verificationToken);
+
+  return {
+    message: "Please check your email to verify"
+  }
+}
+
+const verifyEmailService = async (token: string) => {
+  if (!token) {
+    throw new ApiError(400, "Verification Token is required");
+  }
+
+  try {
+    const payload = verifyToken(token, config.jwt_verify_email_secret as Secret);
+    const user = await UserModel.findOne({ email: payload.email });
+
+    if (!user || user.verificationToken !== token) {
+      throw new ApiError(400, "Invalid or expired token");
+    }
+
+    //user is alreay verified
+    if(user?.isVerified){
+      throw new ApiError(409, "This Email is already verified");
+    }
+
+    //update the user 
+    await UserModel.updateOne({ email: user?.email }, { isVerified: true, verificationToken: '' })
+    return null;
+  }
+  catch {
+    throw new ApiError(400, "Invalid or expired token");
+  }
+}
 
 const loginUserService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select(
@@ -25,7 +96,7 @@ const loginUserService = async (payload: ILoginUser) => {
   }
 
   //check user is blocked
-  if(user.status=== "blocked"){
+  if (user.status === "blocked") {
     throw new AppError(403, "Your account is blocked !")
   }
 
@@ -36,7 +107,7 @@ const loginUserService = async (payload: ILoginUser) => {
   }
 
   //check you are not user
-  if(user.role !== "user"){
+  if (user.role !== "user") {
     throw new AppError(400, `Sorry! You have no access to login`);
   }
 
@@ -63,71 +134,71 @@ const loginUserService = async (payload: ILoginUser) => {
 const loginOwnerService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select('+password');
   if (!user) {
-      throw new AppError(404, `Couldn't find this email address`);
+    throw new AppError(404, `Couldn't find this email address`);
   }
 
   //check user is blocked
-  if(user.status=== "blocked"){
+  if (user.status === "blocked") {
     throw new AppError(403, "Your account is blocked !")
   }
 
   //check you are not admin
-  if(user.role !=="owner"){
+  if (user.role !== "user") {
     throw new AppError(400, `Sorry! You are not Owner`);
   }
 
   //check password
   const isPasswordMatch = await checkPassword(payload.password, user.password);
   if (!isPasswordMatch) {
-      throw new AppError(400, 'Password is not correct');
+    throw new AppError(400, 'Password is not correct');
   }
 
 
 
   //create accessToken
-  const accessToken = createToken({ email: user.email, id: String(user._id), role: user.role}, config.jwt_access_secret as Secret, config.jwt_access_expires_in as TExpiresIn);
+  const accessToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_access_secret as Secret, config.jwt_access_expires_in as TExpiresIn);
   //create refreshToken
   const refreshToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_refresh_secret as Secret, config.jwt_refresh_expires_in as TExpiresIn);
 
   return {
-      accessToken,
-      refreshToken
+    accessToken,
+    refreshToken
   }
 }
 
 const loginSuperAdminService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select('+password');
   if (!user) {
-      throw new AppError(404, `Couldn't find this email address`);
+    throw new AppError(404, `Couldn't find this email address`);
   }
 
   //check user is blocked
-  if(user.status=== "blocked"){
+  if (user.status === "blocked") {
     throw new AppError(403, "Your account is blocked !")
   }
 
   //check you are not super_admin or administrator
-  if((user.role !== "administrator") && (user.role !== "super_admin")){
+  if ((user.role !== "admin") && (user.role !== "super_admin")) {
     throw new AppError(400, `Sorry! You are not 'super_admin' or 'administrator'`);
   }
 
   //check password
   const isPasswordMatch = await checkPassword(payload.password, user.password);
   if (!isPasswordMatch) {
-      throw new AppError(400, 'Password is not correct');
+    throw new AppError(400, 'Password is not correct');
   }
 
 
 
   //create accessToken
-  const accessToken = createToken({ email: user.email, id: String(user._id), role: user.role}, config.jwt_access_secret as Secret, config.jwt_access_expires_in as TExpiresIn);
+  const accessToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_access_secret as Secret, config.jwt_access_expires_in as TExpiresIn);
   //create refreshToken
   const refreshToken = createToken({ email: user.email, id: String(user._id), role: user.role }, config.jwt_refresh_secret as Secret, config.jwt_refresh_expires_in as TExpiresIn);
 
   return {
-      accessToken,
-      refreshToken,
-      message: `${user.role} is logged in successfully`
+    accessToken,
+    refreshToken,
+    message: `${user.role} is logged in successfully`
   }
 }
 
@@ -182,16 +253,16 @@ const forgotPassVerifyOtpService = async (payload: IVerifyOTp) => {
     otpExpires: { $gt: new Date(Date.now()) },
   });
 
-  if(!otpExpired) {
+  if (!otpExpired) {
     throw new AppError(400, "This Otp is expired");
   }
 
 
-   //update the otp status
-   await OtpModel.updateOne(
-    { email, otp, status:0 },
+  //update the otp status
+  await OtpModel.updateOne(
+    { email, otp, status: 0 },
     { status: 1 }
-   );
+  );
 
   return null;
 };
@@ -200,39 +271,39 @@ const forgotPassVerifyOtpService = async (payload: IVerifyOTp) => {
 
 //step-03
 const forgotPassCreateNewPassService = async (payload: INewPassword) => {
-  const { email, otp, password} = payload;
+  const { email, otp, password } = payload;
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, `Couldn't find this email address`);
   }
 
-      //check otp exist
-      const OtpExist = await OtpModel.findOne({ email, otp, status: 1 });
-      if (!OtpExist) {
-        throw new AppError(404, `Invalid Otp Code`);
-      }
-  
-  
-      
-      //Database Third Process
-      //check otp is expired
-      const OtpExpired = await OtpModel.findOne({
-          email,
-          otp,
-          status:1,
-          otpExpires: { $gt: new Date(Date.now()) },
-        });
-  
-  
-        if (!OtpExpired) {
-          throw new AppError(400, `This Otp Code is expired`);
-        }
+  //check otp exist
+  const OtpExist = await OtpModel.findOne({ email, otp, status: 1 });
+  if (!OtpExist) {
+    throw new AppError(404, `Invalid Otp Code`);
+  }
 
-         //update the password
-        const hashPass = await hashedPassword(password);//hashedPassword
-        const result = await UserModel.updateOne({email: email},{password: hashPass, passwordChangedAt: new Date()})
 
-      return result;
+
+  //Database Third Process
+  //check otp is expired
+  const OtpExpired = await OtpModel.findOne({
+    email,
+    otp,
+    status: 1,
+    otpExpires: { $gt: new Date(Date.now()) },
+  });
+
+
+  if (!OtpExpired) {
+    throw new AppError(400, `This Otp Code is expired`);
+  }
+
+  //update the password
+  const hashPass = await hashedPassword(password);//hashedPassword
+  const result = await UserModel.updateOne({ email: email }, { password: hashPass, passwordChangedAt: new Date() })
+
+  return result;
 }
 
 
@@ -246,22 +317,22 @@ const changePasswordService = async (loginUserId: string, payload: IChangePass) 
   const isPasswordMatched = await checkPassword(
     currentPassword,
     user?.password as string
-  ); 
+  );
 
-  if(!isPasswordMatched){
+  if (!isPasswordMatched) {
     throw new AppError(400, 'Current Password is not correct');
   }
 
-   //hash the newPassword
-   const hashPass = await hashedPassword(newPassword);
+  //hash the newPassword
+  const hashPass = await hashedPassword(newPassword);
 
-   //update the password
-   const result = await UserModel.updateOne(
-     { _id: new ObjectId(loginUserId) },
-     { password: hashPass, passwordChangedAt: new Date() }
-   );
-   
-   return result;
+  //update the password
+  const result = await UserModel.updateOne(
+    { _id: new ObjectId(loginUserId) },
+    { password: hashPass, passwordChangedAt: new Date() }
+  );
+
+  return result;
 
 }
 
@@ -270,45 +341,45 @@ const changeStatusService = async (id: string, payload: { status: string }) => {
   const ObjectId = Types.ObjectId;
 
   const user = await UserModel.findById(id);
-  if(!user){
+  if (!user) {
     throw new AppError(404, "User Not Found");
   }
 
-   const result = await UserModel.updateOne(
-    {_id: new ObjectId(id)},
+  const result = await UserModel.updateOne(
+    { _id: new ObjectId(id) },
     payload
-   );
+  );
 
-   return result;
+  return result;
 }
 
 
 const deleteMyAccountService = async (loginUserId: string, password: string) => {
   const ObjectId = Types.ObjectId;
   const user = await UserModel.findById(loginUserId).select('+password');
-  if(!user){
+  if (!user) {
     throw new AppError(404, "User Not Found");
   }
 
-   //check password
-   const isPasswordMatch = await checkPassword(password, user.password);
-   if (!isPasswordMatch) {
-       throw new AppError(400, 'Password is not correct');
-   }
+  //check password
+  const isPasswordMatch = await checkPassword(password, user.password);
+  if (!isPasswordMatch) {
+    throw new AppError(400, 'Password is not correct');
+  }
 
   //transaction & rollback
- const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
 
-  try{
+  try {
     session.startTransaction();
 
-     //delete user
-     const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) }, { session })
-     await session.commitTransaction();
-     await session.endSession();
-     return result;
+    //delete user
+    const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) }, { session })
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
   }
-  catch(err:any){
+  catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err)
@@ -368,7 +439,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
   //check the user
   const user = await UserModel.findOne({ email: payload.email });
   if (user) {
-    
+
     //check user is blocked
     if (user.status === "blocked") {
       throw new AppError(403, "Your account is blocked !");
@@ -391,7 +462,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
       config.jwt_refresh_secret as Secret,
       config.jwt_refresh_expires_in as TExpiresIn
     );
-   
+
     return {
       accessToken,
       role: user.role,
@@ -409,8 +480,8 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
       role: "user",
       password: uuidv4()
     });
-    
-     //create accessToken
+
+    //create accessToken
     const accessToken = createToken(
       { email: result.email, id: String(result._id), role: result.role },
       config.jwt_access_secret as Secret,
@@ -422,7 +493,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
       config.jwt_refresh_secret as Secret,
       config.jwt_refresh_expires_in as TExpiresIn
     );
-   
+
     return {
       accessToken,
       role: result.role,
@@ -439,7 +510,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 //     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //     let email, fullName;
-    
+
 //     try{
 
 //     if(provider === "google"){
@@ -447,7 +518,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 //             idToken,
 //             audience: process.env.GOOGLE_CLIENT_ID,
 //           });
-    
+
 //           const payload = ticket.getPayload();
 //           email = payload?.email;
 //           fullName = payload?.name;
@@ -457,7 +528,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 //             audience: process.env.APPLE_CLIENT_ID,
 //             ignoreExpiration: true,
 //           });
-    
+
 //           email = payload.email;
 //           fullName = payload.name || "Apple User"; // Property 'name' does not exist on type 'AppleIdTokenType'.
 //     }
@@ -477,7 +548,7 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 //       })
 //     }
 
-    
+
 //   //create accessToken
 //   const accessToken = createToken(
 //     { email: user.email, id: String(user._id), role: user.role },
@@ -504,15 +575,17 @@ const socialLoginService = async (payload: TSocialLoginPayload) => {
 // }
 
 export {
-    loginUserService,
-    loginOwnerService,
-    loginSuperAdminService,
-    forgotPassSendOtpService,
-    forgotPassVerifyOtpService,
-    forgotPassCreateNewPassService,
-    changePasswordService,
-    changeStatusService,
-    deleteMyAccountService,
-    refreshTokenService,
-    socialLoginService
+  registerUserService,
+  verifyEmailService,
+  loginUserService,
+  loginOwnerService,
+  loginSuperAdminService,
+  forgotPassSendOtpService,
+  forgotPassVerifyOtpService,
+  forgotPassCreateNewPassService,
+  changePasswordService,
+  changeStatusService,
+  deleteMyAccountService,
+  refreshTokenService,
+  socialLoginService
 }

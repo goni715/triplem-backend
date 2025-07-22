@@ -1,32 +1,54 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, socialLoginService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, registerUserService, socialLoginService, verifyEmailService } from "./auth.service";
 
+
+const registerUser = catchAsync(async (req, res) => {
+  const result = await registerUserService(req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: result.message,
+    data: null
+  })
+});
+
+
+const verifyEmail = catchAsync(async (req, res) => {
+  const token = req.params.token;
+  const result = await verifyEmailService(token);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Email is verified successfully",
+    data: result
+  })
+});
 
 
 const loginUser = catchAsync(async (req, res) => {
- const result = await loginUserService(req.body);
- const { role, accessToken, refreshToken} = result;
- 
- res.cookie("refreshToken", refreshToken, {
-   httpOnly: true,  // Prevents client-side access to the cookie (more secure)
-   secure: config.node_env === "production", // Only use HTTPS in production
-   maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
-   sameSite: "strict", // Prevents CSRF attacks
- });
+  const result = await loginUserService(req.body);
+  const { role, accessToken, refreshToken } = result;
 
- sendResponse(res, {
-   statusCode: 200,
-   success: true,
-   message: "Login Success",
-   data: {
-     role,
-     accessToken,
-     refreshToken
-   }
- })
-})
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,  // Prevents client-side access to the cookie (more secure)
+    secure: config.node_env === "production", // Only use HTTPS in production
+    maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
+    sameSite: "strict", // Prevents CSRF attacks
+  });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Login Success",
+    data: {
+      role,
+      accessToken,
+      refreshToken
+    }
+  })
+});
 
 
 const loginOwner = catchAsync(async (req, res) => {
@@ -191,6 +213,8 @@ const socialLogin = catchAsync(async (req, res) => {
  
 
  const AuthController = {
+  registerUser,
+  verifyEmail,
   loginUser,
   loginOwner,
   loginSuperAdmin,

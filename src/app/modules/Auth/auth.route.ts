@@ -12,9 +12,18 @@ import {
 } from "./auth.validation";
 import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
-import AuthController from "./authController";
+import AuthController from "./auth.controller";
+import { createUserValidationSchema } from "../User/user.validation";
 
 const router = express.Router();
+
+router.post(
+  "/register",
+  validationMiddleware(createUserValidationSchema),
+  AuthController.registerUser
+);
+
+router.get("/verify-email/:token", AuthController.verifyEmail)
 
 router.post(
   "/login",

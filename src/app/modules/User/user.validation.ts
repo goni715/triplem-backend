@@ -8,8 +8,8 @@ export const createUserValidationSchema = z.object({
     invalid_type_error: "Full Name must be string",
     required_error: "full Name is required",
   })
-  .trim()
-  .regex(fullNameRegex, {
+    .trim()
+    .regex(fullNameRegex, {
       message:
         "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
     }),
@@ -20,11 +20,8 @@ export const createUserValidationSchema = z.object({
     })
     .trim()
     .email({
-       message: "Invalid email address"
+      message: "Invalid email address"
     }),
-  phone: z.string({
-    required_error: "phone number is required",
-  }),
   password: z
     .string({
       invalid_type_error: "password must be string",

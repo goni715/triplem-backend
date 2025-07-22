@@ -29,13 +29,16 @@ const userSchema = new Schema<IUser>({
         type: Boolean,
         default: false
     },
+    verificationToken: {
+        type: String
+    },
     passwordChangedAt: {
         type: Date,
     },
     role: {
         type: String,
         enum: ["user", "admin", "super_admin"],
-        required: true
+        default: "user"
     },
     status: {
         type: String,

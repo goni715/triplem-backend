@@ -45,7 +45,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.socialLoginService = exports.refreshTokenService = exports.deleteMyAccountService = exports.changeStatusService = exports.changePasswordService = exports.forgotPassCreateNewPassService = exports.forgotPassVerifyOtpService = exports.forgotPassSendOtpService = exports.loginSuperAdminService = exports.loginOwnerService = exports.loginUserService = void 0;
+exports.socialLoginService = exports.refreshTokenService = exports.deleteMyAccountService = exports.changeStatusService = exports.changePasswordService = exports.forgotPassCreateNewPassService = exports.forgotPassVerifyOtpService = exports.forgotPassSendOtpService = exports.loginSuperAdminService = exports.loginOwnerService = exports.loginUserService = exports.registerUserService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const checkPassword_1 = __importDefault(require("../../utils/checkPassword"));
 const user_model_1 = __importDefault(require("../User/user.model"));
@@ -58,6 +58,25 @@ const verifyToken_1 = __importDefault(require("../../utils/verifyToken"));
 const isJWTIssuedBeforePassChanged_1 = require("../../utils/isJWTIssuedBeforePassChanged");
 const uuid_1 = require("uuid");
 const otp_model_1 = __importDefault(require("../Otp/otp.model"));
+const ApiError_2 = __importDefault(require("../../errors/ApiError"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const registerUserService = (reqBody) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = reqBody;
+    //check email
+    const existingUser = yield user_model_1.default.findOne({ email });
+    //User already exists and verified
+    if (existingUser && existingUser.isVerified) {
+        throw new ApiError_2.default(409, "Email is already existed");
+    }
+    //User exists but not verified → resend verification
+    if (existingUser && !existingUser.isVerified) {
+        throw new ApiError_2.default(409, "Email is already existed");
+    }
+    //No user exists → create new one
+    const verificationToken = jsonwebtoken_1.default.sign({ email }, config_1.default.jwt_verify_email_secret, { expiresIn: config_1.default.jwt_verify_email_expires_in });
+    return reqBody;
+});
+exports.registerUserService = registerUserService;
 const loginUserService = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield user_model_1.default.findOne({ email: payload.email }).select("+password");
     if (!user) {
@@ -97,7 +116,7 @@ const loginOwnerService = (payload) => __awaiter(void 0, void 0, void 0, functio
         throw new ApiError_1.default(403, "Your account is blocked !");
     }
     //check you are not admin
-    if (user.role !== "owner") {
+    if (user.role !== "user") {
         throw new ApiError_1.default(400, `Sorry! You are not Owner`);
     }
     //check password

@@ -31,22 +31,21 @@ const userSchema = new mongoose_1.Schema({
         trim: true,
         default: ""
     },
-    address: {
-        type: String,
-        trim: true,
-        default: ''
-    },
     password: {
         type: String,
         required: [true, 'password is required'],
         select: 0
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     },
     passwordChangedAt: {
         type: Date,
     },
     role: {
         type: String,
-        enum: ["user", "owner", "super_admin", "administrator"],
+        enum: ["user", "admin", "super_admin"],
         required: true
     },
     status: {

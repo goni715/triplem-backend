@@ -30,7 +30,7 @@ app.use((0, cookie_parser_1.default)());
 // }))
 app.use((0, morgan_1.default)('dev'));
 app.get('/', (req, res) => {
-    res.send('Restaurant server is running...');
+    res.send('MTK ecommerce server is running...');
 });
 //custom middleware implementation
 // parse application/x-www-form-urlencoded

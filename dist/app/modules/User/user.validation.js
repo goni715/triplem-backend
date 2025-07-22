@@ -22,9 +22,6 @@ exports.createUserValidationSchema = zod_1.z.object({
         .email({
         message: "Invalid email address"
     }),
-    phone: zod_1.z.string({
-        required_error: "phone number is required",
-    }),
     password: zod_1.z
         .string({
         invalid_type_error: "password must be string",
