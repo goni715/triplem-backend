@@ -13,7 +13,6 @@ import {
 import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
 import AuthController from "./authController";
-import isAccess from "../../middlewares/isAccess";
 
 const router = express.Router();
 
@@ -61,7 +60,6 @@ router.patch(
 router.patch(
   "/change-status/:id",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess('user'),
   validationMiddleware(changeStatusValidationSchema),
   AuthController.changeStatus
 );
@@ -69,7 +67,6 @@ router.patch(
 router.patch(
   "/change-owner-status/:id",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess('owner'),
   validationMiddleware(changeStatusValidationSchema),
   AuthController.changeStatus
 );

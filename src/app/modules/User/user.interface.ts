@@ -6,8 +6,10 @@ export interface IUser {
   phone: string;
   address?: string; //for admin
   password: string;
+  isVerified: boolean;
+  verificationToken: string;
   passwordChangedAt?: Date;
-  role: "user" | "owner" | "super_admin" | "administrator";
+  role: "user" | "admin" | "super_admin";
   status: "blocked" | "unblocked";
   profileImg?: string
 }

@@ -18,24 +18,23 @@ const userSchema = new Schema<IUser>({
     phone: {
         type: String,
         trim: true,
-        default:""
-    },
-    address: {
-        type: String,
-        trim: true,
-        default: ''
+        default: ""
     },
     password: {
         type: String,
         required: [true, 'password is required'],
-        select:0
+        select: 0
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     },
     passwordChangedAt: {
         type: Date,
     },
     role: {
         type: String,
-        enum: ["user", "owner", "super_admin", "administrator"],
+        enum: ["user", "admin", "super_admin"],
         required: true
     },
     status: {
@@ -43,7 +42,7 @@ const userSchema = new Schema<IUser>({
         enum: ['blocked', 'unblocked'],
         default: 'unblocked'
     },
-    profileImg: { 
+    profileImg: {
         type: String,
         default: ''
     },
@@ -58,13 +57,13 @@ const userSchema = new Schema<IUser>({
 //Hash Password before saving
 userSchema.pre("save", async function (next) {
     const user = this; //this means user
-  
+
     // Only hash the password if it has been modified (or is new)
     if (!user.isModified("password")) return next();
-  
+
     user.password = await hashedPassword(user.password);
     next();
-  });
+});
 
 
 

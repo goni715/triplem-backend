@@ -33,7 +33,7 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('Restaurant server is running...');
+    res.send('MTK ecommerce server is running...');
 });
 
 

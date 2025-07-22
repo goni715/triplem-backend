@@ -2,7 +2,7 @@ import { Secret } from "jsonwebtoken";
 import AppError from "../../errors/ApiError";
 import checkPassword from "../../utils/checkPassword";
 import UserModel from "../User/user.model";
-import { IChangePass, ILoginUser, INewPassword, IVerifyOTp, OAuth, TSocialLoginPayload } from "./auth.interface";
+import { IChangePass, ILoginUser, INewPassword, IVerifyOTp, TSocialLoginPayload } from "./auth.interface";
 import createToken, { TExpiresIn } from "../../utils/createToken";
 import config from "../../config";
 import sendEmailUtility from "../../utils/sendEmailUtility";
@@ -301,27 +301,6 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
 
   try{
     session.startTransaction();
-
-    //delete restaurant
-    await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session })
-
-    //delete social media
-    await SocialMediaModel.deleteOne({ ownerId: loginUserId }, { session });
-
-    //delete menus
-    await MenuModel.deleteMany({ ownerId: loginUserId }, { session })
-
-    //delete favourite list
-    await FavouriteModel.deleteMany({ userId: loginUserId }, { session } )
-
-    //delete the reviews
-    await ReviewModel.deleteMany({ userId: loginUserId }, { session })
-    
-    //delete the menu reviews
-    await MenuReviewModel.deleteMany({ userId: loginUserId }, { session })
-
-    //delete the menu reviews
-    await ScheduleModel.deleteMany({ ownerId: loginUserId }, { session })
 
      //delete user
      const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) }, { session })
