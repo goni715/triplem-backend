@@ -94,8 +94,4 @@ router.post(
   AuthController.refreshToken
 );
 
-router.post(
-  "/social-login",
-  AuthController.socialLogin
-);
 export const AuthRoutes = router;

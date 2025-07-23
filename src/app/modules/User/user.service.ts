@@ -2,34 +2,10 @@ import UserModel from "./user.model";
 import { IUser, TUserQuery } from "./user.interface";
 import AppError from "../../errors/ApiError";
 import { Request } from "express";
-import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
 import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
-
-
-
-const createUserService = async (req:Request, payload: IUser) => {
-  const user = await UserModel.findOne({ email: payload.email });
-  if (user) {
-      throw new AppError(409, 'Email is already existed')
-  }
-        
-  if (req?.file) {
-     payload.profileImg = await uploadImage(req);
-  }
-
-  const result = await UserModel.create({
-    ...payload,
-    role: "user"
-  });
-
-  return {
-    fullName: result?.fullName,
-    email: result?.email
-  };
-}
 
 
 const getUsersService = async (query: TUserQuery) => {
@@ -183,7 +159,6 @@ const updateProfileImgService = async (req:Request, loginUserId: string) => {
 
 
 export {
-  createUserService,
   getUsersService,
   getSingleUserService,
   getMeForSuperAdminService,

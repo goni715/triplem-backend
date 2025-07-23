@@ -178,7 +178,6 @@ export default ${capitalize(moduleName)}Routes;
       content: `/* eslint-disable @typescript-eslint/no-explicit-any */
 import ApiError from '../../errors/ApiError';
 import { ${capitalize(moduleName)}SearchableFields } from './${moduleName}.constant';
-import mongoose from 'mongoose';
 import { I${capitalize(moduleName)}, T${capitalize(moduleName)}Query } from './${moduleName}.interface';
 import ${capitalize(moduleName)}Model from './${moduleName}.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
@@ -271,7 +270,7 @@ return {
 const getSingle${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string) => {
   const result = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
   if (!result) {
-    throw new AppError(404, '${capitalize(moduleName)} Not Found');
+    throw new ApiError(404, '${capitalize(moduleName)} Not Found');
   }
 
   return result;
@@ -281,7 +280,7 @@ const update${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()
  
   const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
   if(!${moduleName.toLowerCase()}){
-    throw new AppError(404, "${capitalize(moduleName)} Not Found");
+    throw new ApiError(404, "${capitalize(moduleName)} Not Found");
   }
   const result = await ${capitalize(moduleName)}Model.updateOne(
     { _id: ${moduleName.toLowerCase()}Id },
@@ -294,9 +293,9 @@ const update${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()
 const delete${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string) => {
   const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
   if(!${moduleName.toLowerCase()}){
-    throw new AppError(404, "${capitalize(moduleName)} Not Found");
+    throw new ApiError(404, "${capitalize(moduleName)} Not Found");
   }
-  const result = await ${capitalize(moduleName)}Model.deleteOne({ _id:moduleName.toLowerCase()}Id });
+  const result = await ${capitalize(moduleName)}Model.deleteOne({ _id:${moduleName.toLowerCase()}Id });
   return result;
 };
 

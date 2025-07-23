@@ -1,8 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
-import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { DiningValidFields } from "./Size.constant";
-import { createSizeService, deleteSizeService, getDiningListService, getSizeDropDownService, updateSizeService } from "./Size.service";
+import { createSizeService, deleteSizeService, getSizeDropDownService, updateSizeService } from "./Size.service";
 
 
 const createSize = catchAsync(async (req, res) => {
@@ -20,38 +18,22 @@ const createSize = catchAsync(async (req, res) => {
 
 
 
-const getDiningList = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const validatedQuery = pickValidFields(req.query, DiningValidFields);
-  const result = await getDiningListService(loginUserId as string, validatedQuery);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Dinings are retrived successfully",
-    meta: result.meta,
-    data: result.data
-  });
-});
-
 const getSizeDropDown = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const result = await getSizeDropDownService(loginUserId as string);
+  const result = await getSizeDropDownService();
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Dinings are retrived successfully",
+    message: "Sizes are retrieved successfully",
     data: result
   });
 });
 
 
 const updateSize = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const { diningId } = req.params;
-  const { name } = req.body;
-  const result = await updateSizeService(loginUserId as string, diningId, name);
+  const { sizeId } = req.params;
+  const { size } = req.body;
+  const result = await updateSizeService(sizeId, size);
 
   sendResponse(res, {
     statusCode: 200,
@@ -63,8 +45,8 @@ const updateSize = catchAsync(async (req, res) => {
 
 
 const deleteSize = catchAsync(async (req, res) => {
-  const { diningId } = req.params;
-  const result = await deleteSizeService(diningId);
+  const { sizeId } = req.params;
+  const result = await deleteSizeService(sizeId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -77,7 +59,6 @@ const deleteSize = catchAsync(async (req, res) => {
 
 const SizeController = {
   createSize,
-  getDiningList,
   getSizeDropDown,
   updateSize,
   deleteSize

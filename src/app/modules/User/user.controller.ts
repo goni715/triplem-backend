@@ -2,20 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
-
-
-const createUser = catchAsync(async (req, res) => {
-  const result = await createUserService(req, req.body);
-  sendResponse(res, {
-    statusCode: 201,
-    success: true,
-    message: "User is created successfully",
-    data: result
-  })
-})
-
-
+import { editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const getUsers = catchAsync(async (req, res) => {
@@ -96,7 +83,6 @@ const updateProfileImg = catchAsync(async (req, res) => {
 
 
 const UserController = {
-    createUser,
     getUsers,
     getSingleUser,
     getMe,

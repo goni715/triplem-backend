@@ -62,27 +62,6 @@ const loginUser = catchAsync(async (req, res) => {
 });
 
 
-const loginOwner = catchAsync(async (req, res) => {
-  const result = await loginOwnerService(req.body);
-  const { accessToken, refreshToken} = result;
-  
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,  // Prevents client-side access to the cookie (more secure)
-    secure: config.node_env === "production", // Only use HTTPS in production
-    maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
-    sameSite: "strict", // Prevents CSRF attacks
-  });
- 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Owner is logged in successfully",
-    data: {
-      accessToken
-    }
-  })
- })
-
 
 const loginAdmin = catchAsync(async (req, res) => {
   const result = await loginAdminService(req.body);
@@ -196,31 +175,6 @@ const refreshToken = catchAsync(async (req, res) => {
   });
 });
 
-
-
-const socialLogin = catchAsync(async (req, res) => {
-  const result = await socialLoginService(req.body);
-  //const { role, accessToken, refreshToken} = result;
-  
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,  
-    secure: config.node_env === "production", 
-    maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
-    sameSite: "strict", // Prevents CSRF attacks
-  });
- 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "User is logged in successfully",
-    // data: {
-    //   "role",
-    //   "accessToken",
-    //   "refreshToken"
-    // }
-    data: result
-  })
- })
  
 
  const AuthController = {
@@ -228,7 +182,6 @@ const socialLogin = catchAsync(async (req, res) => {
   verifyEmail,
   resendVerifyEmail,
   loginUser,
-  loginOwner,
   loginAdmin,
   forgotPassSendOtp,
   forgotPassVerifyOtp,
@@ -236,8 +189,7 @@ const socialLogin = catchAsync(async (req, res) => {
   changePassword,
   changeStatus,
   deleteMyAccount,
-  refreshToken,
-  socialLogin
+  refreshToken
 }
 
 export default AuthController;

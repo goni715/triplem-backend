@@ -431,72 +431,6 @@ const refreshTokenService = async (token: string) => {
 };
 
 
-const socialLoginService = async (payload: TSocialLoginPayload) => {
-  //check the user
-  const user = await UserModel.findOne({ email: payload.email });
-  if (user) {
-
-    //check user is blocked
-    if (user.status === "blocked") {
-      throw new AppError(403, "Your account is blocked !");
-    }
-
-    //check you are not admin or admin
-    if (user.role !== "user") {
-      throw new AppError(400, `Sorry! You have no access to login`);
-    }
-
-    //create accessToken
-    const accessToken = createToken(
-      { email: user.email, id: String(user._id), role: user.role },
-      config.jwt_access_secret as Secret,
-      config.jwt_access_expires_in as TExpiresIn
-    );
-    //create refreshToken
-    const refreshToken = createToken(
-      { email: user.email, id: String(user._id), role: user.role },
-      config.jwt_refresh_secret as Secret,
-      config.jwt_refresh_expires_in as TExpiresIn
-    );
-
-    return {
-      accessToken,
-      role: user.role,
-      refreshToken,
-    };
-  }
-
-  //if user does not exist
-  if (!user) {
-    //create the user
-    const result = await UserModel.create({
-      fullName: payload.fullName,
-      email: payload.email,
-      profileImg: payload.image,
-      role: "user",
-      password: uuidv4()
-    });
-
-    //create accessToken
-    const accessToken = createToken(
-      { email: result.email, id: String(result._id), role: result.role },
-      config.jwt_access_secret as Secret,
-      config.jwt_access_expires_in as TExpiresIn
-    );
-    //create refreshToken
-    const refreshToken = createToken(
-      { email: result.email, id: String(result._id), role: result.role },
-      config.jwt_refresh_secret as Secret,
-      config.jwt_refresh_expires_in as TExpiresIn
-    );
-
-    return {
-      accessToken,
-      role: result.role,
-      refreshToken,
-    };
-  }
-};
 
 
 export {
@@ -512,5 +446,4 @@ export {
   changeStatusService,
   deleteMyAccountService,
   refreshTokenService,
-  socialLoginService
 }
