@@ -3,16 +3,37 @@ import { ProductSearchableFields } from './Product.constant';
 import { IProduct, TProductQuery } from './Product.interface';
 import ProductModel from './Product.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import slugify from 'slugify';
+import CategoryModel from '../Category/Category.model';
 
 const createProductService = async (
   payload: IProduct,
 ) => {
-  return payload;
+  const { name, categoryId } = payload;
+  const slug = slugify(name).toLowerCase();
+  payload.slug=slug;
+
+  //check product name is already existed
+  const product = await ProductModel.findOne({
+    slug
+  });
+
+  if(product){
+    throw new ApiError(409, "This name is already taken.")
+  }
+
+
+  //check categoryId
+  const existingCategory = await CategoryModel.findById(categoryId);
+  if (!existingCategory) {
+    throw new ApiError(404, 'This categoryId not found');
+  }
+
   const result = await ProductModel.create(payload);
   return result;
 };
 
-const getAllProductsService = async (query: TProductQuery) => {
+const getProductsService = async (query: TProductQuery) => {
   const {
     searchTerm, 
     page = 1, 
@@ -42,22 +63,51 @@ const getAllProductsService = async (query: TProductQuery) => {
   const result = await ProductModel.aggregate([
     {
       $match: {
-        ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
+        ...searchQuery, 
+        ...filterQuery
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "restaurantId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
       },
     },
     {
       $project: {
         _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        name: 1,
+        categoryId: 1,
+        categoryName: "$category.name",
+        currentPrice: "$currentPrice",
+        originalPrice: "$originalPrice",
+        discount: "$discount",
+        ratings: "$ratings",
+        totalReview: "$totalReview",
+        images: "$images",
+        colors: "$colors",
+        sizes: "$sizes",
+        introduction: "$introduction",
+        description: "$description",
+        status: "$status"
       },
     },
     { $sort: { [sortBy]: sortDirection } }, 
@@ -81,7 +131,7 @@ const getAllProductsService = async (query: TProductQuery) => {
 
 return {
   meta: {
-    page: Number(page), //currentPage
+    page: Number(page), 
     limit: Number(limit),
     totalPages,
     total: totalCount,
@@ -124,7 +174,7 @@ const deleteProductService = async (productId: string) => {
 
 export {
   createProductService,
-  getAllProductsService,
+  getProductsService,
   getSingleProductService,
   updateProductService,
   deleteProductService,

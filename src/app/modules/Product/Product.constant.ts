@@ -1,6 +1,5 @@
 export const ProductSearchableFields = ['name', 'description'];
 
-
 export const ProductValidFields: string[] = [
   "searchTerm",
   "page",
@@ -8,7 +7,6 @@ export const ProductValidFields: string[] = [
   "sortBy",
   "sortOrder",
   "status",
-  "gender"
 ];
       
       

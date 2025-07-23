@@ -2,6 +2,7 @@ import slugify from "slugify";
 import ApiError from "../../errors/ApiError";
 import CategoryModel from "./Category.model";
 import { Types } from "mongoose";
+import ProductModel from "../Product/Product.model";
 
 
 
@@ -67,13 +68,13 @@ const deleteCategoryService = async (categoryId: string) => {
         throw new ApiError(404, 'This categoryId not found');
     }
 
-    //check if diningId is associated with Product
-    // const associateWithTable = await TableModel.findOne({
-    //      diningId
-    // });
-    // if(associateWithTable){
-    //     throw new ApiError(409, 'Failled to delete, This dining is associated with Table');
-    // }
+    //check if categoryId is associated with Product
+    const associateWithProduct = await ProductModel.findOne({
+         categoryId
+    });
+    if(associateWithProduct){
+        throw new ApiError(409, 'Failled to delete, This category is associated with Product');
+    }
 
     const result = await CategoryModel.deleteOne({ _id: categoryId})
     return result;

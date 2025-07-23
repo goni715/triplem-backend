@@ -31,8 +31,8 @@ router.delete(
 );
 
 router.get(
-  '/get-all-products',
-  ProductController.getAllProducts,
+  '/get-products',
+  ProductController.getProducts,
 );
 
 const ProductRoutes = router;

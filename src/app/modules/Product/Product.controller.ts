@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createProductService, getSingleProductService, getAllProductsService, updateProductService, deleteProductService } from './Product.service';
+import { createProductService, getSingleProductService, updateProductService, deleteProductService, getProductsService } from './Product.service';
 
 const createProduct = catchAsync(async (req, res) => {
   const result = await createProductService(req.body);
@@ -25,8 +25,8 @@ const getSingleProduct = catchAsync(async (req, res) => {
   });
 });
 
-const getAllProducts = catchAsync(async (req, res) => {
-  const result = await getAllProductsService(req.query);
+const getProducts = catchAsync(async (req, res) => {
+  const result = await getProductsService(req.query);
 
   sendResponse(res, {
     statusCode: 200,
@@ -64,7 +64,7 @@ const deleteProduct = catchAsync(async (req, res) => {
 const ProductController = {
   createProduct,
   getSingleProduct,
-  getAllProducts,
+  getProducts,
   updateProduct,
   deleteProduct,
 };
