@@ -23,7 +23,12 @@ const createShippingService = async (
 const getShippingAddressService = async (loginUserId: string,) => {
   const result = await ShippingModel.findOne({ userId: loginUserId }).select("streetAddress state city zipCode -_id");
   if (!result) {
-    throw new ApiError(404, "Shipping not found");
+    return {
+      "streetAddress": "",
+      "city": "",
+      "state": "",
+      "zipCode": ""
+    }
   }
   return result;
 };
