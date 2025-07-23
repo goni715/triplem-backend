@@ -1,12 +1,8 @@
-import { Types } from "mongoose";
 
 
-
-export interface IDining {
-  name: string;
+export interface ISize {
+  size: string;
   slug: string;
-  ownerId: Types.ObjectId;
-  restaurantId : Types.ObjectId;
 }
 
 

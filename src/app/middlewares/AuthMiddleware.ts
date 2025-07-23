@@ -62,6 +62,17 @@ const AuthMiddleware = (...roles: TUserRole[]) => {
         });
       }
 
+      //check if the user email is not verified
+      if(!user?.isVerified){
+        return res.status(401).json({
+          success: false,
+          message: "You are not authorized",
+          error: {
+            message: "This Account is not verified",
+          },
+        });
+      }
+
       //check if passwordChangedAt is greater than token iat
       if (
         user?.passwordChangedAt &&

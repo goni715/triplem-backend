@@ -1,34 +1,24 @@
 import { model, Schema } from "mongoose";
-import { IDining } from "./Size.interface";
+import { ISize } from "./Size.interface";
 
 
-const diningSchema = new Schema<IDining>({
-    name: {
+const sizeSchema = new Schema<ISize>({
+    size: {
         type: String,
         required: true,
-        trim:true
+        trim: true,
+        enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     },
     slug: {
         type: String,
         required: true,
         trim: true
-    },
-    ownerId: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: "User",
-    },
-    restaurantId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: "Restaurant",
-    },
-},{
-    timestamps: true,
+    }
+}, {
     versionKey: false
 })
 
 
 
-const DiningModel = model<IDining>("Dining", diningSchema);
-export default DiningModel;
+const SizeModel = model<ISize>("Size", sizeSchema);
+export default SizeModel;

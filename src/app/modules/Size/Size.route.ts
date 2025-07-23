@@ -2,38 +2,35 @@ import express from 'express';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { diningValidationSchema } from './Size.validation';
-import DiningController from './dining.controller';
+import SizeController from './size.controller';
+import { sizeValidationSchema } from './Size.validation';
 
 const router = express.Router();
 
 router.post(
-  "/create-dining",
-  AuthMiddleware(UserRole.owner),
-  validationMiddleware(diningValidationSchema),
-  DiningController.createDining
-);
-router.get(
-  "/get-dining-list",
-  AuthMiddleware(UserRole.owner),
-  DiningController.getDiningList
-);
-router.get(
-  "/get-dining-drop-down",
-  AuthMiddleware(UserRole.owner),
-  DiningController.getDiningDropDown
-);
-router.patch(
-  "/update-dining/:diningId",
-  AuthMiddleware(UserRole.owner),
-  validationMiddleware(diningValidationSchema),
-  DiningController.updateDining
-);
-router.delete(
-  "/delete-dining/:diningId",
-  AuthMiddleware(UserRole.owner),
-  DiningController.deleteDining
+  "/create-size",
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
+  validationMiddleware(sizeValidationSchema),
+  SizeController.createSize
 );
 
 
-export const DiningRoutes = router;
+// router.get(
+//   "/get-dining-drop-down",
+//   AuthMiddleware(UserRole.admin, UserRole.super_admin),
+//   SizeController.getDiningDropDown
+// );
+// router.patch(
+//   "/update-dining/:diningId",
+//   AuthMiddleware(UserRole.admin, UserRole.super_admin),
+//   validationMiddleware(diningValidationSchema),
+//   SizeController.updateDining
+// );
+// router.delete(
+//   "/delete-dining/:diningId",
+//   AuthMiddleware(UserRole.admin, UserRole.super_admin),
+//   SizeController.deleteDining
+// );
+
+
+export const SizeRoutes = router;

@@ -1,41 +1,29 @@
 import slugify from "slugify";
-import AppError from "../../errors/AppError";
 import DiningModel from "./Size.model";
-import RestaurantModel from "../Restaurant/restaurant.model";
 import ObjectId from "../../utils/ObjectId";
 import { TDiningQuery } from "./Size.interface";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
-import { DiningSearchFields } from "./dining.constant";
-import TableModel from "../Table/table.model";
+import { DiningSearchFields } from "./Size.constant";
+import ApiError from "../../errors/ApiError";
+import SizeModel from "./Size.model";
 
 
 
-const createDiningService = async (loginUserId:string, name: string) => {
-    const restaurant = await RestaurantModel.findOne({
-        ownerId: loginUserId
-    });
-    if(!restaurant){
-        throw new AppError(404, "You have no restaurant !");
-    }
-
-    const slug = slugify(name).toLowerCase();
+const createSizeService = async (loginUserId:string, size: string) => {
+    const slug = slugify(size).toLowerCase();
     
-    //check Dining is already existed
-    const dining = await DiningModel.findOne({
-        slug,
-        ownerId: loginUserId,
-        restaurantId: restaurant._id
+    //check size is already existed
+    const existingSize = await SizeModel.findOne({
+        slug
     });
 
-    if(dining){
-        throw new AppError(409, 'This dining is already existed');
+    if(existingSize){
+        throw new ApiError(409, 'This size is already existed');
     }
 
-    const result = await DiningModel.create({
-         name,
-         slug,
-         ownerId: loginUserId,
-         restaurantId: restaurant._id
+    const result = await SizeModel.create({
+         size,
+         slug
     })
     return result;
 }
@@ -115,7 +103,8 @@ data: result,
 };
 }
 
-const getDiningDropDownService = async (loginUserId:string) => {
+const getSizeDropDownService = async (loginUserId:string) => {
+    return "Size Drop Down Service";
     const result = await DiningModel.find({
         ownerId: loginUserId
     }).select('-createdAt -updatedAt -slug -ownerId -restaurantId').sort('-createdAt');
@@ -124,20 +113,16 @@ const getDiningDropDownService = async (loginUserId:string) => {
 
 
 
-const updateDiningService = async (loginUserId:string, diningId: string, name: string) => {
-    const restaurant = await RestaurantModel.findOne({
-        ownerId: loginUserId
-    });
-    if(!restaurant){
-        throw new AppError(404, "You have no restaurant !");
-    }
+const updateSizeService = async (loginUserId:string, diningId: string, name: string) => {
+    
+    return "Update Size Service"
 
     const dining = await DiningModel.findOne({
         ownerId: loginUserId,
         _id: diningId
     })
     if(!dining){
-        throw new AppError(404, 'This diningId not found');
+        throw new ApiError(404, 'This diningId not found');
     }
 
     const slug = slugify(name).toLowerCase();
@@ -147,7 +132,7 @@ const updateDiningService = async (loginUserId:string, diningId: string, name: s
         slug 
     })
     if(diningExist){
-        throw new AppError(409, 'Sorry! This dining name is already taken');
+        throw new ApiError(409, 'Sorry! This dining name is already taken');
     }
 
     const result = await DiningModel.updateOne(
@@ -161,27 +146,21 @@ const updateDiningService = async (loginUserId:string, diningId: string, name: s
     return result;
 }
 
-const deleteDiningService = async (diningId: string) => {
+const deleteSizeService = async (diningId: string) => {
+    return "Delete Size Service";
     const dining = await DiningModel.findById(diningId)
     if(!dining){
-        throw new AppError(404, 'This diningId not found');
+        throw new ApiError(404, 'This diningId not found');
     }
 
     //check if diningId is associated with table
-    const associateWithTable = await TableModel.findOne({
-         diningId
-    });
-    if(associateWithTable){
-        throw new AppError(409, 'Failled to delete, This dining is associated with Table');
-    }
+    // const associateWithTable = await TableModel.findOne({
+    //      diningId
+    // });
+    // if(associateWithTable){
+    //     throw new ApiError(409, 'Failled to delete, This dining is associated with Table');
+    // }
 
-     //check if diningId is associated with Booking Table
-     const associateWithTableBooking = await TableModel.findOne({
-        diningId
-   });
-   if(associateWithTableBooking){
-       throw new AppError(409, 'Failled to delete, This dining is associated with Booking Table');
-   }
 
     const result = await DiningModel.deleteOne({ _id: dining})
     return result;
@@ -190,9 +169,9 @@ const deleteDiningService = async (diningId: string) => {
 
 
 export {
-    createDiningService,
+    createSizeService,
     getDiningListService,
-    getDiningDropDownService,
-    updateDiningService,
-    deleteDiningService
+    getSizeDropDownService,
+    updateSizeService,
+    deleteSizeService
 }
