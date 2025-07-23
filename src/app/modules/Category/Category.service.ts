@@ -1,23 +1,24 @@
 import slugify from "slugify";
 import ApiError from "../../errors/ApiError";
 import CategoryModel from "./Category.model";
+import { Types } from "mongoose";
 
 
 
-const createCategoryService = async (loginUserId:string, size: string) => {
-    const slug = slugify(size).toLowerCase();
+const createCategoryService = async (name: string) => {
+    const slug = slugify(name).toLowerCase();
     
-    //check size is already existed
-    const existingSize = await CategoryModel.findOne({
+    //check category is already existed
+    const category = await CategoryModel.findOne({
         slug
     });
 
-    if(existingSize){
-        throw new ApiError(409, 'This size is already existed');
+    if(category){
+        throw new ApiError(409, 'This category is already existed');
     }
 
     const result = await CategoryModel.create({
-         size,
+         name,
          slug
     })
     return result;
@@ -30,25 +31,29 @@ const getCategoryDropDownService = async () => {
 }
 
 
-const updateCategoryService = async (sizeId: string, size: string) => {
-    const existingSize = await CategoryModel.findById(sizeId);
-    if (!existingSize) {
-        throw new ApiError(404, 'This sizeId not found');
+const updateCategoryService = async (categoryId: string, name: string) => {
+    if (!Types.ObjectId.isValid(categoryId)) {
+        throw new ApiError(400, "categoryId must be a valid ObjectId")
     }
 
-    const slug = slugify(size).toLowerCase();
-    const sizeExist = await CategoryModel.findOne({
-        _id: { $ne: sizeId },
+    const existingCategory = await CategoryModel.findById(categoryId);
+    if (!existingCategory) {
+        throw new ApiError(404, 'This categoryId not found');
+    }
+
+    const slug = slugify(name).toLowerCase();
+    const categoryExist = await CategoryModel.findOne({
+        _id: { $ne: categoryId },
         slug
     })
-    if (sizeExist) {
-        throw new ApiError(409, 'Sorry! This size is already existed');
+    if (categoryExist) {
+        throw new ApiError(409, 'Sorry! This category is already existed');
     }
 
     const result = await CategoryModel.updateOne(
-        { _id: sizeId },
+        { _id: categoryId },
         {
-            size,
+            name,
             slug
         }
     )
@@ -56,10 +61,10 @@ const updateCategoryService = async (sizeId: string, size: string) => {
     return result;
 }
 
-const deleteCategoryService = async (sizeId: string) => {
-    const existingSize = await CategoryModel.findById(sizeId)
-    if(!existingSize){
-        throw new ApiError(404, 'This sizeId not found');
+const deleteCategoryService = async (categoryId: string) => {
+    const category = await CategoryModel.findById(categoryId)
+    if(!category){
+        throw new ApiError(404, 'This categoryId not found');
     }
 
     //check if diningId is associated with Product
@@ -70,7 +75,7 @@ const deleteCategoryService = async (sizeId: string) => {
     //     throw new ApiError(409, 'Failled to delete, This dining is associated with Table');
     // }
 
-    const result = await CategoryModel.deleteOne({ _id: sizeId})
+    const result = await CategoryModel.deleteOne({ _id: categoryId})
     return result;
 }
 

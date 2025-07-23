@@ -15,18 +15,18 @@ router.post(
 );
 
 router.get(
-  "/get-size-drop-down",
+  "/get-category-drop-down",
   AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user),
   CategoryController.getCategoryDropDown
 );
 router.patch(
-  "/update-size/:sizeId",
+  "/update-category/:categoryId",
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
   validationMiddleware(categoryValidationSchema),
   CategoryController.updateCategory
 );
 router.delete(
-  "/delete-size/:sizeId",
+  "/delete-category/:categoryId",
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
   CategoryController.deleteCategory
 );

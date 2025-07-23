@@ -4,9 +4,8 @@ import { createCategoryService, deleteCategoryService, getCategoryDropDownServic
 
 
 const createCategory = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const { size } = req.body;
-  const result = await createCategoryService(loginUserId as string, size);
+  const { name } = req.body;
+  const result = await createCategoryService(name);
 
   sendResponse(res, {
     statusCode: 201,
@@ -32,8 +31,8 @@ const getCategoryDropDown = catchAsync(async (req, res) => {
 
 const updateCategory = catchAsync(async (req, res) => {
   const { categoryId } = req.params;
-  const { size } = req.body;
-  const result = await updateCategoryService(categoryId, size);
+  const { name } = req.body;
+  const result = await updateCategoryService(categoryId, name);
 
   sendResponse(res, {
     statusCode: 200,
@@ -45,8 +44,8 @@ const updateCategory = catchAsync(async (req, res) => {
 
 
 const deleteCategory = catchAsync(async (req, res) => {
-  const { sizeId } = req.params;
-  const result = await deleteCategoryService(sizeId);
+   const { categoryId } = req.params;
+  const result = await deleteCategoryService(categoryId);
 
   sendResponse(res, {
     statusCode: 200,

@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginAdminService, loginUserService, refreshTokenService, registerUserService, resendVerifyEmailService, socialLoginService, verifyEmailService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginAdminService, loginUserService, refreshTokenService, registerUserService, resendVerifyEmailService, verifyEmailService } from "./auth.service";
 
 
 const registerUser = catchAsync(async (req, res) => {
