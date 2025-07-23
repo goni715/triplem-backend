@@ -1,5 +1,7 @@
 import { Types } from "mongoose";
 
+export type TStockStatus = 'In Stock' | 'Stock Out' | 'Up Coming';
+
 export interface IProduct {
   name: string;
   slug: string;
@@ -8,9 +10,9 @@ export interface IProduct {
   originalPrice?: number;
   discount: string;
   ratings: number;
-  colors?: string[];
+  colors?: Types.ObjectId[];
   sizes?: Types.ObjectId[];
-  status: 'In Stock' | 'Stock Out' | 'Up Comming';
+  status: TStockStatus;
   images: string[];
   introduction: string;
   description: string;

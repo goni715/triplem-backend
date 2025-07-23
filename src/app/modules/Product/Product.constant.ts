@@ -1,5 +1,6 @@
 export const ProductSearchableFields = ['name', 'description'];
 
+
 export const ProductValidFields: string[] = [
   "searchTerm",
   "page",

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import ApiError from '../../errors/ApiError';
 import { ProductSearchableFields } from './Product.constant';
 import { IProduct, TProductQuery } from './Product.interface';
@@ -8,6 +7,7 @@ import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 const createProductService = async (
   payload: IProduct,
 ) => {
+  return payload;
   const result = await ProductModel.create(payload);
   return result;
 };

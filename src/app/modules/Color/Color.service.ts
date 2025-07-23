@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import ApiError from '../../errors/ApiError';
 import { ColorSearchableFields } from './Color.constant';
 import { IColor, TColorQuery } from './Color.interface';
