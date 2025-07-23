@@ -4,9 +4,8 @@ import { createSizeService, deleteSizeService, getSizeDropDownService, updateSiz
 
 
 const createSize = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
   const { size } = req.body;
-  const result = await createSizeService(loginUserId as string, size);
+  const result = await createSizeService(size);
 
   sendResponse(res, {
     statusCode: 201,

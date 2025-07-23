@@ -7,11 +7,13 @@ const sizeSchema = new Schema<ISize>({
         type: String,
         required: true,
         trim: true,
+        unique: true,
         enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     },
     slug: {
         type: String,
         required: true,
+        unique: true,
         trim: true
     }
 }, {
