@@ -27,17 +27,32 @@ router.get(
 
 router.patch(
   '/update-product/:productId',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
   validationMiddleware(updateProductValidationSchema),
   ProductController.updateProduct,
 );
 
+router.patch(
+  '/update-product-img/:productId',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
+  upload.array("image", 4),
+  ProductController.updateProductImg,
+);
+
 router.delete(
   '/delete-product/:productId',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
   ProductController.deleteProduct,
 );
 
 router.get(
+  '/get-user-products',
+  AuthMiddleware(UserRole.user),
+  ProductController.getUserProducts,
+);
+router.get(
   '/get-products',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
   ProductController.getProducts,
 );
 

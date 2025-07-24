@@ -63,11 +63,17 @@ const productSchema = new Schema<IProduct>({
   },
   status: {
     type: String,
+    enum: ['visible', 'hidden'],
+    default: "visible"
+  },
+  stockStatus: {
+    type: String,
     enum: ['In Stock', 'Stock Out', 'Up Coming'],
     default: "In Stock"
   },
   images: {
-    type: [String]
+    type: [String],
+    required: true
   }
 }, {
   timestamps: true,

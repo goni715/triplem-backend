@@ -1,6 +1,8 @@
 import slugify from "slugify";
 import ApiError from "../../errors/ApiError";
 import SizeModel from "./Size.model";
+import ProductModel from "../Product/Product.model";
+import ObjectId from "../../utils/ObjectId";
 
 
 
@@ -62,13 +64,13 @@ const deleteSizeService = async (sizeId: string) => {
         throw new ApiError(404, 'This sizeId not found');
     }
 
-    //check if diningId is associated with Product
-    // const associateWithTable = await TableModel.findOne({
-    //      diningId
-    // });
-    // if(associateWithTable){
-    //     throw new ApiError(409, 'Failled to delete, This dining is associated with Table');
-    // }
+    //check if sizeidId is associated with Product
+    const associateWithProduct = await ProductModel.findOne({
+        sizes: { $in: [new ObjectId(sizeId)] } 
+    });
+    if(associateWithProduct){
+        throw new ApiError(409, 'Failled to delete, This size is associated with Product');
+    }
 
     const result = await SizeModel.deleteOne({ _id: sizeId})
     return result;

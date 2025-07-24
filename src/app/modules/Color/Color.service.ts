@@ -5,6 +5,8 @@ import ColorModel from './Color.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import slugify from 'slugify';
 import { Types } from "mongoose";
+import ObjectId from '../../utils/ObjectId';
+import ProductModel from '../Product/Product.model';
 
 const createColorService = async (
   payload: IColor,
@@ -179,12 +181,12 @@ const deleteColorService = async (colorId: string) => {
   }
 
   //check if colorId is associated with Product
-  // const associateWithProduct = await ProductModel.findOne({
-  //   colorId
-  // });
-  // if (associateWithProduct) {
-  //   throw new ApiError(409, 'Failled to delete, This color is associated with Product');
-  // }
+  const associateWithProduct = await ProductModel.findOne({
+    colors: new ObjectId(colorId),
+  });
+  if (associateWithProduct) {
+    throw new ApiError(409, 'Failled to delete, This color is associated with Product');
+  }
 
   const result = await ColorModel.deleteOne({ _id: colorId });
   return result;

@@ -12,7 +12,8 @@ export interface IProduct {
   ratings: number;
   colors?: Types.ObjectId[];
   sizes?: Types.ObjectId[];
-  status: TStockStatus;
+  status: "visible" | "hidden";
+  stockStatus: TStockStatus;
   images: string[];
   introduction: string;
   description: string;

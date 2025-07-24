@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createProductService, getSingleProductService, updateProductService, deleteProductService, getProductsService } from './Product.service';
+import { createProductService, getSingleProductService, updateProductService, deleteProductService, getProductsService, updateProductImgService, getUserProductsService } from './Product.service';
 
 const createProduct = catchAsync(async (req, res) => {
   const result = await createProductService(req, req.body);
@@ -25,6 +25,17 @@ const getSingleProduct = catchAsync(async (req, res) => {
   });
 });
 
+const getUserProducts = catchAsync(async (req, res) => {
+  const result = await getUserProductsService(req.query);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Products are retrieved successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
 const getProducts = catchAsync(async (req, res) => {
   const result = await getProductsService(req.query);
 
@@ -39,7 +50,7 @@ const getProducts = catchAsync(async (req, res) => {
 
 const updateProduct = catchAsync(async (req, res) => {
   const { productId } = req.params;
-  const result = await updateProductService(productId, req.body);
+  const result = await updateProductService(req, productId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -48,10 +59,21 @@ const updateProduct = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const updateProductImg = catchAsync(async (req, res) => {
+  const { productId } = req.params;
+  const result = await updateProductImgService(req, productId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: `Product's image is updated successfully`,
+    data: result,
+  });
+});
 
 const deleteProduct = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteProductService(id);
+  const { productId } = req.params;
+  const result = await deleteProductService(productId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -64,8 +86,10 @@ const deleteProduct = catchAsync(async (req, res) => {
 const ProductController = {
   createProduct,
   getSingleProduct,
+  getUserProducts,
   getProducts,
   updateProduct,
+  updateProductImg,
   deleteProduct,
 };
 export default ProductController;
