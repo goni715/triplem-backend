@@ -12,5 +12,4 @@ export type TColorQuery = {
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  status?: string,
 };

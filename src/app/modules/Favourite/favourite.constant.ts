@@ -1,9 +1,7 @@
 
 export const FavouriteSearchFields = [
-    "restaurant.name",
-    "restaurant.cuisine",
-    "restaurant.location",
-    //"keywords", //this is array fields
+    "name",
+    "categoryName"
 ]
 
 
@@ -13,8 +11,6 @@ export const FavoriteValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "restaurant.cuisine",
-  "restaurant.price",
-  "restaurant.dining",
-  "restaurant.ratings",
+  "status",
+  "categoryName"
 ];

@@ -3,10 +3,33 @@ import { ColorSearchableFields } from './Color.constant';
 import { IColor, TColorQuery } from './Color.interface';
 import ColorModel from './Color.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import slugify from 'slugify';
 
 const createColorService = async (
   payload: IColor,
 ) => {
+  const { name, hexCode } = payload;
+  const slug = slugify(name).toLowerCase();
+  payload.slug=slug;
+
+  //check color name is already existed
+  const existingColorName = await ColorModel.findOne({
+    slug
+  });
+
+  if (existingColorName) {
+    throw new ApiError(409, 'This color name is already existed');
+  }
+
+  //check color code is already existed
+  const existingHexCode = await ColorModel.findOne({
+    hexCode
+  });
+
+  if (existingHexCode) {
+    throw new ApiError(409, 'This Hex Code is already existed');
+  }
+
   const result = await ColorModel.create(payload);
   return result;
 };
@@ -48,15 +71,8 @@ const getAllColorsService = async (query: TColorQuery) => {
     {
       $project: {
         _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        name: 1,
+        hexCode: 1
       },
     },
     { $sort: { [sortBy]: sortDirection } }, 
@@ -64,8 +80,8 @@ const getAllColorsService = async (query: TColorQuery) => {
     { $limit: Number(limit) }, 
   ]);
 
-     // total count
-  const totalReviewResult = await ColorModel.aggregate([
+  // total count
+  const totalCountResult = await ColorModel.aggregate([
     {
       $match: {
         ...searchQuery,
@@ -75,7 +91,7 @@ const getAllColorsService = async (query: TColorQuery) => {
     { $count: "totalCount" }
   ])
 
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalCount = totalCountResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
 return {
@@ -88,6 +104,13 @@ return {
   data: result,
 };
 };
+
+
+const getColorDropDownService = async () => {
+    const result = await ColorModel.find().select('-createdAt -updatedAt -slug').sort('-createdAt');
+    return result;
+}
+
 
 const getSingleColorService = async (colorId: string) => {
   const result = await ColorModel.findById(colorId);
@@ -124,6 +147,7 @@ const deleteColorService = async (colorId: string) => {
 export {
   createColorService,
   getAllColorsService,
+  getColorDropDownService,
   getSingleColorService,
   updateColorService,
   deleteColorService,

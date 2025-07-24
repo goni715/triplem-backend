@@ -110,7 +110,7 @@ const getProductsService = async (query: TProductQuery) => {
         status: "$status"
       },
     },
-    { $sort: { [sortBy]: sortDirection } }, 
+    { $sort: { ratings:-1 } },
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);

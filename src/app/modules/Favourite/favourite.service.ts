@@ -1,28 +1,28 @@
 import { Types } from "mongoose";
-import RestaurantModel from "../Restaurant/restaurant.model";
-import AppError from "../../errors/AppError";
 import FavouriteModel from "./favourite.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { FavouriteSearchFields } from "./favourite.constant";
 import { TFavouriteQuery } from "./favourite.interface";
+import ApiError from "../../errors/ApiError";
+import ProductModel from "../Product/Product.model";
 
 
 const addOrRemoveFavouriteService = async (
   loginUserId: string,
-  restaurantId: string
+  productId: string
 ) => {
   const ObjectId = Types.ObjectId;
 
-  //check restaurant not exist
-  const restaurant = await RestaurantModel.findById(restaurantId);
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant Not Found");
+  //check Product doesn't exist
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product Not Found");
   }
 
-  //cheack restaurant is already existed or not existed
+  //cheack produsct is already existed to favourite list
   const favourite = await FavouriteModel.findOne({
     userId: loginUserId,
-    restaurantId
+    productId
   })
 
   
@@ -32,7 +32,7 @@ const addOrRemoveFavouriteService = async (
   //if exist, remove it
   if(favourite){
     result = await FavouriteModel.deleteOne({ _id: new ObjectId(favourite._id) })
-    message = "Restaurant has been removed from your favorite list successfully."
+    message = "Removed from your favourite list"
   }
 
 
@@ -40,12 +40,11 @@ const addOrRemoveFavouriteService = async (
    if(!favourite){
     result = await FavouriteModel.create({
         userId: loginUserId,
-        restaurantId
+        productId
     })
-    message = "Restaurant has been added to your favorite list successfully."
+    message = "Added to your favourite list"
    }
 
-   
    return {
       message,
       data: result
@@ -78,12 +77,6 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
   let searchQuery: any = {};
    if (searchTerm) {
      searchQuery = makeSearchQuery(searchTerm, FavouriteSearchFields);
-     searchQuery = {
-       $or: [
-         ...searchQuery?.$or,
-         { ["restaurant.keywords"]: { $in: [new RegExp(searchTerm, "i")] } },
-       ],
-     };
    }
 
 
@@ -96,45 +89,58 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
 
   
 
-    const result = await FavouriteModel.aggregate([
-      {
-        $match: { userId: new ObjectId(loginUserId) },
+  const result = await FavouriteModel.aggregate([
+    {
+      $match: { userId: new ObjectId(loginUserId) },
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product",
       },
-      {
-        $lookup: {
-          from: "restaurants", 
-          localField: "restaurantId",
-          foreignField: "_id",
-          as: "restaurant",
-        },
+    },
+    {
+      $unwind: "$product"
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "product.categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $project: {
+        _id: "$product._id",
+        name: "$product.name",
+        categoryId: "$product.categoryId",
+        categoryName: "$category.name",
+        currentPrice: "$product.currentPrice",
+        originalPrice: "$product.originalPrice",
+        discount: "$product.discount",
+        ratings: "$product.ratings",
+        totalReview: "$product.totalReview",
+        images: "$product.images",
+        colors: "$product.colors",
+        sizes: "$product.sizes",
+        introduction: "$product.introduction",
+        description: "$product.description",
+        status: "$product.status"
       },
-      {
-        $unwind: "$restaurant"
-      },
-      {
-        $match: { ...searchQuery, ...filterQuery }, // Apply search & filter queries
-      },
-      {
-        $project: {
-          _id: "$restaurant._id",
-          name: "$restaurant.name",
-          cuisine: "$restaurant.cuisine",
-          dining: "$restaurant.dining",
-          website: "$restaurant.website",
-          location: "$restaurant.location",
-          keywords: "$restaurant.keywords",
-          price: "$restaurant.price",
-          features: "$restaurant.features",
-          discount: "$restaurant.discount",
-          ratings: "$restaurant.ratings",
-          restaurantImg: "$restaurant.restaurantImg",
-          createdAt: "$createdAt",
-        },
-      },
-      { $skip: skip }, 
-      { $limit: Number(limit) }, 
-      { $sort: { [sortBy]: sortDirection } }, 
-    ]);
+    },
+     {
+      $match: { ...searchQuery, ...filterQuery },
+    },
+    { $skip: skip },
+    { $limit: Number(limit) },
+    { $sort: { [sortBy]: sortDirection } },
+  ]);
 
 
     //count total for pagination
@@ -143,19 +149,49 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
         $match: { userId: new ObjectId(loginUserId) },
       },
       {
-        $lookup: {
-          from: "restaurants", 
-          localField: "restaurantId",
-          foreignField: "_id",
-          as: "restaurant",
-        },
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product",
       },
-      {
-        $unwind: "$restaurant"
+    },
+    {
+      $unwind: "$product"
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "product.categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $project: {
+        _id: "$product._id",
+        name: "$product.name",
+        categoryId: "$product.categoryId",
+        categoryName: "$category.name",
+        currentPrice: "$product.currentPrice",
+        originalPrice: "$product.originalPrice",
+        discount: "$product.discount",
+        ratings: "$product.ratings",
+        totalReview: "$product.totalReview",
+        images: "$product.images",
+        colors: "$product.colors",
+        sizes: "$product.sizes",
+        introduction: "$product.introduction",
+        description: "$product.description",
+        status: "$product.status"
       },
-      {
-        $match: { ...searchQuery, ...filterQuery }, // Apply search & filter queries
-      },
+    },
+     {
+      $match: { ...searchQuery, ...filterQuery },
+    },
       { $count: "totalCount" },
     ]);
 

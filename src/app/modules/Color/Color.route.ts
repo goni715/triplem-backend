@@ -2,18 +2,23 @@ import express from 'express';
 import ColorController from './Color.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createColorValidationSchema, updateColorValidationSchema } from './Color.validation';
+import AuthMiddleware from '../../middlewares/AuthMiddleware';
+import { UserRole } from '../User/user.constant';
 
 const router = express.Router();
 
 router.post(
   '/create-color',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
   validationMiddleware(createColorValidationSchema),
   ColorController.createColor,
 );
 
+
 router.get(
-  '/get-single-color/:colorId',
-  ColorController.getSingleColor,
+  "/get-color-drop-down",
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
+  ColorController.getColorDropDown
 );
 
 router.patch(
@@ -28,7 +33,7 @@ router.delete(
 );
 
 router.get(
-  '/get-all-colors',
+  '/get-colors',
   ColorController.getAllColors,
 );
 

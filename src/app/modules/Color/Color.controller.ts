@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createColorService, getSingleColorService, getAllColorsService, updateColorService, deleteColorService } from './Color.service';
+import { createColorService, getSingleColorService, getAllColorsService, updateColorService, deleteColorService, getColorDropDownService } from './Color.service';
 
 const createColor = catchAsync(async (req, res) => {
   const result = await createColorService(req.body);
@@ -37,6 +37,18 @@ const getAllColors = catchAsync(async (req, res) => {
   });
 });
 
+
+const getColorDropDown = catchAsync(async (req, res) => {
+  const result = await getColorDropDownService();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Colors are retrieved successfully",
+    data: result
+  });
+});
+
 const updateColor = catchAsync(async (req, res) => {
   const { colorId } = req.params;
   const result = await updateColorService(colorId, req.body);
@@ -65,6 +77,7 @@ const ColorController = {
   createColor,
   getSingleColor,
   getAllColors,
+  getColorDropDown,
   updateColor,
   deleteColor,
 };

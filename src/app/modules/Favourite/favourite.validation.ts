@@ -2,11 +2,11 @@ import { z } from "zod";
 import { Types } from "mongoose";
 
 export const addOrRemoveFavouriteSchema = z.object({
-  restaurantId: z
+  productId: z
     .string({
-      required_error: "restaurantId is required!",
+      required_error: "productId is required!",
     })
     .refine((id) => Types.ObjectId.isValid(id), {
-      message: "restaurantId must be a valid ObjectId",
+      message: "productId must be a valid ObjectId",
     }),
 });

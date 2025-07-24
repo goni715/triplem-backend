@@ -11,4 +11,5 @@ router.post('/add-or-remove-favourite', AuthMiddleware(UserRole.user), validatio
 router.get('/get-favourite-list', AuthMiddleware(UserRole.user), FavouriteController.getFavouriteList);
 
 
-export const FavouriteRoutes = router;
+const FavouriteRoutes = router;
+export default FavouriteRoutes;

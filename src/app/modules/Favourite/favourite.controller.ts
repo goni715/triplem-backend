@@ -6,8 +6,8 @@ import { addOrRemoveFavouriteService, getFavouriteListService } from "./favourit
 
 const addOrRemoveFavourite = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const { restaurantId } = req.body;
-  const result = await addOrRemoveFavouriteService(loginUserId as string, restaurantId);
+  const { productId } = req.body;
+  const result = await addOrRemoveFavouriteService(loginUserId as string, productId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -26,7 +26,7 @@ const getFavouriteList = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Favourite Restaurants are retrieved successfully",
+      message: "Favourite products are retrieved successfully",
       meta: result.meta,
       data: result.data
     });
