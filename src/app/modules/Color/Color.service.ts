@@ -4,6 +4,7 @@ import { IColor, TColorQuery } from './Color.interface';
 import ColorModel from './Color.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import slugify from 'slugify';
+import { Types } from "mongoose";
 
 const createColorService = async (
   payload: IColor,
@@ -68,6 +69,7 @@ const getAllColorsService = async (query: TColorQuery) => {
         ...filterQuery, // Apply filters
       },
     },
+    { $sort: { [sortBy]: sortDirection } }, 
     {
       $project: {
         _id: 1,
@@ -75,7 +77,6 @@ const getAllColorsService = async (query: TColorQuery) => {
         hexCode: 1
       },
     },
-    { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);
@@ -121,26 +122,71 @@ const getSingleColorService = async (colorId: string) => {
   return result;
 };
 
-const updateColorService = async (colorId: string, payload: any) => {
+const updateColorService = async (colorId: string, payload: Partial<IColor>) => {
  
-  const color = await ColorModel.findById(colorId);
-  if(!color){
-    throw new ApiError(404, "Color Not Found");
+  if (!Types.ObjectId.isValid(colorId)) {
+    throw new ApiError(400, "colorId must be a valid ObjectId")
   }
+
+  const existingColor = await ColorModel.findById(colorId);
+  if (!existingColor) {
+    throw new ApiError(404, 'This colorId not found');
+  }
+
+  //check color name is already existed
+  if (payload?.name) {
+    const slug = slugify(payload.name).toLowerCase();
+    payload.slug = slug;
+    const existingColorName = await ColorModel.findOne({
+      _id: { $ne: colorId },
+      slug
+    })
+
+    if (existingColorName) {
+      throw new ApiError(409, 'This color name is already existed');
+    }
+  }
+    
+
+  if (payload.hexCode) {
+    const existingHexCode = await ColorModel.findOne({
+      _id: { $ne: colorId },
+      hexCode: payload.hexCode
+    });
+
+    if (existingHexCode) {
+      throw new ApiError(409, 'This Hex Code is already existed');
+    }
+  }
+
+
   const result = await ColorModel.updateOne(
     { _id: colorId },
-    payload,
+    payload
   );
 
   return result;
 };
 
 const deleteColorService = async (colorId: string) => {
-  const color = await ColorModel.findById(colorId);
-  if(!color){
-    throw new ApiError(404, "Color Not Found");
+  if (!Types.ObjectId.isValid(colorId)) {
+    throw new ApiError(400, "colorId must be a valid ObjectId")
   }
-  const result = await ColorModel.deleteOne({ _id:colorId });
+
+  const color = await ColorModel.findById(colorId);
+  if (!color) {
+    throw new ApiError(404, "colorId Not Found");
+  }
+
+  //check if colorId is associated with Product
+  // const associateWithProduct = await ProductModel.findOne({
+  //   colorId
+  // });
+  // if (associateWithProduct) {
+  //   throw new ApiError(409, 'Failled to delete, This color is associated with Product');
+  // }
+
+  const result = await ColorModel.deleteOne({ _id: colorId });
   return result;
 };
 

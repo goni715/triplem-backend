@@ -62,8 +62,8 @@ const updateColor = catchAsync(async (req, res) => {
 });
 
 const deleteColor = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteColorService(id);
+  const { colorId } = req.params;
+  const result = await deleteColorService(colorId);
 
   sendResponse(res, {
     statusCode: 200,

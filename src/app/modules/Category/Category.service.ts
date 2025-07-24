@@ -3,6 +3,9 @@ import ApiError from "../../errors/ApiError";
 import CategoryModel from "./Category.model";
 import { Types } from "mongoose";
 import ProductModel from "../Product/Product.model";
+import { TCategoryQuery } from "./Category.interface";
+import { CategorySearchableFields } from "./Category.constant";
+import { makeSearchQuery } from "../../helper/QueryBuilder";
 
 
 
@@ -25,7 +28,7 @@ const createCategoryService = async (name: string) => {
     return result;
 }
 
-const getCategoriesService = async (query: TColorQuery) => {
+const getCategoriesService = async (query: TCategoryQuery) => {
   const {
     searchTerm, 
     page = 1, 
@@ -44,39 +47,32 @@ const getCategoriesService = async (query: TColorQuery) => {
   //4. setup searching
   let searchQuery = {};
   if (searchTerm) {
-    searchQuery = makeSearchQuery(searchTerm, ColorSearchableFields);
+    searchQuery = makeSearchQuery(searchTerm, CategorySearchableFields);
   }
 
-  //5 setup filters
-  let filterQuery = {};
-  if (filters) {
-    filterQuery = makeFilterQuery(filters);
-  }
-  const result = await ColorModel.aggregate([
+ 
+  const result = await CategoryModel.aggregate([
     {
       $match: {
         ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
       },
     },
+    { $sort: { [sortBy]: sortDirection } }, 
     {
       $project: {
         _id: 1,
         name: 1,
-        hexCode: 1
       },
     },
-    { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);
 
   // total count
-  const totalCountResult = await ColorModel.aggregate([
+  const totalCountResult = await CategoryModel.aggregate([
     {
       $match: {
-        ...searchQuery,
-        ...filterQuery
+        ...searchQuery
       }
     },
     { $count: "totalCount" }
@@ -154,6 +150,7 @@ const deleteCategoryService = async (categoryId: string) => {
 
 export {
     createCategoryService,
+    getCategoriesService,
     getCategoryDropDownService,
     updateCategoryService,
     deleteCategoryService
