@@ -5,6 +5,7 @@ import { FavouriteSearchFields } from "./favourite.constant";
 import { TFavouriteQuery } from "./favourite.interface";
 import ApiError from "../../errors/ApiError";
 import ProductModel from "../Product/Product.model";
+import ObjectId from "../../utils/ObjectId";
 
 
 const addOrRemoveFavouriteService = async (
@@ -213,8 +214,20 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
 }
 
 
+const getFavouriteIdsService = async (loginUserId: string) => {
+  const products = await FavouriteModel.aggregate([
+    {
+      $match: { userId: new ObjectId(loginUserId)}
+    }
+  ]);
+
+  return products?.length > 0 ? products?.map((product)=>product.productId) : [];
+}
+
+
 
 export {
     addOrRemoveFavouriteService,
-    getFavouriteListService
+    getFavouriteListService,
+    getFavouriteIdsService
 }

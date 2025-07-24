@@ -3,7 +3,7 @@ import sendResponse from '../../utils/sendResponse';
 import { createProductService, getSingleProductService, updateProductService, deleteProductService, getProductsService } from './Product.service';
 
 const createProduct = catchAsync(async (req, res) => {
-  const result = await createProductService(req.body);
+  const result = await createProductService(req, req.body);
 
   sendResponse(res, {
     statusCode: 201,

@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/add-or-remove-favourite', AuthMiddleware(UserRole.user), validationMiddleware(addOrRemoveFavouriteSchema), FavouriteController.addOrRemoveFavourite);
 router.get('/get-favourite-list', AuthMiddleware(UserRole.user), FavouriteController.getFavouriteList);
+router.get('/get-favourite-ids', AuthMiddleware(UserRole.user), FavouriteController.getFavouriteIds);
 
 
 const FavouriteRoutes = router;
