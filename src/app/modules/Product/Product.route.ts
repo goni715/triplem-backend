@@ -1,7 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import ProductController from './Product.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createProductValidationSchema, updateProductValidationSchema } from './Product.validation';
+import { updateProductValidationSchema } from './Product.validation';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import upload from '../../helper/upload';

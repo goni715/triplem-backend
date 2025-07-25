@@ -10,6 +10,7 @@ import SizeModel from '../Size/Size.model';
 import { Request } from 'express';
 import { Types } from "mongoose";
 import hasDuplicates from '../../utils/hasDuplicates';
+import ObjectId from '../../utils/ObjectId';
 
 
 const createProductService = async (
@@ -255,7 +256,7 @@ const getUserProductsService = async (query: TProductQuery) => {
       $lookup: {
         from: "reviews",
         localField: "_id",
-        foreignField: "restaurantId",
+        foreignField: "productId",
         as: "reviews",
       },
     },
@@ -276,10 +277,6 @@ const getUserProductsService = async (query: TProductQuery) => {
         ratings: "$ratings",
         totalReview: "$totalReview",
         images: "$images",
-        colors: "$colors",
-        sizes: "$sizes",
-        introduction: "$introduction",
-        description: "$description",
         status: "$status"
       },
     },
@@ -320,10 +317,6 @@ const getUserProductsService = async (query: TProductQuery) => {
         ratings: "$ratings",
         totalReview: "$totalReview",
         images: "$images",
-        colors: "$colors",
-        sizes: "$sizes",
-        introduction: "$introduction",
-        description: "$description",
         status: "$status"
       },
     },
@@ -389,11 +382,11 @@ const getProductsService = async (query: TProductQuery) => {
     {
       $unwind: "$category"
     },
-    {
+   {
       $lookup: {
         from: "reviews",
         localField: "_id",
-        foreignField: "restaurantId",
+        foreignField: "productId",
         as: "reviews",
       },
     },
@@ -414,10 +407,6 @@ const getProductsService = async (query: TProductQuery) => {
         ratings: "$ratings",
         totalReview: "$totalReview",
         images: "$images",
-        colors: "$colors",
-        sizes: "$sizes",
-        introduction: "$introduction",
-        description: "$description",
         status: "$status",
         stockStatus: "$stockStatus"
       },
@@ -490,12 +479,156 @@ return {
 };
 
 const getSingleProductService = async (productId: string) => {
-  const result = await ProductModel.findById(productId);
-  if (!result) {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new ApiError(400, "productId must be a valid ObjectId")
+  }
+
+  const product = await ProductModel.aggregate([
+    {
+      $match: { _id: new ObjectId(productId) }
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $lookup: {
+        from: "colors",
+        localField: "colors",
+        foreignField: "_id",
+        as: "colors"
+      }
+    },
+     {
+      $lookup: {
+        from: "sizes",
+        localField: "sizes",
+        foreignField: "_id",
+        as: "sizes"
+      }
+    },
+   {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "productId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        categoryId: 1,
+        categoryName: "$category.name",
+        currentPrice: "$currentPrice",
+        originalPrice: "$originalPrice",
+        discount: "$discount",
+        ratings: "$ratings",
+        totalReview: "$totalReview",
+        images: "$images",
+        colors: {
+          $map: {
+            input: "$colors",
+            as: "color",
+            in: {
+              _id: "$$color._id",
+              name: "$$color.name",
+              hexCode: "$$color.hexCode"
+            }
+          }
+        },
+        sizes: {
+          $map: {
+            input: "$sizes",
+            as: "size",
+            in: {
+              _id: "$$size._id",
+              size: "$$size.size",
+            }
+          }
+        },
+        introduction: "$introduction",
+        description: "$description",
+        status: "$status"
+      },
+    },
+  ]);
+
+  if (product.length===0) {
     throw new ApiError(404, 'Product Not Found');
   }
 
-  return result;
+  const categoryId = product[0]?.categoryId;
+
+
+  //find related products
+  const relatedProducts = await ProductModel.aggregate([
+    {
+      $match: {
+        _id: { $ne: new Types.ObjectId(productId) },
+        categoryId: categoryId,
+        status: "visible"
+      }
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "productId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
+     {
+      $lookup: {
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        categoryId: 1,
+        categoryName: "$category.name",
+        currentPrice: "$currentPrice",
+        originalPrice: "$originalPrice",
+        discount: "$discount",
+        ratings: "$ratings",
+        totalReview: "$totalReview",
+        images: "$images",
+        status: "$status"
+      },
+    },
+  ]);
+
+
+  return {
+    product: product[0],
+    relatedProducts
+  };
 };
 
 const updateProductService = async (req:Request, productId: string, payload: Partial<IProduct>) => {
@@ -530,6 +663,7 @@ const updateProductService = async (req:Request, productId: string, payload: Par
   const result = await ProductModel.updateOne(
     { _id: productId },
     payload,
+    { runValidators: true}
   );
 
   return result;
