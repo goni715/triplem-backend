@@ -13,26 +13,26 @@ export const createProductValidationSchema = z.object({
       "name only contain letters and valid symbols (' . - & , ( )) are allowed."
     )
     .trim(),
-  categoryId: z
-    .string({
-      invalid_type_error: "categoryId must be a string",
-      required_error: "categoryId is required!",
-    })
-    .refine((id) => Types.ObjectId.isValid(id), {
-      message: "categoryId must be a valid ObjectId",
-    }),
-  currentPrice: z
-    .preprocess(
-      (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-      z
-        .number({
-          required_error: "Current price is required",
-          invalid_type_error: "Current price must be a number",
-        })
-        .refine((val) => !isNaN(val), { message: "Current price must be a valid number" })
-        .refine((val) => val > 0, { message: "Current price must be greater than 0" })
-    )
-  ,
+  // categoryId: z
+  //   .string({
+  //     invalid_type_error: "categoryId must be a string",
+  //     required_error: "categoryId is required!",
+  //   })
+  //   .refine((id) => Types.ObjectId.isValid(id), {
+  //     message: "categoryId must be a valid ObjectId",
+  //   }),
+  // currentPrice: z
+  //   .preprocess(
+  //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+  //     z
+  //       .number({
+  //         required_error: "Current price is required",
+  //         invalid_type_error: "Current price must be a number",
+  //       })
+  //       .refine((val) => !isNaN(val), { message: "Current price must be a valid number" })
+  //       .refine((val) => val > 0, { message: "Current price must be greater than 0" })
+  //   )
+  // ,
   // originalPrice: z
   //   .preprocess(
   //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
@@ -199,7 +199,7 @@ export const updateProductValidationSchema = z.object({
   stockStatus: z.string({
     invalid_type_error: "Stock Status must be a valid string value.",
   })
-    .refine((val) => ['In Stock', 'Stock Out', 'Up Coming'].includes(val), {
-      message: "Stock Status must be one of: In Stock', 'Stock Out', 'Up Coming'",
+    .refine((val) => ['in_stock', 'stock_out', 'up_coming'].includes(val), {
+      message: "Stock Status must be one of: in_stock', 'stock Out', 'up_coming'",
     }).optional(),
 });

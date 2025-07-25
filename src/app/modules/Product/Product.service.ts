@@ -9,8 +9,7 @@ import ColorModel from '../Color/Color.model';
 import SizeModel from '../Size/Size.model';
 import { Request } from 'express';
 import { Types } from "mongoose";
-import { createProductValidationSchema } from './Product.validation';
-import { ZodError } from 'zod';
+import hasDuplicates from '../../utils/hasDuplicates';
 
 
 const createProductService = async (
@@ -18,12 +17,28 @@ const createProductService = async (
   reqBody: IProduct,
 ) => {
 
+
+  let images = []
+
+  if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+    const files = req.files as Express.Multer.File[];
+    for (const file of files) {
+      const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+      images.push(path)
+    }
+  }
+  else {
+    throw new ApiError(400, "Minimum one image required");
+  }
+
   //destructuring the reqBody
   if(!reqBody){
     throw new ApiError(400, "name is required!");
   }
 
-  const { name, categoryId, introduction, description, currentPrice, colors } = reqBody;
+  const { name, categoryId, introduction, description, currentPrice, originalPrice, discount, colors, sizes, status, stockStatus } = reqBody;
+
+  let payload: Record<string, unknown> ={}
 
   if(!name){
     throw new ApiError(400, "name is required!");
@@ -53,6 +68,37 @@ const createProductService = async (
     throw new ApiError(400, "Current price must be greater than 0");
   }
 
+
+  //set required fields
+  payload = {
+    name,
+    images,
+    categoryId,
+    introduction,
+    description,
+    currentPrice: Number(currentPrice),
+  }
+
+
+  //check original price
+  if (originalPrice) {
+    if (typeof Number(originalPrice) !== "number" || isNaN(Number(originalPrice))) {
+      throw new ApiError(400, "original price must be a valid number");
+    }
+    // Step 4: Must be greater than 0
+    if (Number(originalPrice) <= 0) {
+      throw new ApiError(400, "original price must be greater than 0");
+    }
+    payload.originalPrice=Number(originalPrice)
+  }
+
+
+  //check discount
+  if(discount){
+    payload.discount=discount;
+  }
+ 
+
   
   //check colors
   if (colors) {
@@ -61,7 +107,7 @@ const createProductService = async (
       if (!Types.ObjectId.isValid(colors)) {
         throw new ApiError(400, "colors must be valid ObjectId")
       }
-      reqBody.colors = [colors]
+      payload.colors = [colors]
     }
 
     if (Array.isArray(colors)) {
@@ -70,34 +116,60 @@ const createProductService = async (
           throw new ApiError(400, "colors must be valid ObjectId")
         }
       }
-      if(ha)
-      req.body = colors
+      if(hasDuplicates(colors)){
+        throw new ApiError(400, "colors can not be duplicate value")
+      }
+      payload.colors = colors
     }
   }
 
 
-  //return "Create Product Service"
-
-return reqBody;
-  try {
-    //const parsedData = await createProductValidationSchema.parseAsync(reqBody);
-    //const { name, categoryId, colors, sizes } = parsedData;
-    
-    let images = []
-
-    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-      const files = req.files as Express.Multer.File[];
-      for (const file of files) {
-        const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-        images.push(path)
+   
+  //check sizes
+  if (sizes) {
+    if (typeof sizes === "string") {
+      //check ObjectId
+      if (!Types.ObjectId.isValid(sizes)) {
+        throw new ApiError(400, "sizes must be valid ObjectId")
       }
+      payload.sizes = [sizes]
     }
-    else {
-      throw new ApiError(400, "Minimum one image required");
+
+    if (Array.isArray(sizes)) {
+      for (let i = 0; i < sizes.length; i++) {
+        if (!Types.ObjectId.isValid(sizes[i])) {
+          throw new ApiError(400, "sizes must be valid ObjectId")
+        }
+      }
+      if(hasDuplicates(sizes)){
+        throw new ApiError(400, "sizes can not be duplicate value")
+      }
+      payload.sizes = sizes
     }
+  }
+
+
+  //check status
+  if(status){
+    if(!['visible', 'hidden'].includes(status)){
+      throw new ApiError(400, "status must be one of: 'visible', 'hidden'");
+    }
+    payload.status= status;
+  }
+
+  //check stock status
+  if(stockStatus){
+    if(!['in_stock', 'stock_out', 'up_coming'].includes(stockStatus)){
+      throw new ApiError(400, "Stock Status must be one of: in_stock', 'stock_out', 'up_coming'");
+    }
+    payload.stockStatus=stockStatus
+  }
+  
+
 
     //make slug
     const slug = slugify(name).toLowerCase();
+    payload.slug=slug;
 
 
     //check product name is already existed
@@ -136,104 +208,9 @@ return reqBody;
     }
 
 
-    const result = await ProductModel.create({
-      ...parsedData,
-      images,
-      slug
-    });
+    const result = await ProductModel.create(payload);
     return result;
-
-
-  }
-  catch (error) {
-    if (error instanceof ZodError) {
-      const formattedErrors: Record<string, string> = {};
-      error.issues.forEach((e) => {
-        if (e.path.length > 0) {
-          formattedErrors[e.path.join(".")] = e.message;
-        }
-      });
-
-      console.log(error.issues)
-
-      //first error message
-      const firstErrorMessage = error.issues[0]?.message || "Invalid input";
-      throw new ApiError(400, firstErrorMessage);
-    }
-  }
 };
-
-
-// const createProductService = async (
-//   req: Request,
-//   payload: IProduct,
-// ) => {
-
-//   return "create product service"
-//   let images = []
-
-//   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-//     const files = req.files as Express.Multer.File[];
-//     for (const file of files) {
-//       const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-//       images.push(path)
-//     }
-//   }
-//   else {
-//     throw new ApiError(400, "Minimum one image required");
-//   }
-
-//   //set image to payload
-//   if(images && images?.length > 0){
-//     payload.images=images;
-//   }
-
-
-//   //destructuring the payload
-//   const { name, categoryId, colors, sizes } = payload;
-//   const slug = slugify(name).toLowerCase();
-//   payload.slug=slug;
-
-
-//   //check product name is already existed
-//   const product = await ProductModel.findOne({
-//     slug
-//   });
-
-//   if(product){
-//     throw new ApiError(409, "This name is already taken.")
-//   }
-
-//   //check categoryId
-//   const existingCategory = await CategoryModel.findById(categoryId);
-//   if (!existingCategory) {
-//     throw new ApiError(404, 'This categoryId not found');
-//   }
-
-//   //check color
-//   if(colors && colors?.length > 0){
-//      for (let i = 0; i < colors.length; i++) {
-//       const color = await ColorModel.findById(colors[i]);
-//       if(!color){
-//         throw new ApiError(400, `This '${colors[i]}' colorId not found`)
-//       }
-//     }
-//   }
-
-//   //check size
-//   if(sizes && sizes?.length > 0){
-//      for (let i = 0; i < sizes.length; i++) {
-//       const size = await SizeModel.findById(sizes[i]);
-//       if(!size){
-//         throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
-//       }
-//     }
-//   }
-
-
-//   const result = await ProductModel.create(payload);
-//   return result;
-// };
 
 const getUserProductsService = async (query: TProductQuery) => {
   const {
@@ -441,7 +418,8 @@ const getProductsService = async (query: TProductQuery) => {
         sizes: "$sizes",
         introduction: "$introduction",
         description: "$description",
-        status: "$status"
+        status: "$status",
+        stockStatus: "$stockStatus"
       },
     },
     {
@@ -484,7 +462,8 @@ const getProductsService = async (query: TProductQuery) => {
         sizes: "$sizes",
         introduction: "$introduction",
         description: "$description",
-        status: "$status"
+        status: "$status",
+        stockStatus: "$stockStatus"
       },
     },
     {

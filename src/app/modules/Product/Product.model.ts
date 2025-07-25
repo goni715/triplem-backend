@@ -68,8 +68,8 @@ const productSchema = new Schema<IProduct>({
   },
   stockStatus: {
     type: String,
-    enum: ['In Stock', 'Stock Out', 'Up Coming'],
-    default: "In Stock"
+    enum: ['in_stock', 'stock_out', 'up_coming'],
+    default: "in_stock"
   },
   images: {
     type: [String],

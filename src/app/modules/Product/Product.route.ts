@@ -12,7 +12,7 @@ const router = express.Router();
 router.post(
   '/create-product',
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
-  upload.array("image", 4),
+  upload.array("image", 5),
   ProductController.createProduct,
 );
 
@@ -31,7 +31,7 @@ router.patch(
 router.patch(
   '/update-product-img/:productId',
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
-  upload.array("image", 4),
+  upload.array("image", 5),
   ProductController.updateProductImg,
 );
 

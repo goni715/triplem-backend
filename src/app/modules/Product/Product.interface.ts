@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type TStockStatus = 'In Stock' | 'Stock Out' | 'Up Coming';
+export type TStockStatus = 'in_stock' | 'stock_out' | 'up_coming';
 
 export interface IProduct {
   name: string;
@@ -25,5 +25,6 @@ export type TProductQuery = {
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  status?: string,
+  status?: "visible" | "hidden";
+  stockStatus?: TStockStatus;
 };
