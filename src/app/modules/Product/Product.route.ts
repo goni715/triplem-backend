@@ -5,6 +5,7 @@ import { createProductValidationSchema, updateProductValidationSchema } from './
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import upload from '../../helper/upload';
+import parseJsonDataMiddleware from '../../middlewares/parseJsonDataMiddleware';
 
 const router = express.Router();
 
@@ -12,11 +13,6 @@ router.post(
   '/create-product',
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
   upload.array("image", 4),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
-  validationMiddleware(createProductValidationSchema),
   ProductController.createProduct,
 );
 

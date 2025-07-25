@@ -33,21 +33,21 @@ export const createProductValidationSchema = z.object({
         .refine((val) => val > 0, { message: "Current price must be greater than 0" })
     )
   ,
-  originalPrice: z
-    .preprocess(
-      (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-      z
-        .number({
-          invalid_type_error: "Original price must be a number",
-        })
-        .refine((val) => !isNaN(val), {
-          message: "Original price must be a valid number",
-        })
-        .refine((val) => val >= 0, {
-          message: "Original price cannot be negative",
-        })
-    )
-    .default(0),
+  // originalPrice: z
+  //   .preprocess(
+  //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+  //     z
+  //       .number({
+  //         invalid_type_error: "Original price must be a number",
+  //       })
+  //       .refine((val) => !isNaN(val), {
+  //         message: "Original price must be a valid number",
+  //       })
+  //       .refine((val) => val >= 0, {
+  //         message: "Original price cannot be negative",
+  //       })
+  //   )
+  //   .default(0),
   discount: z.string({
     invalid_type_error: "discount must be string"
   }).optional(),

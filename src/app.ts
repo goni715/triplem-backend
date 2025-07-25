@@ -4,9 +4,9 @@ import router from "./app/routes";
 import morgan from "morgan";
 import notFound from "./app/middlewares/notFound";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
-import bodyParser from "body-parser";
 import cookieParser from 'cookie-parser';
 import path from "path";
+import bodyParser from "body-parser";
 
 
 const app: Application = express();

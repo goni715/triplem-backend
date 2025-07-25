@@ -9,77 +9,231 @@ import ColorModel from '../Color/Color.model';
 import SizeModel from '../Size/Size.model';
 import { Request } from 'express';
 import { Types } from "mongoose";
+import { createProductValidationSchema } from './Product.validation';
+import { ZodError } from 'zod';
+
 
 const createProductService = async (
   req: Request,
-  payload: IProduct,
+  reqBody: IProduct,
 ) => {
 
-  return "create product service"
-  let images = []
+  //destructuring the reqBody
+  if(!reqBody){
+    throw new ApiError(400, "name is required!");
+  }
 
-  if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-    const files = req.files as Express.Multer.File[];
-    for (const file of files) {
-      const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-      images.push(path)
+  const { name, categoryId, introduction, description, currentPrice, colors } = reqBody;
+
+  if(!name){
+    throw new ApiError(400, "name is required!");
+  }
+  if(!categoryId){
+    throw new ApiError(400, "categoryId is required!");
+  }
+  if (!Types.ObjectId.isValid(categoryId)) {
+    throw new ApiError(400, "categoryId must be a valid ObjectId")
+  }
+  if(!introduction){
+    throw new ApiError(400, "introduction is required!");
+  }
+  if(!description){
+    throw new ApiError(400, "description is required!");
+  }
+  
+  //check current price
+  if (!currentPrice) {
+    throw new ApiError(400, "currentPrice is required!");
+  }
+  if (typeof Number(currentPrice) !== "number" || isNaN(Number(currentPrice))) {
+    throw new ApiError(400, "current price must be a valid number");
+  }
+  // Step 4: Must be greater than 0
+  if (Number(currentPrice) <= 0) {
+    throw new ApiError(400, "Current price must be greater than 0");
+  }
+
+  
+  //check colors
+  if (colors) {
+    if (typeof colors === "string") {
+      //check ObjectId
+      if (!Types.ObjectId.isValid(colors)) {
+        throw new ApiError(400, "colors must be valid ObjectId")
+      }
+      reqBody.colors = [colors]
+    }
+
+    if (Array.isArray(colors)) {
+      for (let i = 0; i < colors.length; i++) {
+        if (!Types.ObjectId.isValid(colors[i])) {
+          throw new ApiError(400, "colors must be valid ObjectId")
+        }
+      }
+      if(ha)
+      req.body = colors
     }
   }
-  else {
-    throw new ApiError(400, "Minimum one image required");
-  }
-
-  //set image to payload
-  if(images && images?.length > 0){
-    payload.images=images;
-  }
 
 
-  //destructuring the payload
-  const { name, categoryId, colors, sizes } = payload;
-  const slug = slugify(name).toLowerCase();
-  payload.slug=slug;
+  //return "Create Product Service"
 
+return reqBody;
+  try {
+    //const parsedData = await createProductValidationSchema.parseAsync(reqBody);
+    //const { name, categoryId, colors, sizes } = parsedData;
+    
+    let images = []
 
-  //check product name is already existed
-  const product = await ProductModel.findOne({
-    slug
-  });
-
-  if(product){
-    throw new ApiError(409, "This name is already taken.")
-  }
-
-  //check categoryId
-  const existingCategory = await CategoryModel.findById(categoryId);
-  if (!existingCategory) {
-    throw new ApiError(404, 'This categoryId not found');
-  }
-
-  //check color
-  if(colors && colors?.length > 0){
-     for (let i = 0; i < colors.length; i++) {
-      const color = await ColorModel.findById(colors[i]);
-      if(!color){
-        throw new ApiError(400, `This '${colors[i]}' colorId not found`)
+    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+      const files = req.files as Express.Multer.File[];
+      for (const file of files) {
+        const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+        images.push(path)
       }
     }
-  }
+    else {
+      throw new ApiError(400, "Minimum one image required");
+    }
 
-  //check size
-  if(sizes && sizes?.length > 0){
-     for (let i = 0; i < sizes.length; i++) {
-      const size = await SizeModel.findById(sizes[i]);
-      if(!size){
-        throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
+    //make slug
+    const slug = slugify(name).toLowerCase();
+
+
+    //check product name is already existed
+    const product = await ProductModel.findOne({
+      slug
+    });
+
+    if (product) {
+      throw new ApiError(409, "This name is already taken.")
+    }
+
+    //check categoryId
+    const existingCategory = await CategoryModel.findById(categoryId);
+    if (!existingCategory) {
+      throw new ApiError(404, 'This categoryId not found');
+    }
+
+    //check color
+    if (colors && colors?.length > 0) {
+      for (let i = 0; i < colors.length; i++) {
+        const color = await ColorModel.findById(colors[i]);
+        if (!color) {
+          throw new ApiError(400, `This '${colors[i]}' colorId not found`)
+        }
       }
     }
+
+    //check size
+    if (sizes && sizes?.length > 0) {
+      for (let i = 0; i < sizes.length; i++) {
+        const size = await SizeModel.findById(sizes[i]);
+        if (!size) {
+          throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
+        }
+      }
+    }
+
+
+    const result = await ProductModel.create({
+      ...parsedData,
+      images,
+      slug
+    });
+    return result;
+
+
   }
+  catch (error) {
+    if (error instanceof ZodError) {
+      const formattedErrors: Record<string, string> = {};
+      error.issues.forEach((e) => {
+        if (e.path.length > 0) {
+          formattedErrors[e.path.join(".")] = e.message;
+        }
+      });
 
+      console.log(error.issues)
 
-  const result = await ProductModel.create(payload);
-  return result;
+      //first error message
+      const firstErrorMessage = error.issues[0]?.message || "Invalid input";
+      throw new ApiError(400, firstErrorMessage);
+    }
+  }
 };
+
+
+// const createProductService = async (
+//   req: Request,
+//   payload: IProduct,
+// ) => {
+
+//   return "create product service"
+//   let images = []
+
+//   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+//     const files = req.files as Express.Multer.File[];
+//     for (const file of files) {
+//       const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+//       images.push(path)
+//     }
+//   }
+//   else {
+//     throw new ApiError(400, "Minimum one image required");
+//   }
+
+//   //set image to payload
+//   if(images && images?.length > 0){
+//     payload.images=images;
+//   }
+
+
+//   //destructuring the payload
+//   const { name, categoryId, colors, sizes } = payload;
+//   const slug = slugify(name).toLowerCase();
+//   payload.slug=slug;
+
+
+//   //check product name is already existed
+//   const product = await ProductModel.findOne({
+//     slug
+//   });
+
+//   if(product){
+//     throw new ApiError(409, "This name is already taken.")
+//   }
+
+//   //check categoryId
+//   const existingCategory = await CategoryModel.findById(categoryId);
+//   if (!existingCategory) {
+//     throw new ApiError(404, 'This categoryId not found');
+//   }
+
+//   //check color
+//   if(colors && colors?.length > 0){
+//      for (let i = 0; i < colors.length; i++) {
+//       const color = await ColorModel.findById(colors[i]);
+//       if(!color){
+//         throw new ApiError(400, `This '${colors[i]}' colorId not found`)
+//       }
+//     }
+//   }
+
+//   //check size
+//   if(sizes && sizes?.length > 0){
+//      for (let i = 0; i < sizes.length; i++) {
+//       const size = await SizeModel.findById(sizes[i]);
+//       if(!size){
+//         throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
+//       }
+//     }
+//   }
+
+
+//   const result = await ProductModel.create(payload);
+//   return result;
+// };
 
 const getUserProductsService = async (query: TProductQuery) => {
   const {

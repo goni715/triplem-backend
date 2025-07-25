@@ -1,17 +1,19 @@
+import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createProductService, getSingleProductService, updateProductService, deleteProductService, getProductsService, updateProductImgService, getUserProductsService } from './Product.service';
+import { getSingleProductService, updateProductService, deleteProductService, getProductsService, updateProductImgService, getUserProductsService, createProductService } from './Product.service';
 
 const createProduct = catchAsync(async (req, res) => {
   const result = await createProductService(req, req.body);
 
-  sendResponse(res, {
+ return sendResponse(res, {
     statusCode: 201,
     success: true,
     message: 'Product is created successfully',
     data: result,
   });
 });
+
 
 const getSingleProduct = catchAsync(async (req, res) => {
   const { productId } = req.params;
