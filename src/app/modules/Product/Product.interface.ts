@@ -27,4 +27,5 @@ export type TProductQuery = {
   sortOrder?: "asc" | "desc";
   status?: "visible" | "hidden";
   stockStatus?: TStockStatus;
+  categoryId?: string;
 };

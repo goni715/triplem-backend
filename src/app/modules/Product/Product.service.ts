@@ -220,6 +220,7 @@ const getUserProductsService = async (query: TProductQuery) => {
     limit = 10, 
     sortOrder = "desc",
     sortBy = "createdAt", 
+    categoryId,
     ...filters  // Any additional filters
   } = query;
 
@@ -240,6 +241,40 @@ const getUserProductsService = async (query: TProductQuery) => {
   if (filters) {
     filterQuery = makeFilterQuery(filters);
   }
+
+
+ if (categoryId) {
+    if (typeof categoryId === "string") {
+      //check ObjectId
+      if (!Types.ObjectId.isValid(categoryId)) {
+        throw new ApiError(400, "categoryId must be valid ObjectId")
+      }
+      //payload.colors = [categoryId]
+      filterQuery = {
+        ...filterQuery,
+        categoryId: { $in: [new Types.ObjectId(categoryId)] }
+      }
+    }
+
+    if (Array.isArray(categoryId)) {
+      for (let i = 0; i < categoryId.length; i++) {
+        if (!Types.ObjectId.isValid(categoryId[i])) {
+          throw new ApiError(400, "categoryId must be valid ObjectId")
+        }
+      }
+      if(hasDuplicates(categoryId)){
+        throw new ApiError(400, "categoryId can not be duplicate value")
+      }
+      // const objectIds = categoryId?.map(id => new Types.ObjectId(id));
+      // //payload.colors = colors
+    }
+  }
+
+
+ console.log(categoryId)
+
+
+
   const result = await ProductModel.aggregate([
     {
       $lookup: {
