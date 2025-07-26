@@ -5,13 +5,13 @@ import config from "./app/config";
 
 let server: Server;
 
-const port = 8000;
+const port = config.port || 9090;
 
 
 async function main() {
     try {
       await dbConnect();
-      server = app.listen(port, "10.10.10.19",  () => {
+      server = app.listen(port,  () => {
         console.log(`Example app listening on port ${port}`);
       });
 
