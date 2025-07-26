@@ -1,9 +1,14 @@
 
 
-export interface ICart {
+export interface IO {
+  productId: Types.ObjectId;
   name: string;
-  description?: string;
-};
+  quantity: number;
+  price: number;
+  image?: string;
+  color?: Types.ObjectId;
+  size?: Types.ObjectId;
+}
 
 export type TCartQuery = {
   searchTerm?: string;

@@ -11,7 +11,7 @@ const port = 8000;
 async function main() {
     try {
       await dbConnect();
-      server = app.listen(port, '0.0.0.0', () => {
+      server = app.listen(port, "10.10.10.19",  () => {
         console.log(`Example app listening on port ${port}`);
       });
 
