@@ -3,9 +3,9 @@ import { Types } from "mongoose";
 export interface IOrderItem {
   productId: Types.ObjectId;
   name: string;
-  price: number;
   quantity: number;
-  image: string;
+  price: number;
+  image?: string;
   color?: Types.ObjectId;
   size?: Types.ObjectId;
 }
@@ -16,9 +16,11 @@ export type TDeliveryStatus = 'processing' | 'shipped' | 'delivered' | 'cancelle
 export interface IOrder {
   userId: Types.ObjectId;
   items: IOrderItem[];
+  totalPrice: number;
   paymentMethod?: string;
   paymentStatus?: TPaymentStatus,
   status: TDeliveryStatus
+  deliveryAt?: Date;
 };
 
 export type TOrderQuery = {

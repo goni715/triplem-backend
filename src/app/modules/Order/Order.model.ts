@@ -2,16 +2,17 @@ import { Schema, model } from 'mongoose';
 import { IOrder } from './Order.interface';
       
 const orderSchema = new Schema<IOrder>({
-  name: { 
-    type: String,
-    required: true
+  userId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "User"
   },
-  description: { 
+  description: {
     type: String
   }
 }, {
-    timestamps: true,
-    versionKey: false
+  timestamps: true,
+  versionKey: false
 })
       
 const OrderModel = model<IOrder>('Order', orderSchema);
