@@ -12,7 +12,7 @@ import mongoose, { Types } from "mongoose";
 import hasDuplicates from '../../utils/hasDuplicates';
 import ObjectId from '../../utils/ObjectId';
 import FavouriteModel from '../Favourite/favourite.model';
-import fs from "fs";
+import cloudinary from '../../helper/cloudinary';
 
 
 const createProductService = async (
@@ -31,7 +31,7 @@ const createProductService = async (
     // }
 
     images = await Promise.all(
-      files.map(async (file) => {
+      files?.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
           folder: 'Ecommerce',
           // width: 300,
@@ -39,12 +39,9 @@ const createProductService = async (
         });
 
         // Delete local file (non-blocking)
-         fs.unlink(file.path);
+        // fs.unlink(file.path);
 
-        return {
-          public_id: result.public_id,
-          image_url: result.secure_url,
-        };
+        return result.secure_url;
       })
     );
 
