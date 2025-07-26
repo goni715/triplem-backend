@@ -6,11 +6,11 @@ import s3 from "../helper/s3";
 const uploadImage = async (req: Request) => {
   // const path = `${req.protocol}://${req.get("host")}/uploads/${req?.file?.filename}`;  //for local machine
   // return path;
+  
   try {
     if (!req.file) {
       throw new AppError(400, "Please upload a file");
     }
-
 
     const params = {
       Bucket: config.aws_s3_bucket_name as string,

@@ -1,4 +1,4 @@
-
+import { Types } from "mongoose";
 
 export interface IO {
   productId: Types.ObjectId;

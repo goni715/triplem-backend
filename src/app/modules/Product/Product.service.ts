@@ -12,6 +12,7 @@ import mongoose, { Types } from "mongoose";
 import hasDuplicates from '../../utils/hasDuplicates';
 import ObjectId from '../../utils/ObjectId';
 import FavouriteModel from '../Favourite/favourite.model';
+import fs from "fs";
 
 
 const createProductService = async (
@@ -24,10 +25,29 @@ const createProductService = async (
 
   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
     const files = req.files as Express.Multer.File[];
-    for (const file of files) {
-      const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-      images.push(path)
-    }
+    // for (const file of files) {
+    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+    //   images.push(path)
+    // }
+
+    images = await Promise.all(
+      files.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'Ecommerce',
+          // width: 300,
+          // crop: 'scale',
+        });
+
+        // Delete local file (non-blocking)
+         fs.unlink(file.path);
+
+        return {
+          public_id: result.public_id,
+          image_url: result.secure_url,
+        };
+      })
+    );
+
   }
   else {
     throw new ApiError(400, "Minimum one image required");
@@ -310,7 +330,7 @@ const getUserProductsService = async (query: TProductQuery) => {
       throw new ApiError(400, "toPrice must be greater than fromPrice");
     }
 
-    if (Number(fromPrice) > 0 && Number(toPrice) > 0) {
+    if (Number(fromPrice) >= 0 && Number(toPrice) > 0) {
       filterQuery = {
         ...filterQuery,
         currentPrice: { $gte: Number(fromPrice), $lte: Number(toPrice) },
