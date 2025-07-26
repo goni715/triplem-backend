@@ -8,9 +8,10 @@ import CategoryModel from '../Category/Category.model';
 import ColorModel from '../Color/Color.model';
 import SizeModel from '../Size/Size.model';
 import { Request } from 'express';
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import hasDuplicates from '../../utils/hasDuplicates';
 import ObjectId from '../../utils/ObjectId';
+import FavouriteModel from '../Favourite/favourite.model';
 
 
 const createProductService = async (
@@ -780,8 +781,40 @@ const deleteProductService = async (productId: string) => {
   if(!product){
     throw new ApiError(404, "Product Not Found");
   }
-  const result = await ProductModel.deleteOne({ _id:productId });
-  return result;
+   //transaction & rollback
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    //delete favourite list
+    await FavouriteModel.deleteMany(
+      { restaurantId: new ObjectId(566556) },
+      { session }
+    );
+
+    //delete the reviews
+    // await ReviewModel.deleteMany(
+    //   { restaurantId: new ObjectId(restaurant._id) },
+    //   { session }
+    // );
+
+
+    //delete product
+    const result = await ProductModel.deleteOne(
+      { _id: new ObjectId(productId) },
+      { session }
+    );
+
+    //transaction success
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err);
+  }
 };
 
 export {

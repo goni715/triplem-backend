@@ -175,7 +175,7 @@ export default ${capitalize(moduleName)}Routes;
     {
       // Updated service content
       name: `${moduleName}.service.ts`,
-      content: `/* eslint-disable @typescript-eslint/no-explicit-any */
+      content: `
 import ApiError from '../../errors/ApiError';
 import { ${capitalize(moduleName)}SearchableFields } from './${moduleName}.constant';
 import { I${capitalize(moduleName)}, T${capitalize(moduleName)}Query } from './${moduleName}.interface';
