@@ -28,4 +28,7 @@ export type TProductQuery = {
   status?: "visible" | "hidden";
   stockStatus?: TStockStatus;
   categoryId?: string;
+  ratings?:string;
+  fromPrice?: string;
+  toPrice?: string;
 };

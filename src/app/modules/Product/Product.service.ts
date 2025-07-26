@@ -219,8 +219,11 @@ const getUserProductsService = async (query: TProductQuery) => {
     page = 1, 
     limit = 10, 
     sortOrder = "desc",
-    sortBy = "createdAt", 
+    sortBy = "createdAt",
+    ratings, 
     categoryId,
+    fromPrice,
+    toPrice,
     ...filters  // Any additional filters
   } = query;
 
@@ -243,6 +246,7 @@ const getUserProductsService = async (query: TProductQuery) => {
   }
 
 
+//filter by category
  if (categoryId) {
     if (typeof categoryId === "string") {
       //check ObjectId
@@ -265,14 +269,53 @@ const getUserProductsService = async (query: TProductQuery) => {
       if(hasDuplicates(categoryId)){
         throw new ApiError(400, "categoryId can not be duplicate value")
       }
-      // const objectIds = categoryId?.map(id => new Types.ObjectId(id));
-      // //payload.colors = colors
+      const categoryObjectIds = categoryId?.map(id => new Types.ObjectId(id));
+      filterQuery = {
+        ...filterQuery,
+        categoryId: { $in: categoryObjectIds}
+      }
     }
   }
 
 
- console.log(categoryId)
 
+  //filter by ratings
+  if (ratings) {
+    if (typeof Number(ratings) !== "number" || isNaN(Number(ratings))) {
+      throw new ApiError(400, "ratings must be a valid number");
+    }
+    if(Number(ratings) > 5){
+      throw new ApiError(400, "ratings value must be between 1-5");
+    }
+    if (Number(ratings) > 0) {
+      filterQuery = {
+        ...filterQuery,
+        ratings: Number(ratings)
+      }
+    }
+  }
+
+
+  //filter by price range
+  if(fromPrice && toPrice){
+    if (typeof Number(fromPrice) !== "number" || isNaN(Number(fromPrice))) {
+      throw new ApiError(400, "fromPrice must be a valid number");
+    }
+    if (typeof Number(toPrice) !== "number" || isNaN(Number(toPrice))) {
+      throw new ApiError(400, "toPrice must be a valid number");
+    }
+
+    if(Number(fromPrice) >= Number(toPrice)){
+      throw new ApiError(400, "toPrice must be greater than fromPrice");
+    }
+
+    if (Number(fromPrice) > 0 && Number(toPrice) > 0) {
+      filterQuery = {
+        ...filterQuery,
+        currentPrice: { $gte: Number(fromPrice), $lte: Number(toPrice) },
+      };
+    }
+  }
 
 
   const result = await ProductModel.aggregate([
@@ -312,7 +355,8 @@ const getUserProductsService = async (query: TProductQuery) => {
         ratings: "$ratings",
         totalReview: "$totalReview",
         images: "$images",
-        status: "$status"
+        status: "$status",
+        stockStatus: "$stockStatus"
       },
     },
     {
@@ -352,7 +396,8 @@ const getUserProductsService = async (query: TProductQuery) => {
         ratings: "$ratings",
         totalReview: "$totalReview",
         images: "$images",
-        status: "$status"
+        status: "$status",
+        stockStatus: "$stockStatus"
       },
     },
     {
