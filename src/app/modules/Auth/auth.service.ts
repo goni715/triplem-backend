@@ -10,7 +10,6 @@ import hashedPassword from "../../utils/hashedPassword";
 import mongoose, { Types } from "mongoose";
 import verifyToken from "../../utils/verifyToken";
 import { isJWTIssuedBeforePassChanged } from "../../utils/isJWTIssuedBeforePassChanged";
-import { v4 as uuidv4 } from 'uuid';
 import OtpModel from "../Otp/otp.model";
 import { IUser } from "../User/user.interface";
 import ApiError from "../../errors/ApiError";
