@@ -1,13 +1,14 @@
 import { Types } from "mongoose";
 
 export interface ICart {
+  userId: Types.ObjectId;
   productId: Types.ObjectId;
-  name: string;
+  //name: string;
   quantity: number;
   price: number;
   image?: string;
-  color?: Types.ObjectId;
-  size?: Types.ObjectId;
+  colorId?: Types.ObjectId;
+  sizeId?: Types.ObjectId;
 }
 
 export type TCartQuery = {

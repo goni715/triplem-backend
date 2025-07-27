@@ -2,12 +2,14 @@ import express from 'express';
 import CartController from './Cart.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createCartValidationSchema, updateCartValidationSchema } from './Cart.validation';
+import AuthMiddleware from '../../middlewares/AuthMiddleware';
 
 const router = express.Router();
 
 router.post(
   '/create-cart',
-  //validationMiddleware(createCartValidationSchema),
+  AuthMiddleware("user"),
+  validationMiddleware(createCartValidationSchema),
   CartController.createCart,
 );
 

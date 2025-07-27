@@ -6,9 +6,6 @@ const orderSchema = new Schema<IOrder>({
     type: Schema.Types.ObjectId,
     required: true,
     ref: "User"
-  },
-  description: {
-    type: String
   }
 }, {
   timestamps: true,
