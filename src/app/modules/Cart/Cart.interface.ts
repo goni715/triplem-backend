@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface IO {
+export interface ICart {
   productId: Types.ObjectId;
   name: string;
   quantity: number;

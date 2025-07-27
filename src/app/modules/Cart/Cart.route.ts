@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post(
   '/create-cart',
-  validationMiddleware(createCartValidationSchema),
+  //validationMiddleware(createCartValidationSchema),
   CartController.createCart,
 );
 

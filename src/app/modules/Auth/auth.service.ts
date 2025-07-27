@@ -133,7 +133,7 @@ const loginUserService = async (payload: ILoginUser) => {
 
   //check you are not user
   if (user.role !== "user") {
-    throw new AppError(400, `Sorry! You have no access to login`);
+    throw new AppError(403, `Sorry! You have no access to login`);
   }
 
   //create accessToken
@@ -175,7 +175,7 @@ const loginAdminService = async (payload: ILoginUser) => {
 
   //check you are not super_admin or administrator
   if ((user.role !== "admin") && (user.role !== "super_admin")) {
-    throw new AppError(400, `Sorry! You are not 'super_admin' or 'admin'`);
+    throw new AppError(403, `Sorry! You are not 'Super Admin' or 'Admin'`);
   }
 
   //check password
@@ -198,7 +198,7 @@ const loginAdminService = async (payload: ILoginUser) => {
 }
 
 
-//forgot password
+//forgot password-send-otp
 // step-01
 const forgotPassSendOtpService = async (email: string) => {
   const user = await UserModel.findOne({ email });
