@@ -21,18 +21,18 @@ export const createProductValidationSchema = z.object({
   //   .refine((id) => Types.ObjectId.isValid(id), {
   //     message: "categoryId must be a valid ObjectId",
   //   }),
-  // currentPrice: z
-  //   .preprocess(
-  //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-  //     z
-  //       .number({
-  //         required_error: "Current price is required",
-  //         invalid_type_error: "Current price must be a number",
-  //       })
-  //       .refine((val) => !isNaN(val), { message: "Current price must be a valid number" })
-  //       .refine((val) => val > 0, { message: "Current price must be greater than 0" })
-  //   )
-  // ,
+  currentPrice: z
+    .preprocess(
+      (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+      z
+        .number({
+          required_error: "Current price is required",
+          invalid_type_error: "Current price must be a number",
+        })
+        .refine((val) => !isNaN(val), { message: "Current price must be a valid number" })
+        .refine((val) => val > 0, { message: "Current price must be greater than 0" })
+    )
+  ,
   // originalPrice: z
   //   .preprocess(
   //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),

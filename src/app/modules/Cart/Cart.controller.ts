@@ -3,12 +3,13 @@ import sendResponse from '../../utils/sendResponse';
 import { createCartService, getSingleCartService, getAllCartsService, updateCartService, deleteCartService } from './Cart.service';
 
 const createCart = catchAsync(async (req, res) => {
-  const result = await createCartService(req.body);
+  const loginUserId = req.headers.id;
+  const result = await createCartService(loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: 'Cart is created successfully',
+    message: 'Product is added to cart',
     data: result,
   });
 });

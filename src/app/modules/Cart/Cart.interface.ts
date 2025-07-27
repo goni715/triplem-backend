@@ -4,8 +4,8 @@ export interface ICart {
   userId: Types.ObjectId;
   productId: Types.ObjectId;
   //name: string;
-  quantity: number;
   price: number;
+  quantity: number;
   image?: string;
   colorId?: Types.ObjectId;
   sizeId?: Types.ObjectId;

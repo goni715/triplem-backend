@@ -4,12 +4,51 @@ import { CartSearchableFields } from './Cart.constant';
 import { ICart, TCartQuery } from './Cart.interface';
 import CartModel from './Cart.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import ProductModel from '../Product/Product.model';
+import ColorModel from '../Color/Color.model';
+import SizeModel from '../Size/Size.model';
 
 const createCartService = async (
+  loginUserId: string,
   payload: ICart,
 ) => {
-  return "create cart service";
-  const result = await CartModel.create(payload);
+  const { productId, colorId, sizeId } = payload;
+
+  //check product
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "productId not found");
+  }
+
+  //check colorId
+  if (colorId) {
+    const color = await ColorModel.findById(colorId);
+    if (!color) {
+      throw new ApiError(404, "colorId not found");
+    }
+  }
+  
+  //check size
+  if (sizeId) {
+    const size = await SizeModel.findById(sizeId);
+    if (!size) {
+      throw new ApiError(404, "sizeId not found");
+    }
+  }
+
+  //check product has already been added to your cart
+  const cart = await CartModel.findOne({
+    userId: loginUserId,
+    productId
+  });
+  if (cart) {
+    throw new ApiError(409, "This product has already been added to your cart");
+  }
+
+  const result = await CartModel.create({
+    ...payload,
+    userId: loginUserId
+  });
   return result;
 };
 
