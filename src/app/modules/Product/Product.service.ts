@@ -694,7 +694,7 @@ const getSingleProductService = async (productId: string) => {
         totalReview: { $size: "$reviews" },
       },
     },
-     {
+    {
       $lookup: {
         from: "categories",
         localField: "categoryId",

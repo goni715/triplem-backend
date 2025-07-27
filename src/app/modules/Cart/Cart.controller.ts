@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createCartService, getSingleCartService, getAllCartsService, updateCartService, deleteCartService } from './Cart.service';
+import { createCartService, updateCartService, deleteCartService, getCartsService } from './Cart.service';
 
 const createCart = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -14,33 +14,23 @@ const createCart = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleCart = catchAsync(async (req, res) => {
-  const { cartId } = req.params;
-  const result = await getSingleCartService(cartId);
 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Cart is retrieved successfully',
-    data: result,
-  });
-});
-
-const getAllCarts = catchAsync(async (req, res) => {
-  const result = await getAllCartsService(req.query);
+const getCarts = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getCartsService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Carts are retrieved successfully',
-    meta: result.meta,
-    data: result.data,
+    data: result
   });
 });
 
 const updateCart = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const { cartId } = req.params;
-  const result = await updateCartService(cartId, req.body);
+  const result = await updateCartService(loginUserId as string, cartId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -51,8 +41,9 @@ const updateCart = catchAsync(async (req, res) => {
 });
 
 const deleteCart = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteCartService(id);
+  const loginUserId = req.headers.id;
+  const { cartId } = req.params;
+  const result = await deleteCartService(loginUserId as string, cartId,);
 
   sendResponse(res, {
     statusCode: 200,
@@ -64,8 +55,7 @@ const deleteCart = catchAsync(async (req, res) => {
 
 const CartController = {
   createCart,
-  getSingleCart,
-  getAllCarts,
+  getCarts,
   updateCart,
   deleteCart,
 };

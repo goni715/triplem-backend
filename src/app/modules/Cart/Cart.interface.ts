@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 export interface ICart {
   userId: Types.ObjectId;
   productId: Types.ObjectId;
-  //name: string;
+  name: string;
   price: number;
   quantity: number;
   image?: string;

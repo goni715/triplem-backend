@@ -14,25 +14,22 @@ router.post(
 );
 
 router.get(
-  '/get-single-cart/:cartId',
-  CartController.getSingleCart,
+  '/get-carts',
+  CartController.getCarts,
 );
-
 router.patch(
   '/update-cart/:cartId',
+  AuthMiddleware("user"),
   validationMiddleware(updateCartValidationSchema),
   CartController.updateCart,
 );
 
 router.delete(
   '/delete-cart/:cartId',
+  AuthMiddleware("user"),
   CartController.deleteCart,
 );
 
-router.get(
-  '/get-all-carts',
-  CartController.getAllCarts,
-);
 
 const CartRoutes = router;
 export default CartRoutes;
