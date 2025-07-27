@@ -3,14 +3,14 @@ import { Types } from "mongoose";
 export interface IOrderItem {
   productId: Types.ObjectId;
   name: string;
-  quantity: number;
   price: number;
-  image?: string;
-  color?: Types.ObjectId;
-  size?: Types.ObjectId;
+  quantity: number;
+  image: string;
+  colorId?: Types.ObjectId;
+  sizeId?: Types.ObjectId;
 }
 
-export type TPaymentStatus = "paid" | "unpaid";
+export type TPaymentStatus = "paid" | "unpaid" | "failled";
 export type TDeliveryStatus = 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface IOrder {

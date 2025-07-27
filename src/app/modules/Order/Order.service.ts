@@ -1,14 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import ApiError from '../../errors/ApiError';
 import { OrderSearchableFields } from './Order.constant';
-import { IOrder, TOrderQuery } from './Order.interface';
+import { TOrderQuery } from './Order.interface';
 import OrderModel from './Order.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import CartModel from '../Cart/Cart.model';
+import ObjectId from '../../utils/ObjectId';
 
 const createOrderService = async (
-  payload: IOrder,
+  loginUserId: string
 ) => {
-  return "Create Order service"
+  const carts = await CartModel.aggregate([
+    {
+      $match: {
+        userId: new ObjectId(loginUserId)
+      }
+    }
+  ])
+  return carts;
   const result = await OrderModel.create(payload);
   return result;
 };

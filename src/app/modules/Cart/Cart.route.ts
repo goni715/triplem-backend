@@ -15,6 +15,7 @@ router.post(
 
 router.get(
   '/get-carts',
+  AuthMiddleware("user"),
   CartController.getCarts,
 );
 router.patch(

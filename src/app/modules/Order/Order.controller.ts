@@ -3,7 +3,8 @@ import sendResponse from '../../utils/sendResponse';
 import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService } from './Order.service';
 
 const createOrder = catchAsync(async (req, res) => {
-  const result = await createOrderService(req.body);
+  const loginUserId = req.headers.id;
+  const result = await createOrderService(loginUserId);
 
   sendResponse(res, {
     statusCode: 201,

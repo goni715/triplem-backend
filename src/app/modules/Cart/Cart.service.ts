@@ -72,12 +72,11 @@ const createCartService = async (
 };
 
 const getCartsService = async (loginUserId: string) => {
-
   const result = await CartModel.aggregate([
     {
       $match: {
-         userId: { $ne: new Types.ObjectId(loginUserId) },
-      },
+         userId: new Types.ObjectId(loginUserId)
+      }
     },
     {
       $project: {
