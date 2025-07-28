@@ -5,9 +5,10 @@ export interface IOrderItem {
   name: string;
   price: number;
   quantity: number;
+  total: number;
   image: string;
   colorId?: Types.ObjectId;
-  sizeId?: Types.ObjectId;
+  size?: string;
 }
 
 export type TPaymentStatus = "paid" | "unpaid" | "failled";
@@ -15,7 +16,7 @@ export type TDeliveryStatus = 'processing' | 'shipped' | 'delivered' | 'cancelle
 
 export interface IOrder {
   userId: Types.ObjectId;
-  items: IOrderItem[];
+  products: IOrderItem[];
   totalPrice: number;
   paymentMethod?: string;
   paymentStatus?: TPaymentStatus,
@@ -24,6 +25,14 @@ export interface IOrder {
 };
 
 export type TOrderQuery = {
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  status?: string,
+};
+export type TUserOrderQuery = {
   searchTerm?: string;
   page?: string;
   limit?: string;

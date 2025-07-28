@@ -1,6 +1,6 @@
 
 import ApiError from '../../errors/ApiError';
-import { ICart } from './Cart.interface';
+import { ICart, ICartPayload } from './Cart.interface';
 import CartModel from './Cart.model';
 import ProductModel from '../Product/Product.model';
 import ColorModel from '../Color/Color.model';
@@ -10,7 +10,7 @@ import ObjectId from '../../utils/ObjectId';
 
 const createCartService = async (
   loginUserId: string,
-  payload: ICart,
+  payload: ICartPayload,
 ) => {
   const { productId, colorId, sizeId } = payload;
 
@@ -18,6 +18,15 @@ const createCartService = async (
   const product = await ProductModel.findById(productId);
   if (!product) {
     throw new ApiError(404, "productId not found");
+  }
+
+  //check product status
+  if(product.status==="hidden"){
+    throw new ApiError(404, "This product is hidden")
+  }
+  //check stock status
+  if(product.stockStatus !=="in_stock"){
+    throw new ApiError(404, `This product is ${product.stockStatus==="stock_out" ? "out of stock." : "upcoming"} `)
   }
 
   //check colorId
@@ -50,6 +59,8 @@ const createCartService = async (
     if (!associateWithProduct) {
       throw new ApiError(409, 'This sizeId is not associated with this product');
     }
+    //set size
+    payload.size=size.size;
   }
 
   //check product has already been added to your cart
@@ -92,9 +103,11 @@ const getCartsService = async (loginUserId: string) => {
 
 
 
-return result;
+  return result?.length > 0 ? result?.map((cv)=>({
+    ...cv,
+    total: Number(cv.price) * Number(cv.quantity)
+  })) : [];
 };
-
 
 const updateCartService = async (loginUserId: string, cartId: string, payload: any) => {
   if (!Types.ObjectId.isValid(cartId)) {

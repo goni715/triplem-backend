@@ -1,10 +1,12 @@
 import catchAsync from '../../utils/catchAsync';
+import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
-import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService } from './Order.service';
+import { OrderValidFields } from './Order.constant';
+import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService } from './Order.service';
 
 const createOrder = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createOrderService(loginUserId);
+  const result = await createOrderService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 201,
@@ -26,15 +28,30 @@ const getSingleOrder = catchAsync(async (req, res) => {
   });
 });
 
-const getAllOrders = catchAsync(async (req, res) => {
-  const result = await getAllOrdersService(req.query);
+const getUserOrders = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const validatedQuery = pickValidFields(req.query, OrderValidFields);
+  const result = await getUserOrdersService(loginUserId as string, validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Orders are retrieved successfully',
     meta: result.meta,
-    data: result.data,
+    data: result.data
+  });
+});
+
+const getAllOrders = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, OrderValidFields);
+  const result = await getAllOrdersService(validatedQuery);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Orders are retrieved successfully',
+   // meta: result.meta,
+    data: result,
   });
 });
 
@@ -65,6 +82,7 @@ const deleteOrder = catchAsync(async (req, res) => {
 const OrderController = {
   createOrder,
   getSingleOrder,
+  getUserOrders,
   getAllOrders,
   updateOrder,
   deleteOrder,

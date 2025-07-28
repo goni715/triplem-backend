@@ -38,9 +38,8 @@ const cartSchema = new Schema<ICart>({
     type: Schema.Types.ObjectId,
     ref: "Color"
   },
-  sizeId: {
-    type: Schema.Types.ObjectId,
-    ref: "Size"
+  size: {
+    type: String
   },
 }, {
   timestamps: true,
