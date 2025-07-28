@@ -344,9 +344,12 @@ const getSingleOrderService = async (orderId: string) => {
 };
 
 const updateOrderService = async (orderId: string, payload: any) => {
- 
+  if (!Types.ObjectId.isValid(orderId)) {
+    throw new ApiError(400, "orderId must be a valid ObjectId")
+  }
+  
   const order = await OrderModel.findById(orderId);
-  if(!order){
+  if (!order) {
     throw new ApiError(404, "Order Not Found");
   }
   const result = await OrderModel.updateOne(

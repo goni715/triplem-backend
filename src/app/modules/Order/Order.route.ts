@@ -19,6 +19,7 @@ router.get(
 );
 router.patch(
   '/update-order/:orderId',
+   AuthMiddleware(UserRole.admin, UserRole.super_admin),
   validationMiddleware(updateOrderValidationSchema),
   OrderController.updateOrder,
 );

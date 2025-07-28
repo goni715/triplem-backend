@@ -1,15 +1,16 @@
 import { z } from 'zod';
 
-export const createOrderValidationSchema = z.object({
-   name: z.string({
-    required_error: "name is required!"
-  }),
-  description: z.string({
-    required_error: "description is required !"
-  }),
-});
-
 export const updateOrderValidationSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
+  status: z.string({
+    invalid_type_error: "status must be a valid string value.",
+  })
+    .refine((val) => ['processing', 'shipped', 'delivered', 'cancelled'].includes(val), {
+      message: "status must be one of: 'processing', 'shipped', 'delivered', 'cancelled'",
+    }).optional(),
+  paymentStatus: z.string({
+    invalid_type_error: "status must be a valid string value.",
+  })
+    .refine((val) => ['paid', 'failled'].includes(val), {
+      message: "status must be one of: 'paid', 'shipped', 'failled'",
+    }).optional(),
 });
