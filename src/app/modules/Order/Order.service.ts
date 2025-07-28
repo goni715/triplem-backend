@@ -5,6 +5,7 @@ import OrderModel from './Order.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import CartModel from '../Cart/Cart.model';
 import ObjectId from '../../utils/ObjectId';
+import { Types } from "mongoose";
 
 const createOrderService = async (
   loginUserId: string
@@ -64,17 +65,6 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
   //3. setup sorting
   const sortDirection = sortOrder === "asc" ? 1 : -1;
 
-  //4. setup searching
-  let searchQuery = {};
-  if (searchTerm) {
-    searchQuery = makeSearchQuery(searchTerm, OrderSearchableFields);
-  }
-
-  //5 setup filters
-  let filterQuery = {};
-  if (filters) {
-    filterQuery = makeFilterQuery(filters);
-  }
 
   const result = await OrderModel.aggregate([
     {
@@ -166,6 +156,7 @@ return {
 };
 };
 
+
 const getAllOrdersService = async (query: TOrderQuery) => {
   const {
     searchTerm, 
@@ -194,24 +185,33 @@ const getAllOrdersService = async (query: TOrderQuery) => {
     filterQuery = makeFilterQuery(filters);
   }
   const result = await OrderModel.aggregate([
+     {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
     {
-      $match: {
-        ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
-      },
+      $unwind: "$user"
     },
     {
       $project: {
         _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
+        status: "$status",
+        paymentStatus: "$paymentStatus",
+        deliveryAt: "$deliveryAt",
+        createdAt: "$createdAt"
+      },
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
       },
     },
     { $sort: { [sortBy]: sortDirection } }, 
@@ -219,18 +219,41 @@ const getAllOrdersService = async (query: TOrderQuery) => {
     { $limit: Number(limit) }, 
   ]);
 
-     // total count
-  const totalReviewResult = await OrderModel.aggregate([
+  // total count result
+  const totalCountResult = await OrderModel.aggregate([
+     {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $project: {
+        _id: 1,
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
+        status: "$status",
+        paymentStatus: "$paymentStatus",
+        deliveryAt: "$deliveryAt",
+        createdAt: "$createdAt"
+      },
+    },
     {
       $match: {
         ...searchQuery,
         ...filterQuery
-      }
+      },
     },
     { $count: "totalCount" }
   ])
 
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalCount = totalCountResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
 return {
@@ -245,9 +268,76 @@ return {
 };
 
 const getSingleOrderService = async (orderId: string) => {
-  const result = await OrderModel.findById(orderId);
-  if (!result) {
-    throw new ApiError(404, 'Order Not Found');
+  if (!Types.ObjectId.isValid(orderId)) {
+    throw new ApiError(400, "orderId must be a valid ObjectId")
+  }
+
+  const result = await OrderModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(orderId)
+      }
+    },
+    { $unwind: "$products" },
+    {
+      $lookup: {
+        from: "colors",
+        localField: "products.colorId",
+        foreignField: "_id",
+        as: "products.color"
+      }
+    },
+    {
+      $unwind: {
+        path: "$products.color",
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $group: {
+        _id: "$_id",
+        userId: { $first: "$userId" },
+        totalPrice: { $first: "$totalPrice" },
+        paymentStatus: { $first: "$paymentStatus" },
+        status: { $first: "$status" },
+        deliveryAt: { $first: "$deliveryAt" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        products: { $push: "$products" }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        totalPrice: 1,
+        paymentStatus: 1,
+        status: 1,
+        deliveryAt: 1,
+        createdAt: 1,
+        products: {
+          $map: {
+            input: "$products",
+            as: "product",
+            in: {
+              productId: "$$product.productId",
+              name: "$$product.name",
+              price: "$$product.price",
+              quantity: "$$product.quantity",
+              total: "$$product.total",
+              image: "$$product.image",
+              size: "$$product.size",
+              colorName: "$$product.color.name",
+              colorHexCode: "$$product.color.hexCode"
+            }
+          }
+        }
+      }
+    }
+  ]);
+
+
+  if (result.length===0) {
+    throw new ApiError(404, 'orderId Not Found');
   }
 
   return result;

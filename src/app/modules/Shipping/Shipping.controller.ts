@@ -9,7 +9,7 @@ const createShipping = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: 'Shipping is created successfully',
+    message: 'Shipping address is updated successfully',
     data: result,
   });
 });

@@ -8,14 +8,22 @@ const createShippingService = async (
 ) => {
   //check shipping information
   const shipping = await ShippingModel.findOne({ userId: loginUserId });
-  if(shipping){
-    throw new ApiError(409, "You have already set shipping information");
+
+  if (shipping) {
+    //throw new ApiError(409, "You have already set shipping information");
+    const result = await ShippingModel.updateOne(
+      { userId: loginUserId },
+      payload,
+      { runValidators: true }
+    );
+    return result;
   }
-  
+
   const result = await ShippingModel.create({
     ...payload,
     userId: loginUserId
   });
+
   return result;
 };
 

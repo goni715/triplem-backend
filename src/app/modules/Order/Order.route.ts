@@ -12,12 +12,11 @@ router.post(
   AuthMiddleware("user"),
   OrderController.createOrder,
 );
-
 router.get(
   '/get-single-order/:orderId',
+  AuthMiddleware(UserRole.admin, UserRole.super_admin),
   OrderController.getSingleOrder,
 );
-
 router.patch(
   '/update-order/:orderId',
   validationMiddleware(updateOrderValidationSchema),
@@ -28,7 +27,6 @@ router.delete(
   '/delete-order/:orderId',
   OrderController.deleteOrder,
 );
-
 router.get(
   '/get-user-orders',
   AuthMiddleware(UserRole.user),

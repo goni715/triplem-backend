@@ -1,4 +1,10 @@
-export const OrderSearchableFields = ['name', 'description'];
+export const OrderSearchableFields = ['fullName', 'email', 'phone'];
+
+export const UserOrderValidFields: string[] = [
+  "page",
+  "limit",
+  "status"
+];
 
 export const OrderValidFields: string[] = [
   "searchTerm",
@@ -7,7 +13,7 @@ export const OrderValidFields: string[] = [
   "sortBy",
   "sortOrder",
   "status",
-  "gender"
+  "paymentStatus"
 ];
       
       

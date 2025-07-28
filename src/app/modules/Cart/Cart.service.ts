@@ -1,6 +1,6 @@
 
 import ApiError from '../../errors/ApiError';
-import { ICart, ICartPayload } from './Cart.interface';
+import { ICartPayload } from './Cart.interface';
 import CartModel from './Cart.model';
 import ProductModel from '../Product/Product.model';
 import ColorModel from '../Color/Color.model';
