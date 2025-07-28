@@ -1,18 +1,11 @@
 import express from 'express';
 import ShippingController from './Shipping.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createShippingValidationSchema, updateShippingValidationSchema } from './Shipping.validation';
+import { createShippingValidationSchema } from './Shipping.validation';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 
 const router = express.Router();
-
-router.post(
-  '/create-shipping',
-  AuthMiddleware(UserRole.user),
-  validationMiddleware(createShippingValidationSchema),
-  ShippingController.createShipping,
-);
 
 router.get(
   '/get-shipping-address',
@@ -21,9 +14,9 @@ router.get(
 );
 
 router.patch(
-  '/update-shipping',
+  '/create-update-shipping',
   AuthMiddleware(UserRole.user),
-  validationMiddleware(updateShippingValidationSchema),
+  validationMiddleware(createShippingValidationSchema),
   ShippingController.updateShipping,
 );
 
