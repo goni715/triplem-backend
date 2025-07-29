@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createContactService, getSingleContactService, getAllContactsService, deleteContactService, replyContactService } from './Contact.service';
+import { createContactService, getAllContactsService, deleteContactService, replyContactService } from './Contact.service';
 
 const createContact = catchAsync(async (req, res) => {
   const result = await createContactService(req.body);
@@ -13,17 +13,6 @@ const createContact = catchAsync(async (req, res) => {
   });
 });
 
-const getSingleContact = catchAsync(async (req, res) => {
-  const { contactId } = req.params;
-  const result = await getSingleContactService(contactId);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Contact is retrieved successfully',
-    data: result,
-  });
-});
 
 const getAllContacts = catchAsync(async (req, res) => {
   const result = await getAllContactsService(req.query);
@@ -64,7 +53,6 @@ const deleteContact = catchAsync(async (req, res) => {
 
 const ContactController = {
   createContact,
-  getSingleContact,
   getAllContacts,
   replyContact,
   deleteContact,

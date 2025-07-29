@@ -83,14 +83,6 @@ return {
 };
 };
 
-const getSingleContactService = async (contactId: string) => {
-  const result = await ContactModel.findById(contactId);
-  if (!result) {
-    throw new ApiError(404, 'Contact Not Found');
-  }
-
-  return result;
-};
 
 const replyContactService = async (contactId: string, replyText: string) => {
   if (!Types.ObjectId.isValid(contactId)) {
@@ -100,11 +92,15 @@ const replyContactService = async (contactId: string, replyText: string) => {
   if (!contact) {
     throw new ApiError(404, "contactId Not Found");
   }
+
+  if(contact.replyText){
+    throw new ApiError(409, "Reply already sent.")
+  }
  
   //update contact
   const result = await ContactModel.updateOne(
     { _id: contactId },
-    { replyText }
+    { replyText, replyAt: new Date() }
   );
 
   //send reply message
@@ -127,7 +123,6 @@ const deleteContactService = async (contactId: string) => {
 export {
   createContactService,
   getAllContactsService,
-  getSingleContactService,
   replyContactService,
   deleteContactService,
 };

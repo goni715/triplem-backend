@@ -20,7 +20,10 @@ const contactSchema = new Schema<IContact>({
   replyText: { 
     type: String,
     default: ""
-  }
+  },
+  replyAt: {
+    type: Date,
+  },
 }, {
     timestamps: true,
     versionKey: false

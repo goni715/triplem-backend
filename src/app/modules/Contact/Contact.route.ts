@@ -13,11 +13,6 @@ router.post(
   ContactController.createContact,
 );
 
-router.get(
-  '/get-single-contact/:contactId',
-  ContactController.getSingleContact,
-);
-
 router.patch(
   '/reply/:contactId',
   AuthMiddleware('admin', 'super_admin'),

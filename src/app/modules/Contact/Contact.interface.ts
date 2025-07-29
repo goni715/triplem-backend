@@ -5,6 +5,7 @@ export interface IContact {
   phone: string;
   message: string;
   replyText?: string;
+  replyAt?: Date;
 };
 
 export type TContactQuery = {
