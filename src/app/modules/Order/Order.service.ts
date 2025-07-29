@@ -81,55 +81,91 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
         from: "colors",
         localField: "products.colorId",
         foreignField: "_id",
-        as:"products.color"
+        as: "products.color"
       }
     },
     {
-    $unwind: {
-      path: "$products.color",
-      preserveNullAndEmptyArrays: true
-    }
-  },
-  {
-    $group: {
-      _id: "$_id",
-      userId: { $first: "$userId" },
-      totalPrice: { $first: "$totalPrice" },
-      paymentStatus: { $first: "$paymentStatus" },
-      status: { $first: "$status" },
-      deliveryAt: { $first: "$deliveryAt" },
-      createdAt: { $first: "$createdAt" },
-      updatedAt: { $first: "$updatedAt" },
-      products: { $push: "$products" }
-    }
-  },
-  {
-    $project: {
-      _id:1,
-      totalPrice: 1,
-      paymentStatus: 1,
-      status: 1,
-      deliveryAt: 1,
-      createdAt: 1,
-      products: {
-        $map: {
-          input: "$products",
-          as: "product",
-          in: {
-            productId: "$$product.productId",
-            name: "$$product.name",
-            price: "$$product.price",
-            quantity: "$$product.quantity",
-            total: "$$product.total",
-            image: "$$product.image",
-            size: "$$product.size",
-            colorName: "$$product.color.name",
-            colorHexCode: "$$product.color.hexCode"
+      $unwind: {
+        path: "$products.color",
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        let: {
+          productId: "$products.productId",
+          orderId: "$_id",
+          userId: new ObjectId(loginUserId),
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$productId", "$$productId"] },
+                  { $eq: ["$orderId", "$$orderId"] },
+                  { $eq: ["$userId", "$$userId"] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "products.reviews",
+      },
+    },
+    {
+      $addFields: {
+        "products.isReview": {
+          $cond: {
+            if: { $gt: [{ $size: "$products.reviews" }, 0] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        userId: { $first: "$userId" },
+        totalPrice: { $first: "$totalPrice" },
+        paymentStatus: { $first: "$paymentStatus" },
+        status: { $first: "$status" },
+        deliveryAt: { $first: "$deliveryAt" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        products: { $push: "$products" }
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        totalPrice: 1,
+        paymentStatus: 1,
+        status: 1,
+        deliveryAt: 1,
+        createdAt: 1,
+        products: {
+          $map: {
+            input: "$products",
+            as: "product",
+            in: {
+              productId: "$$product.productId",
+              name: "$$product.name",
+              price: "$$product.price",
+              quantity: "$$product.quantity",
+              total: "$$product.total",
+              image: "$$product.image",
+              size: "$$product.size",
+              colorName: "$$product.color.name",
+              colorHexCode: "$$product.color.hexCode",
+              isReview: "$$product.isReview"
+            }
           }
         }
       }
     }
-  }
   ]);
 
   // total count

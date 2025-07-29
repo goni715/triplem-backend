@@ -38,15 +38,24 @@ const createReviewService = async (
     throw new ApiError(409, "Your order has not been delivered yet");
   }
 
-  return "create review service";
+  
+  const orderProducts = order?.products;
+
+  //check productId is not associated with this order
+  const existingProduct = orderProducts?.find((cv)=> cv.productId.toString() === productId.toString());
+  if(!existingProduct){
+    throw new ApiError(400, "This product is not associated with this order");
+  }
+
   //check if you already put the comment
   const review = await ReviewModel.findOne({
     userId: loginUserId,
     orderId,
+    productId
   })
 
   if(review){
-    throw new ApiError(409, "You have already reviewed this order");
+    throw new ApiError(409, "You have already reviewed this product");
   }
 
   //transaction & rollback
@@ -60,6 +69,7 @@ const createReviewService = async (
       [{
         userId: loginUserId,
         orderId,
+        productId,
         star,
         comment,
       }],
@@ -70,11 +80,11 @@ const createReviewService = async (
     const averageRatingsResult = await ReviewModel.aggregate(
       [
         {
-          $match: { restaurantId: new ObjectId(restaurantId) },
+          $match: { productId: new ObjectId(productId) },
         },
         {
           $group: {
-            _id: "$restaurantId",
+            _id: "$productId",
             averageRating: { $avg: "$star" },
           },
         },
@@ -85,11 +95,11 @@ const createReviewService = async (
     const averageRatings =
       averageRatingsResult.length > 0
         ? Number((averageRatingsResult[0]?.averageRating).toFixed(1))
-        : restaurant.ratings;
+        : product.ratings;
 
     //update the ratings
-    const result = await RestaurantModel.updateOne(
-      { _id: new ObjectId(restaurantId) },
+    const result = await ProductModel.updateOne(
+      { _id: new ObjectId(productId) },
       { ratings: averageRatings },
       { session }
     );
@@ -159,10 +169,8 @@ const getMyRestaurantReviewsService = async (loginUserId: string, query: TReview
       filterQuery = makeFilterQuery(filters);
     }
 
-    return
-  
-   //check restaurant not exist
-   const restaurant = await RestaurantModel.findOne({ownerId: loginUserId});
+    
+   const restaurant = await ProductModel.findOne({ownerId: loginUserId});
    if (!restaurant) {
      throw new ApiError(404, "Restaurant Not Found");
    }
@@ -280,7 +288,7 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
     }
   
    //check restaurant not exist
-   const restaurant = await RestaurantModel.findById(restaurantId);
+   const restaurant = await ProductModel.findById(restaurantId);
    if (!restaurant) {
      throw new ApiError(404, "Restaurant Not Found");
    }

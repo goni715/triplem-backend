@@ -13,6 +13,11 @@ const reviewSchema = new Schema<IReview>(
       required: true,
       ref: "Order",
     },
+    productId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Product",
+    },
     star: {
       type: Number,
       required: true,
