@@ -1,0 +1,380 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteOrderService = exports.updateOrderService = exports.getSingleOrderService = exports.getAllOrdersService = exports.getUserOrdersService = exports.createOrderService = void 0;
+const ApiError_1 = __importDefault(require("../../errors/ApiError"));
+const Order_constant_1 = require("./Order.constant");
+const Order_model_1 = __importDefault(require("./Order.model"));
+const QueryBuilder_1 = require("../../helper/QueryBuilder");
+const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
+const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
+const mongoose_1 = require("mongoose");
+const createOrderService = (loginUserId) => __awaiter(void 0, void 0, void 0, function* () {
+    const carts = yield Cart_model_1.default.aggregate([
+        {
+            $match: {
+                userId: new ObjectId_1.default(loginUserId)
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                userId: 0,
+                createdAt: 0,
+                updatedAt: 0
+            }
+        }
+    ]);
+    if ((carts === null || carts === void 0 ? void 0 : carts.length) === 0) {
+        throw new ApiError_1.default(404, "No items in cart.");
+    }
+    //count totalPrice
+    const totalPrice = carts === null || carts === void 0 ? void 0 : carts.reduce((total, currentValue) => total + (currentValue.price * currentValue.quantity), 0);
+    const cartProducts = carts === null || carts === void 0 ? void 0 : carts.map((cv) => (Object.assign(Object.assign({}, cv), { total: Number(cv.price) * Number(cv.quantity) })));
+    //transaction & rollback
+    const result = yield Order_model_1.default.create({
+        userId: loginUserId,
+        products: cartProducts,
+        totalPrice
+    });
+    return result;
+});
+exports.createOrderService = createOrderService;
+const getUserOrdersService = (loginUserId, query) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
+    ;
+    // 2. Set up pagination
+    const skip = (Number(page) - 1) * Number(limit);
+    //3. setup sorting
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    const result = yield Order_model_1.default.aggregate([
+        {
+            $match: {
+                userId: new ObjectId_1.default(loginUserId)
+            }
+        },
+        { $sort: { [sortBy]: sortDirection } },
+        { $skip: skip },
+        { $limit: Number(limit) },
+        { $unwind: "$products" },
+        {
+            $lookup: {
+                from: "colors",
+                localField: "products.colorId",
+                foreignField: "_id",
+                as: "products.color"
+            }
+        },
+        {
+            $unwind: {
+                path: "$products.color",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $lookup: {
+                from: "reviews",
+                let: {
+                    productId: "$products.productId",
+                    orderId: "$_id",
+                    userId: new ObjectId_1.default(loginUserId),
+                },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$productId", "$$productId"] },
+                                    { $eq: ["$orderId", "$$orderId"] },
+                                    { $eq: ["$userId", "$$userId"] },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                as: "products.reviews",
+            },
+        },
+        {
+            $addFields: {
+                "products.isReview": {
+                    $cond: {
+                        if: { $gt: [{ $size: "$products.reviews" }, 0] },
+                        then: true,
+                        else: false,
+                    },
+                },
+            },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                userId: { $first: "$userId" },
+                totalPrice: { $first: "$totalPrice" },
+                paymentStatus: { $first: "$paymentStatus" },
+                status: { $first: "$status" },
+                deliveryAt: { $first: "$deliveryAt" },
+                createdAt: { $first: "$createdAt" },
+                updatedAt: { $first: "$updatedAt" },
+                products: { $push: "$products" }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                totalPrice: 1,
+                paymentStatus: 1,
+                status: 1,
+                deliveryAt: 1,
+                createdAt: 1,
+                products: {
+                    $map: {
+                        input: "$products",
+                        as: "product",
+                        in: {
+                            productId: "$$product.productId",
+                            name: "$$product.name",
+                            price: "$$product.price",
+                            quantity: "$$product.quantity",
+                            total: "$$product.total",
+                            image: "$$product.image",
+                            size: "$$product.size",
+                            colorName: "$$product.color.name",
+                            colorHexCode: "$$product.color.hexCode",
+                            isReview: "$$product.isReview"
+                        }
+                    }
+                }
+            }
+        }
+    ]);
+    // total count
+    const totalCountResult = yield Order_model_1.default.aggregate([
+        {
+            $match: {
+                userId: new ObjectId_1.default(loginUserId)
+            }
+        },
+        { $count: "totalCount" }
+    ]);
+    const totalCount = ((_a = totalCountResult[0]) === null || _a === void 0 ? void 0 : _a.totalCount) || 0;
+    const totalPages = Math.ceil(totalCount / Number(limit));
+    return {
+        meta: {
+            page: Number(page), //currentPage
+            limit: Number(limit),
+            totalPages,
+            total: totalCount,
+        },
+        data: result,
+    };
+});
+exports.getUserOrdersService = getUserOrdersService;
+const getAllOrdersService = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
+    ;
+    // 2. Set up pagination
+    const skip = (Number(page) - 1) * Number(limit);
+    //3. setup sorting
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    //4. setup searching
+    let searchQuery = {};
+    if (searchTerm) {
+        searchQuery = (0, QueryBuilder_1.makeSearchQuery)(searchTerm, Order_constant_1.OrderSearchableFields);
+    }
+    //5 setup filters
+    let filterQuery = {};
+    if (filters) {
+        filterQuery = (0, QueryBuilder_1.makeFilterQuery)(filters);
+    }
+    const result = yield Order_model_1.default.aggregate([
+        {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            $project: {
+                _id: 1,
+                fullName: "$user.fullName",
+                email: "$user.email",
+                phone: "$user.phone",
+                status: "$status",
+                paymentStatus: "$paymentStatus",
+                deliveryAt: "$deliveryAt",
+                createdAt: "$createdAt"
+            },
+        },
+        {
+            $match: Object.assign(Object.assign({}, searchQuery), filterQuery),
+        },
+        { $sort: { [sortBy]: sortDirection } },
+        { $skip: skip },
+        { $limit: Number(limit) },
+    ]);
+    // total count result
+    const totalCountResult = yield Order_model_1.default.aggregate([
+        {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            $project: {
+                _id: 1,
+                fullName: "$user.fullName",
+                email: "$user.email",
+                phone: "$user.phone",
+                status: "$status",
+                paymentStatus: "$paymentStatus",
+                deliveryAt: "$deliveryAt",
+                createdAt: "$createdAt"
+            },
+        },
+        {
+            $match: Object.assign(Object.assign({}, searchQuery), filterQuery),
+        },
+        { $count: "totalCount" }
+    ]);
+    const totalCount = ((_a = totalCountResult[0]) === null || _a === void 0 ? void 0 : _a.totalCount) || 0;
+    const totalPages = Math.ceil(totalCount / Number(limit));
+    return {
+        meta: {
+            page: Number(page), //currentPage
+            limit: Number(limit),
+            totalPages,
+            total: totalCount,
+        },
+        data: result,
+    };
+});
+exports.getAllOrdersService = getAllOrdersService;
+const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.Types.ObjectId.isValid(orderId)) {
+        throw new ApiError_1.default(400, "orderId must be a valid ObjectId");
+    }
+    const result = yield Order_model_1.default.aggregate([
+        {
+            $match: {
+                _id: new ObjectId_1.default(orderId)
+            }
+        },
+        { $unwind: "$products" },
+        {
+            $lookup: {
+                from: "colors",
+                localField: "products.colorId",
+                foreignField: "_id",
+                as: "products.color"
+            }
+        },
+        {
+            $unwind: {
+                path: "$products.color",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                userId: { $first: "$userId" },
+                totalPrice: { $first: "$totalPrice" },
+                paymentStatus: { $first: "$paymentStatus" },
+                status: { $first: "$status" },
+                deliveryAt: { $first: "$deliveryAt" },
+                createdAt: { $first: "$createdAt" },
+                updatedAt: { $first: "$updatedAt" },
+                products: { $push: "$products" }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                totalPrice: 1,
+                paymentStatus: 1,
+                status: 1,
+                deliveryAt: 1,
+                createdAt: 1,
+                products: {
+                    $map: {
+                        input: "$products",
+                        as: "product",
+                        in: {
+                            productId: "$$product.productId",
+                            name: "$$product.name",
+                            price: "$$product.price",
+                            quantity: "$$product.quantity",
+                            total: "$$product.total",
+                            image: "$$product.image",
+                            size: "$$product.size",
+                            colorName: "$$product.color.name",
+                            colorHexCode: "$$product.color.hexCode"
+                        }
+                    }
+                }
+            }
+        }
+    ]);
+    if (result.length === 0) {
+        throw new ApiError_1.default(404, 'orderId Not Found');
+    }
+    return result;
+});
+exports.getSingleOrderService = getSingleOrderService;
+const updateOrderService = (orderId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.Types.ObjectId.isValid(orderId)) {
+        throw new ApiError_1.default(400, "orderId must be a valid ObjectId");
+    }
+    const order = yield Order_model_1.default.findById(orderId);
+    if (!order) {
+        throw new ApiError_1.default(404, "Order Not Found");
+    }
+    const result = yield Order_model_1.default.updateOne({ _id: orderId }, payload);
+    return result;
+});
+exports.updateOrderService = updateOrderService;
+const deleteOrderService = (orderId) => __awaiter(void 0, void 0, void 0, function* () {
+    const order = yield Order_model_1.default.findById(orderId);
+    if (!order) {
+        throw new ApiError_1.default(404, "Order Not Found");
+    }
+    const result = yield Order_model_1.default.deleteOne({ _id: orderId });
+    return result;
+});
+exports.deleteOrderService = deleteOrderService;
