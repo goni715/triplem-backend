@@ -1,48 +1,52 @@
 import mongoose, { Types } from "mongoose";
-import AppError from "../../errors/AppError";
-import RestaurantModel from "../Restaurant/restaurant.model";
+import ApiError from "../../errors/ApiError";
 import { IReviewPayload, TReviewQuery } from "./review.interface";
 import ReviewModel from "./review.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { ReviewSearchFields } from "./review.constant";
-import BookingModel from "../Booking/booking.model";
+import OrderModel from "../Order/Order.model";
+import ObjectId from "../../utils/ObjectId";
+import ProductModel from "../Product/Product.model";
 
 
 const createReviewService = async (
   loginUserId: string,
   payload: IReviewPayload
 ) => {
-  const ObjectId = Types.ObjectId;
-  const { restaurantId, bookingId, star, comment } = payload;
-  //check restaurant not exist
-  const restaurant = await RestaurantModel.findById(restaurantId);
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant Not Found");
+  
+  const { orderId, productId, star, comment } = payload;
+   if (!Types.ObjectId.isValid(productId)) {
+    throw new ApiError(400, "productId must be a valid ObjectId")
   }
 
-  //check booking
-  const booking = await BookingModel.findOne({
-    _id: bookingId,
-    restaurantId,
-  })
-  if(!booking){
-    throw new AppError(404, "booking not found");
+  //check product
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product Not Found");
   }
 
-  if(booking.status !== "seating"){
-    throw new AppError(409, "You have no permission to review this restaurant");
+  //check order
+   const order = await OrderModel.findOne({
+    _id: orderId,
+    userId: loginUserId
+   });
+  if (!order) {
+    throw new ApiError(404, "Order Not Found");
   }
 
+  if(order.status !== "delivered"){
+    throw new ApiError(409, "Your order has not been delivered yet");
+  }
+
+  return "create review service";
   //check if you already put the comment
   const review = await ReviewModel.findOne({
     userId: loginUserId,
-    bookingId,
-    restaurantId,
-    ownerId: restaurant?.ownerId,
+    orderId,
   })
 
   if(review){
-    throw new AppError(409, "You have already reviewed this restaurant");
+    throw new ApiError(409, "You have already reviewed this order");
   }
 
   //transaction & rollback
@@ -55,9 +59,7 @@ const createReviewService = async (
     await ReviewModel.create(
       [{
         userId: loginUserId,
-        bookingId,
-        restaurantId,
-        ownerId: restaurant?.ownerId,
+        orderId,
         star,
         comment,
       }],
@@ -112,7 +114,7 @@ const deleteReviewService = async (loginUserId: string, reviewId: string) => {
     ownerId: loginUserId
    });
    if (!review) {
-     throw new AppError(404, "Review Not Found");
+     throw new ApiError(404, "Review Not Found");
    }
 
    //delete the review
@@ -156,11 +158,13 @@ const getMyRestaurantReviewsService = async (loginUserId: string, query: TReview
     if (filters) {
       filterQuery = makeFilterQuery(filters);
     }
+
+    return
   
    //check restaurant not exist
    const restaurant = await RestaurantModel.findOne({ownerId: loginUserId});
    if (!restaurant) {
-     throw new AppError(404, "Restaurant Not Found");
+     throw new ApiError(404, "Restaurant Not Found");
    }
 
   const result = await ReviewModel.aggregate([
@@ -278,7 +282,7 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
    //check restaurant not exist
    const restaurant = await RestaurantModel.findById(restaurantId);
    if (!restaurant) {
-     throw new AppError(404, "Restaurant Not Found");
+     throw new ApiError(404, "Restaurant Not Found");
    }
 
   const result = await ReviewModel.aggregate([

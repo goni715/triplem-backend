@@ -740,6 +740,12 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     throw new ApiError(404, "Product Not Found");
   }
 
+  if(payload.originalPrice){
+    if(product.currentPrice > payload.originalPrice){
+      throw new ApiError(400, "Original price must be more than current price")
+    }
+  }
+
   //desctructuring the payload
   const { name } = payload;
  

@@ -43,7 +43,6 @@ router.delete(
 
 router.get(
   '/get-user-products',
-  AuthMiddleware(UserRole.user),
   ProductController.getUserProducts,
 );
 router.get(

@@ -8,20 +8,10 @@ const reviewSchema = new Schema<IReview>(
       required: true,
       ref: "User",
     },
-    restaurantId: {
+    orderId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "Restaurant",
-    },
-    ownerId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: "Owner",
-    },
-    bookingId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: "Booking",
+      ref: "Order",
     },
     star: {
       type: Number,
