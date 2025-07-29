@@ -1,7 +1,7 @@
 import express from 'express';
 import ContactController from './Contact.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createContactValidationSchema, updateContactValidationSchema } from './Contact.validation';
+import { createContactValidationSchema, replyContactValidationSchema } from './Contact.validation';
 import { UserRole } from '../User/user.constant';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 
@@ -19,9 +19,10 @@ router.get(
 );
 
 router.patch(
-  '/update-contact/:contactId',
-  validationMiddleware(updateContactValidationSchema),
-  ContactController.updateContact,
+  '/reply/:contactId',
+  AuthMiddleware('admin', 'super_admin'),
+  validationMiddleware(replyContactValidationSchema),
+  ContactController.replyContact,
 );
 
 router.delete(

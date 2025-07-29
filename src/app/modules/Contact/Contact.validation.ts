@@ -25,7 +25,12 @@ export const createContactValidationSchema = z.object({
     .min(1, "message is required")
 });
 
-export const updateContactValidationSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
+export const replyContactValidationSchema = z.object({
+  replyText: z
+    .string({
+      invalid_type_error: "Reply text must be string",
+      required_error: "Reply text is required",
+    })
+    .trim()
+    .min(1, "Reply text is required")
 });

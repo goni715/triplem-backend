@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createContactService, getSingleContactService, getAllContactsService, updateContactService, deleteContactService } from './Contact.service';
+import { createContactService, getSingleContactService, getAllContactsService, deleteContactService, replyContactService } from './Contact.service';
 
 const createContact = catchAsync(async (req, res) => {
   const result = await createContactService(req.body);
@@ -37,21 +37,22 @@ const getAllContacts = catchAsync(async (req, res) => {
   });
 });
 
-const updateContact = catchAsync(async (req, res) => {
+const replyContact = catchAsync(async (req, res) => {
   const { contactId } = req.params;
-  const result = await updateContactService(contactId, req.body);
+  const { replyText } = req.body;
+  const result = await replyContactService(contactId, replyText);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Contact is updated successfully',
+    message: 'Reply sent successfully.',
     data: result,
   });
 });
 
 const deleteContact = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteContactService(id);
+  const { contactId } = req.params;
+  const result = await deleteContactService(contactId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -65,7 +66,7 @@ const ContactController = {
   createContact,
   getSingleContact,
   getAllContacts,
-  updateContact,
+  replyContact,
   deleteContact,
 };
 export default ContactController;

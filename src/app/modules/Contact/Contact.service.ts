@@ -4,6 +4,8 @@ import { ContactSearchableFields } from './Contact.constant';
 import { IContact, TContactQuery } from './Contact.interface';
 import ContactModel from './Contact.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import { Types } from "mongoose";
+import sendReplyEmail from '../../utils/sendReplyEmail';
 
 const createContactService = async (
   payload: IContact,
@@ -46,20 +48,11 @@ const getAllContactsService = async (query: TContactQuery) => {
         ...filterQuery
       },
     },
-    // {
-    //   $project: {
-    //     _id: 1,
-    //     fullName: 1,
-    //     email: 1,
-    //     phone: 1,
-    //     gender:1,
-    //     role: 1,
-    //     status: 1,
-    //     profileImg: 1,
-    //     createdAt: 1,
-    //     updatedAt: 1,
-    //   },
-    // },
+    {
+      $project: {
+        updatedAt: 0
+      },
+    },
     { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
@@ -99,24 +92,33 @@ const getSingleContactService = async (contactId: string) => {
   return result;
 };
 
-const updateContactService = async (contactId: string, payload: any) => {
- 
-  const contact = await ContactModel.findById(contactId);
-  if(!contact){
-    throw new ApiError(404, "Contact Not Found");
+const replyContactService = async (contactId: string, replyText: string) => {
+  if (!Types.ObjectId.isValid(contactId)) {
+    throw new ApiError(400, "contactId must be a valid ObjectId")
   }
+  const contact = await ContactModel.findById(contactId);
+  if (!contact) {
+    throw new ApiError(404, "contactId Not Found");
+  }
+ 
+  //update contact
   const result = await ContactModel.updateOne(
     { _id: contactId },
-    payload,
+    { replyText }
   );
 
+  //send reply message
+  await sendReplyEmail(contact.email, replyText);
   return result;
 };
 
 const deleteContactService = async (contactId: string) => {
+  if (!Types.ObjectId.isValid(contactId)) {
+    throw new ApiError(400, "contactId must be a valid ObjectId")
+  }
   const contact = await ContactModel.findById(contactId);
   if(!contact){
-    throw new ApiError(404, "Contact Not Found");
+    throw new ApiError(404, "contactId Not Found");
   }
   const result = await ContactModel.deleteOne({ _id:contactId });
   return result;
@@ -126,6 +128,6 @@ export {
   createContactService,
   getAllContactsService,
   getSingleContactService,
-  updateContactService,
+  replyContactService,
   deleteContactService,
 };

@@ -14,7 +14,7 @@ const sendEmailUtility = async (EmailTo: string, name: string, otp: string) => {
   });
 
   const mailOptions = {
-     from: `MTK Ecommerce ${config.smtp_from}`, //sender email address//smtp-username
+    from: `MTK Ecommerce ${config.smtp_from}`, //sender email address//smtp-username
     to: EmailTo, //receiver email address
     subject: "MTK Ecommerce Reset Password",
      html: `
