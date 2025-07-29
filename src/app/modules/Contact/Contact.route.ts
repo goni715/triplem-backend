@@ -2,11 +2,14 @@ import express from 'express';
 import ContactController from './Contact.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createContactValidationSchema, updateContactValidationSchema } from './Contact.validation';
+import AuthMiddleware from '../../middlewares/AuthMiddleware';
+import { UserRole } from '../User/user.constant';
 
 const router = express.Router();
 
 router.post(
   '/create-contact',
+  AuthMiddleware(UserRole.user),
   validationMiddleware(createContactValidationSchema),
   ContactController.createContact,
 );

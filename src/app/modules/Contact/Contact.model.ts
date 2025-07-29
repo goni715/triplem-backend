@@ -2,12 +2,24 @@ import { Schema, model } from 'mongoose';
 import { IContact } from './Contact.interface';
       
 const contactSchema = new Schema<IContact>({
-  name: { 
+  email: { 
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
-  description: { 
-    type: String
+  phone: { 
+    type: String,
+    required: true,
+    trim: true
+  },
+  message: { 
+    type: String,
+    required: true,
+    trim: true
+  },
+  replyText: { 
+    type: String,
+    default: ""
   }
 }, {
     timestamps: true,

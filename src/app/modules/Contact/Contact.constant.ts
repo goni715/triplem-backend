@@ -1,4 +1,4 @@
-export const ContactSearchableFields = ['name', 'description'];
+export const ContactSearchableFields = ['email', 'phone'];
 
 export const ContactValidFields: string[] = [
   "searchTerm",
@@ -6,8 +6,6 @@ export const ContactValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "status",
-  "gender"
 ];
       
       

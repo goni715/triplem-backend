@@ -1,8 +1,10 @@
 
 
 export interface IContact {
-  name: string;
-  description?: string;
+  email: string;
+  phone: string;
+  message: string;
+  replyText?: string;
 };
 
 export type TContactQuery = {

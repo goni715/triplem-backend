@@ -9,6 +9,7 @@ import FavouriteRoutes from '../modules/Favourite/favourite.route';
 import ColorRoutes from '../modules/Color/Color.route';
 import OrderRoutes from '../modules/Order/Order.route';
 import CartRoutes from '../modules/Cart/Cart.route';
+import ContactRoutes from '../modules/Contact/Contact.route';
 
 
 const router = express.Router();
@@ -54,6 +55,10 @@ const moduleRoutes = [
     {
         path: '/order',
         route: OrderRoutes
+    },
+    {
+        path: '/contact',
+        route: ContactRoutes
     }
 ]
 
