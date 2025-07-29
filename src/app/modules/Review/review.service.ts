@@ -137,7 +137,7 @@ const deleteReviewService = async (loginUserId: string, reviewId: string) => {
 }
 
 
-const getMyRestaurantReviewsService = async (loginUserId: string, query: TReviewQuery) => {
+const getUserProductReviewService = async (productId: string, query: TReviewQuery) => {
   const ObjectId = Types.ObjectId;
     
   // 1. Extract query parameters
@@ -483,6 +483,6 @@ export {
     createReviewService,
     deleteReviewService,
     getRestaurantReviewsService,
-    getMyRestaurantReviewsService,
+    getUserProductReviewService,
     getUserRestaurantReviewsService
 }

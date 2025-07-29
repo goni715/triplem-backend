@@ -33,7 +33,7 @@ const createProductService = async (
     images = await Promise.all(
       files?.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'Ecommerce',
+          folder: 'MTK-Ecommerce',
           // width: 300,
           // crop: 'scale',
         });
@@ -493,6 +493,11 @@ const getProductsService = async (query: TProductQuery) => {
         totalReview: { $size: "$reviews" },
       },
     },
+     {
+      $addFields: {
+        isFavourite: true
+      },
+    },
     {
       $project: {
         _id: 1,
@@ -506,7 +511,8 @@ const getProductsService = async (query: TProductQuery) => {
         totalReview: "$totalReview",
         images: "$images",
         status: "$status",
-        stockStatus: "$stockStatus"
+        stockStatus: "$stockStatus",
+        isFavourite: "$isFavourite"
       },
     },
     {
@@ -774,18 +780,32 @@ const updateProductService = async (req:Request, productId: string, payload: Par
 };
 
 const updateProductImgService = async (req: Request, productId: string) => {
-  let images = []
-
+  let images: string[] = [];
   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
     const files = req.files as Express.Multer.File[];
-    for (const file of files) {
-      const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-      images.push(path)
-    }
+    // for (const file of files) {
+    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+    //   images.push(path)
+    // }
+    images = await Promise.all(
+      files?.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'MTK-Ecommerce',
+          // width: 300,
+          // crop: 'scale',
+        });
+
+        // Delete local file (non-blocking)
+        // fs.unlink(file.path);
+
+        return result.secure_url;
+      })
+    );
+
   }
   else {
     throw new ApiError(400, "Minimum one image required");
-  }
+  } 
 
   const result = await ProductModel.updateOne(
     { _id: productId },

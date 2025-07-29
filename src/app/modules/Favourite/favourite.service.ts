@@ -117,6 +117,11 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
       $unwind: "$category"
     },
     {
+      $addFields: {
+        isFavourite: true
+      },
+    },
+    {
       $project: {
         _id: "$product._id",
         name: "$product.name",
@@ -132,7 +137,8 @@ const getFavouriteListService = async ( loginUserId: string, query:TFavouriteQue
         sizes: "$product.sizes",
         introduction: "$product.introduction",
         description: "$product.description",
-        status: "$product.status"
+        status: "$product.status",
+        isFavourite: "$isFavourite"
       },
     },
      {
