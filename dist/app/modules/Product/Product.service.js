@@ -80,7 +80,7 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
         // }
         images = yield Promise.all(files === null || files === void 0 ? void 0 : files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
             const result = yield cloudinary_1.default.uploader.upload(file.path, {
-                folder: 'Ecommerce',
+                folder: 'MTK-Ecommerce',
                 // width: 300,
                 // crop: 'scale',
             });
@@ -448,6 +448,11 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
             },
         },
         {
+            $addFields: {
+                isFavourite: true
+            },
+        },
+        {
             $project: {
                 _id: 1,
                 name: 1,
@@ -460,7 +465,8 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
                 totalReview: "$totalReview",
                 images: "$images",
                 status: "$status",
-                stockStatus: "$stockStatus"
+                stockStatus: "$stockStatus",
+                isFavourite: "$isFavourite"
             },
         },
         {
@@ -705,10 +711,20 @@ const updateProductImgService = (req, productId) => __awaiter(void 0, void 0, vo
     let images = [];
     if (req.files && req.files.length > 0) {
         const files = req.files;
-        for (const file of files) {
-            const path = `${req.protocol}://${req.get("host")}/uploads/${file === null || file === void 0 ? void 0 : file.filename}`; //for local machine
-            images.push(path);
-        }
+        // for (const file of files) {
+        //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+        //   images.push(path)
+        // }
+        images = yield Promise.all(files === null || files === void 0 ? void 0 : files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield cloudinary_1.default.uploader.upload(file.path, {
+                folder: 'MTK-Ecommerce',
+                // width: 300,
+                // crop: 'scale',
+            });
+            // Delete local file (non-blocking)
+            // fs.unlink(file.path);
+            return result.secure_url;
+        })));
     }
     else {
         throw new ApiError_1.default(400, "Minimum one image required");

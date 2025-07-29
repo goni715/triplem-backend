@@ -138,6 +138,15 @@ const deleteReviewService = async (loginUserId: string, reviewId: string) => {
 
 
 const getUserProductReviewService = async (productId: string, query: TReviewQuery) => {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new ApiError(400, "productId must be a valid ObjectId")
+  }
+
+  //check product
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product Not Found");
+  }
   const ObjectId = Types.ObjectId;
     
   // 1. Extract query parameters
@@ -170,14 +179,9 @@ const getUserProductReviewService = async (productId: string, query: TReviewQuer
     }
 
     
-   const restaurant = await ProductModel.findOne({ownerId: loginUserId});
-   if (!restaurant) {
-     throw new ApiError(404, "Restaurant Not Found");
-   }
-
   const result = await ReviewModel.aggregate([
     {
-      $match: { restaurantId: new ObjectId(restaurant._id) }
+      $match: { productId: new ObjectId(productId) }
     },
     {
       $lookup: {
@@ -198,16 +202,13 @@ const getUserProductReviewService = async (productId: string, query: TReviewQuer
     },
     {
       $project: {
-        reviewId: "$_id",
-        userId: "$user._id",
+        _id:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
-        profileImg: "$user.profileImg",
         star: "$star",
         comment: "$comment",
         createdAt: "$createdAt",
-        _id:0
       }
     },
     { $sort: { [sortBy]: sortDirection } },
@@ -218,7 +219,7 @@ const getUserProductReviewService = async (productId: string, query: TReviewQuer
    // total count of matching users 
   const totalReviewResult = await ReviewModel.aggregate([
     {
-      $match: { restaurantId: new ObjectId(restaurant._id) }
+      $match: { productId: new ObjectId(productId) }
     },
     {
       $lookup: {

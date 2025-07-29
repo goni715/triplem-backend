@@ -38,14 +38,14 @@ const deleteReview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         data: result,
     });
 }));
-const getMyRestaurantReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const loginUserId = req.headers.id;
+const getUserProductReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { productId } = req.params;
     const validatedQuery = (0, pickValidFields_1.default)(req.query, review_constant_1.ReviewValidFields);
-    const result = yield (0, review_service_1.getMyRestaurantReviewsService)(loginUserId, validatedQuery);
+    const result = yield (0, review_service_1.getUserProductReviewService)(productId, validatedQuery);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Restaurant's reviews are retrived successfully",
+        message: "Reviews are retrived successfully",
         meta: result.meta,
         data: result.data,
     });
@@ -77,7 +77,7 @@ const getUserRestaurantReviews = (0, catchAsync_1.default)((req, res) => __await
 const ReviewController = {
     createReview,
     deleteReview,
-    getMyRestaurantReviews,
+    getUserProductReviews,
     getRestaurantReviews,
     getUserRestaurantReviews
 };

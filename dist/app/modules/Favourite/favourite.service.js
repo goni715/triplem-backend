@@ -111,6 +111,11 @@ const getFavouriteListService = (loginUserId, query) => __awaiter(void 0, void 0
             $unwind: "$category"
         },
         {
+            $addFields: {
+                isFavourite: true
+            },
+        },
+        {
             $project: {
                 _id: "$product._id",
                 name: "$product.name",
@@ -126,7 +131,8 @@ const getFavouriteListService = (loginUserId, query) => __awaiter(void 0, void 0
                 sizes: "$product.sizes",
                 introduction: "$product.introduction",
                 description: "$product.description",
-                status: "$product.status"
+                status: "$product.status",
+                isFavourite: "$isFavourite"
             },
         },
         {

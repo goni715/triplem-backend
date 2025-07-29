@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { ReviewValidFields } from "./review.constant";
-import { createReviewService, deleteReviewService, getMyRestaurantReviewsService, getRestaurantReviewsService, getUserRestaurantReviewsService } from "./review.service";
+import { createReviewService, deleteReviewService, getRestaurantReviewsService, getUserProductReviewService, getUserRestaurantReviewsService } from "./review.service";
 
 
 
@@ -41,18 +41,18 @@ const deleteReview = catchAsync(async (req, res) => {
 });
 
 
-const getMyRestaurantReviews = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
+const getUserProductReviews = catchAsync(async (req, res) => {
+  const { productId } = req.params;
   const validatedQuery = pickValidFields(req.query, ReviewValidFields);
-  const result = await getMyRestaurantReviewsService(
-    loginUserId as string,
+  const result = await getUserProductReviewService(
+    productId,
     validatedQuery
   );
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Restaurant's reviews are retrived successfully",
+    message: "Reviews are retrived successfully",
     meta: result.meta,
     data: result.data,
   });
@@ -98,7 +98,7 @@ const getUserRestaurantReviews = catchAsync(async (req, res) => {
 const ReviewController = {
     createReview,
     deleteReview,
-    getMyRestaurantReviews,
+    getUserProductReviews,
     getRestaurantReviews,
     getUserRestaurantReviews
  }

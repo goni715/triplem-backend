@@ -56,7 +56,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserRestaurantReviewsService = exports.getMyRestaurantReviewsService = exports.getRestaurantReviewsService = exports.deleteReviewService = exports.createReviewService = void 0;
+exports.getUserRestaurantReviewsService = exports.getUserProductReviewService = exports.getRestaurantReviewsService = exports.deleteReviewService = exports.createReviewService = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const review_model_1 = __importDefault(require("./review.model"));
@@ -160,8 +160,16 @@ const deleteReviewService = (loginUserId, reviewId) => __awaiter(void 0, void 0,
     return result;
 });
 exports.deleteReviewService = deleteReviewService;
-const getMyRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserProductReviewService = (productId, query) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    if (!mongoose_1.Types.ObjectId.isValid(productId)) {
+        throw new ApiError_1.default(400, "productId must be a valid ObjectId");
+    }
+    //check product
+    const product = yield Product_model_1.default.findById(productId);
+    if (!product) {
+        throw new ApiError_1.default(404, "Product Not Found");
+    }
     const ObjectId = mongoose_1.Types.ObjectId;
     // 1. Extract query parameters
     const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
@@ -180,13 +188,9 @@ const getMyRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, 
     if (filters) {
         filterQuery = (0, QueryBuilder_1.makeFilterQuery)(filters);
     }
-    const restaurant = yield Product_model_1.default.findOne({ ownerId: loginUserId });
-    if (!restaurant) {
-        throw new ApiError_1.default(404, "Restaurant Not Found");
-    }
     const result = yield review_model_1.default.aggregate([
         {
-            $match: { restaurantId: new ObjectId(restaurant._id) }
+            $match: { productId: new ObjectId(productId) }
         },
         {
             $lookup: {
@@ -204,16 +208,13 @@ const getMyRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, 
         },
         {
             $project: {
-                reviewId: "$_id",
-                userId: "$user._id",
+                _id: 1,
                 fullName: "$user.fullName",
                 email: "$user.email",
                 phone: "$user.phone",
-                profileImg: "$user.profileImg",
                 star: "$star",
                 comment: "$comment",
                 createdAt: "$createdAt",
-                _id: 0
             }
         },
         { $sort: { [sortBy]: sortDirection } },
@@ -223,7 +224,7 @@ const getMyRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, 
     // total count of matching users 
     const totalReviewResult = yield review_model_1.default.aggregate([
         {
-            $match: { restaurantId: new ObjectId(restaurant._id) }
+            $match: { productId: new ObjectId(productId) }
         },
         {
             $lookup: {
@@ -253,7 +254,7 @@ const getMyRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, 
         data: result,
     };
 });
-exports.getMyRestaurantReviewsService = getMyRestaurantReviewsService;
+exports.getUserProductReviewService = getUserProductReviewService;
 const getRestaurantReviewsService = (restaurantId, query) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const ObjectId = mongoose_1.Types.ObjectId;
