@@ -42,31 +42,31 @@ const getAllContactsService = async (query: TContactQuery) => {
   const result = await ContactModel.aggregate([
     {
       $match: {
-        ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
+        ...searchQuery, 
+        ...filterQuery
       },
     },
-    {
-      $project: {
-        _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
-      },
-    },
+    // {
+    //   $project: {
+    //     _id: 1,
+    //     fullName: 1,
+    //     email: 1,
+    //     phone: 1,
+    //     gender:1,
+    //     role: 1,
+    //     status: 1,
+    //     profileImg: 1,
+    //     createdAt: 1,
+    //     updatedAt: 1,
+    //   },
+    // },
     { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);
 
      // total count
-  const totalReviewResult = await ContactModel.aggregate([
+  const totalCountResult = await ContactModel.aggregate([
     {
       $match: {
         ...searchQuery,
@@ -76,7 +76,7 @@ const getAllContactsService = async (query: TContactQuery) => {
     { $count: "totalCount" }
   ])
 
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalCount = totalCountResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
 return {
