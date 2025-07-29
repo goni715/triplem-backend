@@ -19,7 +19,6 @@ router.get(
 );
 router.get(
   "/get-category-drop-down",
-  AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user),
   CategoryController.getCategoryDropDown
 );
 router.patch(
