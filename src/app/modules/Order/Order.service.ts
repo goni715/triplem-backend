@@ -5,7 +5,7 @@ import OrderModel from './Order.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import CartModel from '../Cart/Cart.model';
 import ObjectId from '../../utils/ObjectId';
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 const createOrderService = async (
   loginUserId: string
@@ -37,15 +37,35 @@ const createOrderService = async (
     total: Number(cv.price) * Number(cv.quantity)
   }))
 
-
- //transaction & rollback
-
-  const result = await OrderModel.create({
-    userId: loginUserId,
-    products: cartProducts,
-    totalPrice
-  });
-  return result;
+     //transaction & rollback
+    const session = await mongoose.startSession();
+  
+    try {
+      session.startTransaction();
+  
+      //delete from cart list
+      await CartModel.deleteMany(
+        { userId: new ObjectId(loginUserId) },
+        { session }
+      );
+  
+      const result = await OrderModel.create([
+        {
+          userId: loginUserId,
+          products: cartProducts,
+          totalPrice
+        }
+      ], {session});
+  
+      //transaction success
+      await session.commitTransaction();
+      await session.endSession();
+      return result;
+    } catch (err: any) {
+      await session.abortTransaction();
+      await session.endSession();
+      throw new Error(err);
+    }
 
 };
 

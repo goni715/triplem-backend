@@ -448,11 +448,6 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
             },
         },
         {
-            $addFields: {
-                isFavourite: true
-            },
-        },
-        {
             $project: {
                 _id: 1,
                 name: 1,
@@ -466,7 +461,6 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
                 images: "$images",
                 status: "$status",
                 stockStatus: "$stockStatus",
-                isFavourite: "$isFavourite"
             },
         },
         {
@@ -611,7 +605,8 @@ const getSingleProductService = (productId) => __awaiter(void 0, void 0, void 0,
                 },
                 introduction: "$introduction",
                 description: "$description",
-                status: "$status"
+                status: "$status",
+                stockStatus: "$stockStatus"
             },
         },
     ]);
@@ -746,7 +741,9 @@ const deleteProductService = (productId) => __awaiter(void 0, void 0, void 0, fu
     try {
         session.startTransaction();
         //delete favourite list
-        yield favourite_model_1.default.deleteMany({ restaurantId: new ObjectId_1.default(566556) }, { session });
+        yield favourite_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
+        //delete from cart list
+        yield favourite_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
         //delete the reviews
         // await ReviewModel.deleteMany(
         //   { restaurantId: new ObjectId(restaurant._id) },

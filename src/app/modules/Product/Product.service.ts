@@ -493,11 +493,6 @@ const getProductsService = async (query: TProductQuery) => {
         totalReview: { $size: "$reviews" },
       },
     },
-     {
-      $addFields: {
-        isFavourite: true
-      },
-    },
     {
       $project: {
         _id: 1,
@@ -512,7 +507,6 @@ const getProductsService = async (query: TProductQuery) => {
         images: "$images",
         status: "$status",
         stockStatus: "$stockStatus",
-        isFavourite: "$isFavourite"
       },
     },
     {
