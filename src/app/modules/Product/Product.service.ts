@@ -833,7 +833,13 @@ const deleteProductService = async (productId: string) => {
 
     //delete favourite list
     await FavouriteModel.deleteMany(
-      { restaurantId: new ObjectId(566556) },
+      { productId: new ObjectId(productId) },
+      { session }
+    );
+
+    //delete from cart list
+    await FavouriteModel.deleteMany(
+      { productId: new ObjectId(productId) },
       { session }
     );
 
