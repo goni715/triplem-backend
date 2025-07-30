@@ -666,7 +666,8 @@ const getSingleProductService = async (productId: string) => {
         },
         introduction: "$introduction",
         description: "$description",
-        status: "$status"
+        status: "$status",
+        stockStatus: "$stockStatus"
       },
     },
   ]);
