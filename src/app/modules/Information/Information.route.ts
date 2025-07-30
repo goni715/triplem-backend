@@ -14,6 +14,10 @@ router.patch(
   InformationController.createInformation,
 );
 
+router.get(
+  '/get-information',
+  InformationController.getInformation
+);
 
 
 const InformationRoutes = router;

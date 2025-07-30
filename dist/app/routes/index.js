@@ -16,6 +16,7 @@ const Order_route_1 = __importDefault(require("../modules/Order/Order.route"));
 const Cart_route_1 = __importDefault(require("../modules/Cart/Cart.route"));
 const Contact_route_1 = __importDefault(require("../modules/Contact/Contact.route"));
 const review_route_1 = __importDefault(require("../modules/Review/review.route"));
+const Information_route_1 = __importDefault(require("../modules/Information/Information.route"));
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -65,6 +66,10 @@ const moduleRoutes = [
     {
         path: '/contact',
         route: Contact_route_1.default
+    },
+    {
+        path: '/information',
+        route: Information_route_1.default
     }
 ];
 moduleRoutes.forEach((item, i) => router.use(item.path, item.route));

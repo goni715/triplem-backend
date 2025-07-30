@@ -5,7 +5,6 @@ import { updateProductValidationSchema } from './Product.validation';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import upload from '../../helper/upload';
-import parseJsonDataMiddleware from '../../middlewares/parseJsonDataMiddleware';
 
 const router = express.Router();
 
