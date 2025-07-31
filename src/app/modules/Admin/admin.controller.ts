@@ -2,16 +2,16 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { AdministratorValidFields } from "./admin.constant";
-import { createAdministratorService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAccessService, updateAdministratorService } from "./admin.service";
+import { createAdminService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAccessService, updateAdministratorService } from "./admin.service";
 
 
-const createAdministrator = catchAsync(async (req, res) => {
-  const result = await createAdministratorService(req, req.body);
+const createAdmin = catchAsync(async (req, res) => {
+  const result = await createAdminService(req, req.body);
 
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: "Administrator is created successfully",
+    message: "Admin is created successfully",
     data: result,
   });
 });
@@ -31,7 +31,7 @@ const updateAccess = catchAsync(async (req, res) => {
 });
 
 
-const updateAdministrator = catchAsync(async (req, res) => {
+const updateAdmin = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const result = await updateAdministratorService(userId, req.body);
 
@@ -82,13 +82,13 @@ const getSingleAdministrator = catchAsync(async (req, res) => {
   });
 });
 
-const AdministratorController = {
-    createAdministrator,
+const AdminController = {
+    createAdmin,
     updateAccess,
-    updateAdministrator,
+    updateAdmin,
     getAdministrators,
     deleteAdministrator,
     getSingleAdministrator
 };
   
-export default AdministratorController;
+export default AdminController;

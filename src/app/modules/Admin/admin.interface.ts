@@ -3,9 +3,11 @@ import { IUser } from "../User/user.interface";
 
 export type TAccess = "user" | "owner" | "restaurant" | "settings";
 
-export interface IAdministrator {
-    userId: Types.ObjectId;
-    access: TAccess[]
+export interface IAdmin {
+  fullName: string;
+  email: string;
+  phone: string;
+  password?: string;
 }
 
 export interface IAdministratorPayload {

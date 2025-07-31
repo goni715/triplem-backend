@@ -49,6 +49,13 @@ const orderItemSchema = new Schema<IOrderItem>({
 
       
 const orderSchema = new Schema<IOrder>({
+  token: {
+    type: String,
+    unique: true,
+    required: true,
+    minlength: [6, "Token must be 6 characters long"],
+    maxlength: [6, "Token must be 6 characters long"]
+  },
   userId: {
     type: Schema.Types.ObjectId,
     required: true,

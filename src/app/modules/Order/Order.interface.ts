@@ -15,6 +15,7 @@ export type TPaymentStatus = "paid" | "unpaid" | "failled";
 export type TDeliveryStatus = 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface IOrder {
+  token: string;
   userId: Types.ObjectId;
   products: IOrderItem[];
   totalPrice: number;

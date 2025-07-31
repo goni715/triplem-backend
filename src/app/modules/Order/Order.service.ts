@@ -10,6 +10,7 @@ import mongoose, { Types } from "mongoose";
 const createOrderService = async (
   loginUserId: string
 ) => {
+
   const carts = await CartModel.aggregate([
     {
       $match: {
@@ -37,6 +38,9 @@ const createOrderService = async (
     total: Number(cv.price) * Number(cv.quantity)
   }))
 
+   //generate token
+  const token = Math.floor(100000 + Math.random() * 900000);
+
      //transaction & rollback
     const session = await mongoose.startSession();
   
@@ -52,6 +56,7 @@ const createOrderService = async (
       const result = await OrderModel.create([
         {
           userId: loginUserId,
+          token,
           products: cartProducts,
           totalPrice
         }
@@ -148,6 +153,7 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
     {
       $group: {
         _id: "$_id",
+        token: { $first: "$token" },
         userId: { $first: "$userId" },
         totalPrice: { $first: "$totalPrice" },
         paymentStatus: { $first: "$paymentStatus" },
@@ -161,6 +167,7 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
     {
       $project: {
         _id: 1,
+        token: 1,
         totalPrice: 1,
         paymentStatus: 1,
         status: 1,
@@ -255,6 +262,7 @@ const getAllOrdersService = async (query: TOrderQuery) => {
     {
       $project: {
         _id: 1,
+        token:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
@@ -365,6 +373,7 @@ const getSingleOrderService = async (orderId: string) => {
     {
       $project: {
         _id: 1,
+        token:1,
         totalPrice: 1,
         paymentStatus: 1,
         status: 1,

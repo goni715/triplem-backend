@@ -215,7 +215,7 @@ const forgotPassSendOtpService = async (email: string) => {
     throw new AppError(403, "Your account is blocked !");
   }
 
-  const otp = Math.floor(100000 + Math.random() * 9000);
+  const otp = Math.floor(100000 + Math.random() * 900000);
 
   //insert the otp
   await OtpModel.create({ email, otp });

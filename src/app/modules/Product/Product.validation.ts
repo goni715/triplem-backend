@@ -190,7 +190,7 @@ export const updateProductValidationSchema = z.object({
         message: "description must be valid HTML.",
       }
     ).optional(),
-  status: z.string({
+ status: z.string({
     invalid_type_error: "status must be a valid string value.",
   })
     .refine((val) => ['visible', 'hidden'].includes(val), {

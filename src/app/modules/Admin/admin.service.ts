@@ -1,75 +1,42 @@
 import { Request } from "express";
-import AppError from "../../errors/AppError";
+import ApiError from "../../errors/ApiError";
 import UserModel from "../User/user.model";
-import { IAdministratorPayload, TAccess, TAdministratorQuery, TUpdateAdministrator } from "./admin.interface";
+import { IAdmin, TAccess, TAdministratorQuery, TUpdateAdministrator } from "./admin.interface";
 import mongoose from "mongoose";
 import AdministratorModel from "./administrator.model";
 import config from "../../config";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { AdministratorSearchFields } from "./admin.constant";
-import uploadImage from "../../utils/uploadImage";
 
 
-const createAdministratorService = async (req:Request, payload:IAdministratorPayload) => {
-    const { administratorData, access } = payload;
-    const user = await UserModel.findOne({ email: administratorData.email });
+const createAdminService = async (req:Request, payload:IAdmin) => {
+    const { email, password } = payload;
+    const user = await UserModel.findOne({ email });
     if (user) {
-        throw new AppError(409, 'Email is already existed')
+        throw new ApiError(409, 'This Email is already existed')
     }
 
-    if(!administratorData.password){
-        administratorData.password=config.administrator_default_password as string;
+    if(!password){
+        payload.password=config.administrator_default_password as string;
     }
-
     
-    if(req.file){
-      administratorData.profileImg = await uploadImage(req);
-    }
+    //create admin
+    const result = await UserModel.create({
+      ...payload,
+      role: "admin",
+      isVerified: true
+    });
 
- 
-   const session = await mongoose.startSession();
-   
-   try{
+    result.password=""
+    return result;
 
-    session.startTransaction();
-
-    const newUser = await UserModel.create(
-      [
-        {
-          ...administratorData,
-          role: "administrator",
-        },
-      ],
-      { session }
-    );
-
-    //create the administrator
-    await AdministratorModel.create([
-      {
-        userId: newUser[0]._id,
-        access
-      },
-    ], { session });
-
-
-    //transaction success
-    await session.commitTransaction();
-    await session.endSession();
-    newUser[0].password=""
-    return newUser[0];
-   }
-   catch(err:any){
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error(err)
-   }   
 }
 
 
 const updateAccessService = async (administratorId: string, access: TAccess[]) => {
   const administrator = await AdministratorModel.findById(administratorId);
   if(!administrator){
-    throw new AppError(404, "Administrator Not found");
+    throw new ApiError(404, "Administrator Not found");
   }
 
   //update the administrator
@@ -202,7 +169,7 @@ return {
 const deleteAdministratorService = async (administratorId: string) => {
   const administrator = await AdministratorModel.findById(administratorId);
   if(!administrator){
-    throw new AppError(404, "Administrator Not found");
+    throw new ApiError(404, "Administrator Not found");
   }
 
   const session = await mongoose.startSession();
@@ -236,7 +203,7 @@ const deleteAdministratorService = async (administratorId: string) => {
 const getSingleAdministratorService = async (administratorId: string) => {
   const administrator = await AdministratorModel.findById(administratorId);
   if(!administrator){
-    throw new AppError(404, "Administrator Not found");
+    throw new ApiError(404, "Administrator Not found");
   }
 
   return administrator;
@@ -245,7 +212,7 @@ const getSingleAdministratorService = async (administratorId: string) => {
 const updateAdministratorService = async (userId: string, payload:TUpdateAdministrator) => {
   const administrator = await AdministratorModel.findOne({ userId });
   if(!administrator){
-    throw new AppError(404, "Administrator Not Found");
+    throw new ApiError(404, "Administrator Not Found");
   }
   const result = UserModel.updateOne(
     { _id: userId },
@@ -256,7 +223,7 @@ const updateAdministratorService = async (userId: string, payload:TUpdateAdminis
 }
 
 export {
-    createAdministratorService,
+    createAdminService,
     updateAccessService,
     updateAdministratorService,
     getAdministratorsService,
