@@ -22,6 +22,24 @@ export const createInformationValidationSchema = z.object({
       required_error: "address is required",
     })
     .trim()
-    .min(1, "address is required")
+    .min(1, "address is required"),
+  instagram: z
+    .string({
+      invalid_type_error: "instagram must be a valid URL",
+      required_error: "instagram is required"
+    })
+    .trim()
+    .refine((val) => val === "" || z.string().url().safeParse(val).success, {
+      message: "instagram must be a valid URL",
+    }),
+  teligram: z
+     .string({
+      invalid_type_error: "teligram must be a valid URL",
+      required_error: "teligram is required"
+    })
+    .trim()
+    .refine((val) => val === "" || z.string().url().safeParse(val).success, {
+      message: "teligram must be a valid URL",
+    })
 });
 

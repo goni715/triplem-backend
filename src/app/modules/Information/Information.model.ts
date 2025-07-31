@@ -16,9 +16,19 @@ const informationSchema = new Schema<IInformation>({
     type: String,
     required: true,
     trim: true
+  },
+  instagram: { 
+    type: String,
+    required: true,
+    trim: true
+  },
+  teligram: { 
+    type: String,
+    required: true,
+    trim: true
   }
 }, {
-    timestamps: true,
+    timestamps: false,
     versionKey: false
 })
       
