@@ -25,7 +25,7 @@ const sendVerificationEmail = (email, name, token) => __awaiter(void 0, void 0, 
             pass: config_1.default.smtp_password,
         },
     });
-    const verifyUrl = `http://localhost:3000/auth/verification?token=${token}`;
+    const verifyUrl = `https://triplem-website-integration.vercel.app/auth/verification?token=${token}`;
     const mailOptions = {
         from: `MTK Ecommerce ${config_1.default.smtp_from}`, //sender email address//smtp-username
         to: email, //receiver email address
