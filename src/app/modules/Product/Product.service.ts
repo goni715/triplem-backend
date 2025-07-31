@@ -19,7 +19,7 @@ const createProductService = async (
   req: Request,
   reqBody: IProduct,
 ) => {
-
+  console.log(reqBody)
 
   let images = []
 
@@ -455,7 +455,7 @@ const getProductsService = async (query: TProductQuery) => {
   const skip = (Number(page) - 1) * Number(limit);
 
   //3. setup sorting
- // const sortDirection = sortOrder === "asc" ? 1 : -1;
+ const sortDirection = sortOrder === "asc" ? 1 : -1;
 
   //4. setup searching
   let searchQuery = {};
@@ -503,6 +503,7 @@ const getProductsService = async (query: TProductQuery) => {
         originalPrice: "$originalPrice",
         discount: "$discount",
         ratings: "$ratings",
+        createdAt: "$createdAt",
         totalReview: "$totalReview",
         images: "$images",
         status: "$status",
@@ -515,7 +516,7 @@ const getProductsService = async (query: TProductQuery) => {
         ...filterQuery
     },
     },
-    { $sort: { ratings:-1 } },
+    { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);

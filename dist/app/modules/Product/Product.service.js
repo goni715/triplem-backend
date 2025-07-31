@@ -71,6 +71,7 @@ const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
 const favourite_model_1 = __importDefault(require("../Favourite/favourite.model"));
 const cloudinary_1 = __importDefault(require("../../helper/cloudinary"));
 const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(reqBody);
     let images = [];
     if (req.files && req.files.length > 0) {
         const files = req.files;
@@ -411,7 +412,7 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
     // 2. Set up pagination
     const skip = (Number(page) - 1) * Number(limit);
     //3. setup sorting
-    // const sortDirection = sortOrder === "asc" ? 1 : -1;
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
     //4. setup searching
     let searchQuery = {};
     if (searchTerm) {
@@ -457,6 +458,7 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
                 originalPrice: "$originalPrice",
                 discount: "$discount",
                 ratings: "$ratings",
+                createdAt: "$createdAt",
                 totalReview: "$totalReview",
                 images: "$images",
                 status: "$status",
@@ -466,7 +468,7 @@ const getProductsService = (query) => __awaiter(void 0, void 0, void 0, function
         {
             $match: Object.assign(Object.assign({}, searchQuery), filterQuery),
         },
-        { $sort: { ratings: -1 } },
+        { $sort: { [sortBy]: sortDirection } },
         { $skip: skip },
         { $limit: Number(limit) },
     ]);

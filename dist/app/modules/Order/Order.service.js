@@ -86,6 +86,8 @@ const createOrderService = (loginUserId) => __awaiter(void 0, void 0, void 0, fu
     //count totalPrice
     const totalPrice = carts === null || carts === void 0 ? void 0 : carts.reduce((total, currentValue) => total + (currentValue.price * currentValue.quantity), 0);
     const cartProducts = carts === null || carts === void 0 ? void 0 : carts.map((cv) => (Object.assign(Object.assign({}, cv), { total: Number(cv.price) * Number(cv.quantity) })));
+    //generate token
+    const token = Math.floor(100000 + Math.random() * 900000);
     //transaction & rollback
     const session = yield mongoose_1.default.startSession();
     try {
@@ -95,6 +97,7 @@ const createOrderService = (loginUserId) => __awaiter(void 0, void 0, void 0, fu
         const result = yield Order_model_1.default.create([
             {
                 userId: loginUserId,
+                token,
                 products: cartProducts,
                 totalPrice
             }
@@ -181,6 +184,7 @@ const getUserOrdersService = (loginUserId, query) => __awaiter(void 0, void 0, v
         {
             $group: {
                 _id: "$_id",
+                token: { $first: "$token" },
                 userId: { $first: "$userId" },
                 totalPrice: { $first: "$totalPrice" },
                 paymentStatus: { $first: "$paymentStatus" },
@@ -194,6 +198,7 @@ const getUserOrdersService = (loginUserId, query) => __awaiter(void 0, void 0, v
         {
             $project: {
                 _id: 1,
+                token: 1,
                 totalPrice: 1,
                 paymentStatus: 1,
                 status: 1,
@@ -275,6 +280,7 @@ const getAllOrdersService = (query) => __awaiter(void 0, void 0, void 0, functio
         {
             $project: {
                 _id: 1,
+                token: 1,
                 fullName: "$user.fullName",
                 email: "$user.email",
                 phone: "$user.phone",
@@ -375,6 +381,7 @@ const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, fun
         {
             $project: {
                 _id: 1,
+                token: 1,
                 totalPrice: 1,
                 paymentStatus: 1,
                 status: 1,

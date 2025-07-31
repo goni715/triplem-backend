@@ -9,21 +9,15 @@ const router = express.Router();
 
 router.post(
   "/create-admin",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, "admin"),
   validationMiddleware(createAdminValidationSchema),
   AdministratorController.createAdmin
 );
 
-router.patch(
-  "/update-administrator-access/:administratorId",
-  AuthMiddleware(UserRole.super_admin),
-  validationMiddleware(updateAdministratorAccessSchema),
-  AdministratorController.updateAccess
-);
 
 router.patch(
-  "/update-administrator/:userId",
-  AuthMiddleware(UserRole.super_admin),
+  "/update-admin/:adminId",
+  AuthMiddleware(UserRole.super_admin, "admin"),
   validationMiddleware(updateAdministratorSchema),
   AdministratorController.updateAdmin
 );

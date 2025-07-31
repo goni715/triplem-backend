@@ -31,7 +31,9 @@ const getInformationService = () => __awaiter(void 0, void 0, void 0, function* 
         return {
             "email": "",
             "phone": "",
-            "address": ""
+            "address": "",
+            "instagram": "",
+            "telegram": ""
         };
     }
     return result;

@@ -215,7 +215,7 @@ const forgotPassSendOtpService = (email) => __awaiter(void 0, void 0, void 0, fu
     if (user.status === "blocked") {
         throw new ApiError_1.default(403, "Your account is blocked !");
     }
-    const otp = Math.floor(100000 + Math.random() * 9000);
+    const otp = Math.floor(100000 + Math.random() * 900000);
     //insert the otp
     yield otp_model_1.default.create({ email, otp });
     //send otp to the email address

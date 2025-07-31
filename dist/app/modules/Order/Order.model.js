@@ -47,6 +47,13 @@ const orderItemSchema = new mongoose_1.Schema({
     versionKey: false
 });
 const orderSchema = new mongoose_1.Schema({
+    token: {
+        type: String,
+        unique: true,
+        required: true,
+        minlength: [6, "Token must be 6 characters long"],
+        maxlength: [6, "Token must be 6 characters long"]
+    },
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,

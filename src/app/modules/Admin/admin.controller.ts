@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { AdministratorValidFields } from "./admin.constant";
-import { createAdminService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAccessService, updateAdministratorService } from "./admin.service";
+import { createAdminService, deleteAdminService, getAdminsService, getSingleAdminService, updateAdminService } from "./admin.service";
 
 
 const createAdmin = catchAsync(async (req, res) => {
@@ -17,78 +17,64 @@ const createAdmin = catchAsync(async (req, res) => {
 });
 
 
-const updateAccess = catchAsync(async (req, res) => {
-  const { administratorId } = req.params;
-  const { access } = req.body;
-  const result = await updateAccessService(administratorId, access);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Administrator is updated successfully",
-    data: result,
-  });
-});
-
 
 const updateAdmin = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const result = await updateAdministratorService(userId, req.body);
+  const result = await updateAdminService(userId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Administrator is updated successfully",
+    message: "Admin is updated successfully",
     data: result,
   });
 });
 
 
-const getAdministrators = catchAsync(async (req, res) => {
+const getAdmins = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, AdministratorValidFields);
-  const result = await getAdministratorsService(validatedQuery);
+  const result = await getAdminsService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Administrators are retrieved successfully",
+    message: "Admins are retrieved successfully",
     meta: result.meta,
     data: result.data
   });
 });
 
 
-const deleteAdministrator = catchAsync(async (req, res) => {
-  const { administratorId } = req.params;
-  const result = await deleteAdministratorService(administratorId);
+const deleteAdmin = catchAsync(async (req, res) => {
+  const { adminId } = req.params;
+  const result = await deleteAdminService(adminId);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Administrator is deleted successfully",
+    message: "Admin is deleted successfully",
     data: result,
   });
 });
 
 
-const getSingleAdministrator = catchAsync(async (req, res) => {
+const getSingleAdmin = catchAsync(async (req, res) => {
   const { administratorId } = req.params;
-  const result = await getSingleAdministratorService(administratorId);
+  const result = await getSingleAdminService(administratorId);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Administrator is retrieved successfully",
+    message: "Admin is retrieved successfully",
     data: result,
   });
 });
 
 const AdminController = {
     createAdmin,
-    updateAccess,
     updateAdmin,
-    getAdministrators,
-    deleteAdministrator,
-    getSingleAdministrator
+    getAdmins,
+    deleteAdmin,
+    getSingleAdmin
 };
   
 export default AdminController;

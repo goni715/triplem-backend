@@ -1,15 +1,13 @@
 import { Request } from "express";
 import ApiError from "../../errors/ApiError";
 import UserModel from "../User/user.model";
-import { IAdmin, TAccess, TAdministratorQuery, TUpdateAdministrator } from "./admin.interface";
 import mongoose from "mongoose";
-import AdministratorModel from "./administrator.model";
 import config from "../../config";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { AdministratorSearchFields } from "./admin.constant";
 
 
-const createAdminService = async (req:Request, payload:IAdmin) => {
+const createAdminService = async (req:Request, payload:any) => {
     const { email, password } = payload;
     const user = await UserModel.findOne({ email });
     if (user) {
@@ -33,21 +31,8 @@ const createAdminService = async (req:Request, payload:IAdmin) => {
 }
 
 
-const updateAccessService = async (administratorId: string, access: TAccess[]) => {
-  const administrator = await AdministratorModel.findById(administratorId);
-  if(!administrator){
-    throw new ApiError(404, "Administrator Not found");
-  }
 
-  //update the administrator
-  const result = await AdministratorModel.updateOne(
-    { _id: administratorId },
-    { access }
-  )
-  return result;
-}
-
-const getAdministratorsService = async (query: TAdministratorQuery) => {
+const getAdminsService = async (query: any) => {
       // 1. Extract query parameters
       const {
         searchTerm, 
@@ -77,7 +62,7 @@ const getAdministratorsService = async (query: TAdministratorQuery) => {
       }
   
 
-  const result = await AdministratorModel.aggregate([
+  const result = await UserModel.aggregate([
     {
       $lookup: {
         from : "users",
@@ -116,7 +101,7 @@ const getAdministratorsService = async (query: TAdministratorQuery) => {
 
 
   //total count
-  const administratorResultCount = await AdministratorModel.aggregate([
+  const administratorResultCount = await UserModel.aggregate([
     {
       $lookup: {
         from : "users",
@@ -166,8 +151,8 @@ return {
 
 }
 
-const deleteAdministratorService = async (administratorId: string) => {
-  const administrator = await AdministratorModel.findById(administratorId);
+const deleteAdminService = async (administratorId: string) => {
+  const administrator = await UserModel.findById(administratorId);
   if(!administrator){
     throw new ApiError(404, "Administrator Not found");
   }
@@ -178,16 +163,16 @@ const deleteAdministratorService = async (administratorId: string) => {
     session.startTransaction();
 
     //delete the administrator
-    const result = await AdministratorModel.deleteOne({
+    const result = await UserModel.deleteOne({
       _id: administratorId
     }, { session });
 
 
-    //delete the user
-    await UserModel.deleteOne(
-      { _id: administrator.userId},
-      { session }
-    )
+    // //delete the user
+    // await UserModel.deleteOne(
+    //   { _id: administrator.userId},
+    //   { session }
+    //)
 
     //transaction success
     await session.commitTransaction();
@@ -200,8 +185,8 @@ const deleteAdministratorService = async (administratorId: string) => {
   }
 }
 
-const getSingleAdministratorService = async (administratorId: string) => {
-  const administrator = await AdministratorModel.findById(administratorId);
+const getSingleAdminService = async (administratorId: string) => {
+  const administrator = await UserModel.findById(administratorId);
   if(!administrator){
     throw new ApiError(404, "Administrator Not found");
   }
@@ -209,8 +194,8 @@ const getSingleAdministratorService = async (administratorId: string) => {
   return administrator;
 }
 
-const updateAdministratorService = async (userId: string, payload:TUpdateAdministrator) => {
-  const administrator = await AdministratorModel.findOne({ userId });
+const updateAdminService = async (userId: string, payload:any) => {
+  const administrator = await UserModel.findOne({ userId });
   if(!administrator){
     throw new ApiError(404, "Administrator Not Found");
   }
@@ -224,9 +209,8 @@ const updateAdministratorService = async (userId: string, payload:TUpdateAdminis
 
 export {
     createAdminService,
-    updateAccessService,
-    updateAdministratorService,
-    getAdministratorsService,
-    deleteAdministratorService,
-    getSingleAdministratorService
+    updateAdminService,
+    getAdminsService,
+    deleteAdminService,
+    getSingleAdminService
 }

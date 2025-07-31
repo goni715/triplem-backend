@@ -16,9 +16,19 @@ const informationSchema = new mongoose_1.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    instagram: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    telegram: {
+        type: String,
+        required: true,
+        trim: true
     }
 }, {
-    timestamps: true,
+    timestamps: false,
     versionKey: false
 });
 const InformationModel = (0, mongoose_1.model)('Information', informationSchema);
