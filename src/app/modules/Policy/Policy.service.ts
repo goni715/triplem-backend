@@ -29,7 +29,7 @@ const getPolicyByTypeService = async (type: TPolicyType) => {
     );
   }
 
-  const result = await PolicyModel.findOne({ type }).select("type, content");
+  const result = await PolicyModel.findOne({ type }).select("-_id -createdAt -updatedAt");
   if (!result) {
     return {
       type,

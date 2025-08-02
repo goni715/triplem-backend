@@ -6,7 +6,7 @@ const createInformation = catchAsync(async (req, res) => {
   const result = await createInformationService(req.body);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: 'Information is updated successfully',
     data: result,

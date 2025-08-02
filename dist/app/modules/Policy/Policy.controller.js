@@ -18,7 +18,7 @@ const Policy_service_1 = require("./Policy.service");
 const createUpdatePolicy = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, Policy_service_1.createUpdatePolicyService)(req.body);
     (0, sendResponse_1.default)(res, {
-        statusCode: 201,
+        statusCode: 200,
         success: true,
         message: 'Policy is updated successfully',
         data: result,

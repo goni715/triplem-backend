@@ -18,7 +18,7 @@ const Information_service_1 = require("./Information.service");
 const createInformation = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, Information_service_1.createInformationService)(req.body);
     (0, sendResponse_1.default)(res, {
-        statusCode: 201,
+        statusCode: 200,
         success: true,
         message: 'Information is updated successfully',
         data: result,

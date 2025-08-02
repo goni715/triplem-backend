@@ -7,7 +7,7 @@ const createUpdatePolicy = catchAsync(async (req, res) => {
   const result = await createUpdatePolicyService(req.body);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: 'Policy is updated successfully',
     data: result,

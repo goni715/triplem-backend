@@ -32,7 +32,7 @@ const getPolicyByTypeService = (type) => __awaiter(void 0, void 0, void 0, funct
     if (!Policy_constant_1.PolicyTypeArray.includes(type)) {
         throw new ApiError_1.default(400, `Please provide valid Type-- 'privacy-policy' or 'terms-condition' or 'about-us', 'help' `);
     }
-    const result = yield Policy_model_1.default.findOne({ type }).select("type, content");
+    const result = yield Policy_model_1.default.findOne({ type }).select("-_id -createdAt -updatedAt");
     if (!result) {
         return {
             type,

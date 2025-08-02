@@ -14,6 +14,7 @@ import ReviewRoutes from '../modules/Review/review.route';
 import InformationRoutes from '../modules/Information/Information.route';
 import AdminRoutes from '../modules/Admin/admin.route';
 import PolicyRoutes from '../modules/Policy/Policy.route';
+import FaqRoutes from '../modules/Faq/Faq.route';
 
 
 const router = express.Router();
@@ -79,6 +80,10 @@ const moduleRoutes = [
     {
         path: '/policy',
         route: PolicyRoutes
+    },
+    {
+        path: '/faq',
+        route: FaqRoutes
     }
 ]
 

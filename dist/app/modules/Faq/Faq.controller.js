@@ -13,7 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
+const pickValidFields_1 = __importDefault(require("../../utils/pickValidFields"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const faq_constant_1 = require("./faq.constant");
 const Faq_service_1 = require("./Faq.service");
 const createFaq = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, Faq_service_1.createFaqService)(req.body);
@@ -25,7 +27,18 @@ const createFaq = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
     });
 }));
 const getFaqs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield (0, Faq_service_1.getFaqsService)();
+    const validatedQuery = (0, pickValidFields_1.default)(req.query, faq_constant_1.FaqValidFields);
+    const result = yield (0, Faq_service_1.getFaqsService)(validatedQuery);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Faqs are retrieved successfully',
+        meta: result.meta,
+        data: result.data
+    });
+}));
+const getUserFaqs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, Faq_service_1.getUserFaqsService)();
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -56,6 +69,7 @@ const deleteFaq = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
 const FaqController = {
     createFaq,
     getFaqs,
+    getUserFaqs,
     updateFaq,
     deleteFaq,
 };
