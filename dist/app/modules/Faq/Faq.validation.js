@@ -30,8 +30,11 @@ exports.updateFaqValidationSchema = zod_1.z.object({
         message: "Question must end with a question mark (?)",
     }).optional(),
     answer: zod_1.z.string({
+        invalid_type_error: "answer must be string value",
         required_error: "answer is required !"
     }).optional(),
     category: zod_1.z.string().optional(),
-    isActive: zod_1.z.boolean().optional()
+    isActive: zod_1.z.boolean({
+        invalid_type_error: "isActive must be boolean value"
+    }).optional()
 });

@@ -47,6 +47,7 @@ const getFaqsService = async (query: TFaqQuery) => {
     searchQuery = makeSearchQuery(searchTerm, FaqSearchFields);
   }
 
+
   //5 setup filters
   let filterQuery = {};
   if (filters) {
@@ -110,21 +111,20 @@ const getUserFaqsService = async () => {
       }
     },
     {
-      $project: {
-        category:0,
-        slug:0,
-        createdAt: 0,
-        isActive:0,
-        updatedAt:0
-      }
+      $sort: { createdAt: -1 }
     },
     {
-      $sort: { createdAt: -1 }
-    }
+      $project: {
+        category: 0,
+        slug: 0,
+        createdAt: 0,
+        isActive: 0,
+        updatedAt: 0
+      }
+    },
   ]);
   return result;
 }
-
 
 
 const updateFaqService = async (faqId: string, payload: Partial<IFaq>) => {

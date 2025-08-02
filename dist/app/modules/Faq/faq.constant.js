@@ -10,4 +10,6 @@ exports.FaqValidFields = [
     "limit",
     "sortBy",
     "sortOrder",
+    "isActive",
+    "category"
 ];

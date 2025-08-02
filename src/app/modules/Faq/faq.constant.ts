@@ -8,4 +8,6 @@ export const FaqValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
+  "isActive",
+  "category"
 ];

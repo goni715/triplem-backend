@@ -105,6 +105,9 @@ const getUserFaqsService = () => __awaiter(void 0, void 0, void 0, function* () 
             }
         },
         {
+            $sort: { createdAt: -1 }
+        },
+        {
             $project: {
                 category: 0,
                 slug: 0,
@@ -113,9 +116,6 @@ const getUserFaqsService = () => __awaiter(void 0, void 0, void 0, function* () 
                 updatedAt: 0
             }
         },
-        {
-            $sort: { createdAt: -1 }
-        }
     ]);
     return result;
 });

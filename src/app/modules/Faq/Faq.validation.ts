@@ -31,8 +31,11 @@ export const updateFaqValidationSchema = z.object({
         "Question must end with a question mark (?)",
     }).optional(),
   answer: z.string({
+    invalid_type_error: "answer must be string value",
     required_error: "answer is required !"
   }).optional(),
   category: z.string().optional(),
-  isActive: z.boolean().optional()
+  isActive: z.boolean({
+    invalid_type_error: "isActive must be boolean value"
+  }).optional()
 });
