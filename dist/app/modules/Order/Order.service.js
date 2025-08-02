@@ -411,7 +411,7 @@ const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, fun
     if (result.length === 0) {
         throw new ApiError_1.default(404, 'orderId Not Found');
     }
-    return result;
+    return result[0];
 });
 exports.getSingleOrderService = getSingleOrderService;
 const updateOrderService = (orderId, payload) => __awaiter(void 0, void 0, void 0, function* () {

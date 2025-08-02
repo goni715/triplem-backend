@@ -406,7 +406,7 @@ const getSingleOrderService = async (orderId: string) => {
     throw new ApiError(404, 'orderId Not Found');
   }
 
-  return result;
+  return result[0];
 };
 
 const updateOrderService = async (orderId: string, payload: any) => {

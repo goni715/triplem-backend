@@ -1,21 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdministratorValidFields = exports.VALID_ACCESS_VALUES = exports.AdministratorSearchFields = void 0;
-exports.AdministratorSearchFields = [
-    "name",
+exports.AdminValidFields = exports.AdminSearchFields = void 0;
+exports.AdminSearchFields = [
+    "fullName",
     "email",
     "phone"
 ];
-exports.VALID_ACCESS_VALUES = [
-    "user",
-    "owner",
-    "restaurant",
-    "settings",
-];
-exports.AdministratorValidFields = [
+exports.AdminValidFields = [
     "searchTerm",
     "page",
     "limit",
     "sortBy",
     "sortOrder",
+    "status"
 ];

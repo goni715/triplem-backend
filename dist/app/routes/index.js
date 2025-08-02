@@ -85,6 +85,10 @@ const moduleRoutes = [
     {
         path: '/faq',
         route: Faq_route_1.default
+    },
+    {
+        path: '/admin',
+        route: admin_route_1.default
     }
 ];
 moduleRoutes.forEach((item, i) => router.use(item.path, item.route));

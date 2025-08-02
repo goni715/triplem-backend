@@ -4,7 +4,8 @@ import UserModel from "../User/user.model";
 import mongoose from "mongoose";
 import config from "../../config";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
-import { AdministratorSearchFields } from "./admin.constant";
+import { TAdminQuery } from "./admin.interface";
+import { AdminSearchFields } from "./admin.constant";
 
 
 const createAdminService = async (req:Request, payload:any) => {
@@ -32,124 +33,78 @@ const createAdminService = async (req:Request, payload:any) => {
 
 
 
-const getAdminsService = async (query: any) => {
-      // 1. Extract query parameters
-      const {
-        searchTerm, 
-        page = 1, 
-        limit = 10, 
-        sortOrder = "desc",
-        sortBy = "createdAt", 
-        ...filters  // Any additional filters
-      } = query;
-    
-      // 2. Set up pagination
-      const skip = (Number(page) - 1) * Number(limit);
-    
-      //3. setup sorting
-      const sortDirection = sortOrder === "asc" ? 1 : -1;
-    
-      //4. setup searching
-      let searchQuery = {};
-      if (searchTerm) {
-        searchQuery = makeSearchQuery(searchTerm, AdministratorSearchFields);
-      }
-    
-      //5 setup filters
-      let filterQuery = {};
-      if (filters) {
-        filterQuery = makeFilterQuery(filters);
-      }
-  
+const getAdminsService = async (query: TAdminQuery) => {
+  // 1. Extract query parameters
+  const {
+    searchTerm,
+    page = 1,
+    limit = 10,
+    sortOrder = "desc",
+    sortBy = "createdAt",
+    ...filters  // Any additional filters
+  } = query;
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+  let searchQuery = {};
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, AdminSearchFields);
+  }
+
+  //5 setup filters
+  let filterQuery = {};
+  if (filters) {
+    filterQuery = makeFilterQuery(filters);
+  }
 
   const result = await UserModel.aggregate([
     {
-      $lookup: {
-        from : "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user"
-      }
-    },
-    {
-      $unwind: "$user"
+      $match: {
+        role: "admin",
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
     },
     {
       $project: {
-        _id:1,
-        userId:1,
-        access:1,
-        name: "$user.fullName",
-        email: "$user.email",
-        phone: "$user.phone",
-        profileImg: "$user.profileImg",
-        status: "$user.status",
-        createdAt: "$createdAt",
-        updatedAt: "$updatedAt",
-      }
+        _id: 1,
+        fullName: 1,
+        email: 1,
+        phone: 1,
+        gender: 1,
+        status: 1
+      },
     },
-    {
-      $match: {
-        ...searchQuery,
-        ...filterQuery
-      }
-    },
-    { $sort: { [sortBy]: sortDirection } }, 
-    { $skip: skip }, 
-    { $limit: Number(limit) }
-  ])
-
-
-  //total count
-  const administratorResultCount = await UserModel.aggregate([
-    {
-      $lookup: {
-        from : "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user"
-      }
-    },
-    {
-      $unwind: "$user"
-    },
-    {
-      $project: {
-        _id:1,
-        userId:1,
-        access:1,
-        name: "$user.fullName",
-        email: "$user.email",
-        phone: "$user.phone",
-        profileImg: "$user.profileImg",
-        createdAt: "$createdAt",
-        updatedAt: "$updatedAt",
-      }
-    },
-    {
-      $match: {
-        ...searchQuery,
-        ...filterQuery
-      }
-    },
-    { $count: "totalCount" }
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
   ]);
 
-  
-  const totalCount = administratorResultCount[0]?.totalCount || 0;
-  const totalPages = Math.ceil(totalCount / Number(limit));
+  // total count of matching users
+  const totalCount = await UserModel.countDocuments({
+    role: "admin",
+    ...searchQuery,
+    ...filterQuery,
+  });
 
-return {
-  meta: {
-    page: Number(page), //currentPage
-    limit: Number(limit),
-    totalPages,
-    total: totalCount,
-  },
-  data: result,
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages: Math.ceil(totalCount / Number(limit)),
+      total: totalCount,
+    },
+    data: result,
+  };
+
 };
 
-}
+
 
 const deleteAdminService = async (administratorId: string) => {
   const administrator = await UserModel.findById(administratorId);

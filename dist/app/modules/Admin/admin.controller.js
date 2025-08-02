@@ -37,7 +37,7 @@ const updateAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 const getAdmins = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const validatedQuery = (0, pickValidFields_1.default)(req.query, admin_constant_1.AdministratorValidFields);
+    const validatedQuery = (0, pickValidFields_1.default)(req.query, admin_constant_1.AdminValidFields);
     const result = yield (0, admin_service_1.getAdminsService)(validatedQuery);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,

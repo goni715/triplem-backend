@@ -1,7 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { AdministratorValidFields } from "./admin.constant";
+import { AdminValidFields } from "./admin.constant";
 import { createAdminService, deleteAdminService, getAdminsService, getSingleAdminService, updateAdminService } from "./admin.service";
 
 
@@ -32,7 +32,7 @@ const updateAdmin = catchAsync(async (req, res) => {
 
 
 const getAdmins = catchAsync(async (req, res) => {
-  const validatedQuery = pickValidFields(req.query, AdministratorValidFields);
+  const validatedQuery = pickValidFields(req.query, AdminValidFields);
   const result = await getAdminsService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,

@@ -1,22 +1,15 @@
-export const AdministratorSearchFields = [
-  "name",
+export const AdminSearchFields = [
+  "fullName",
   "email",
   "phone"
 ]
 
 
-export const VALID_ACCESS_VALUES = [
-  "user",
-  "owner",
-  "restaurant",
-  "settings",
-] as const;
-
-
-export const AdministratorValidFields: string[] = [
+export const AdminValidFields: string[] = [
   "searchTerm",
   "page",
   "limit",
   "sortBy",
   "sortOrder",
+  "status"
 ];

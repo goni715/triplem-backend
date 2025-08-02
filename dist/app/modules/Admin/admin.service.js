@@ -46,7 +46,6 @@ const createAdminService = (req, payload) => __awaiter(void 0, void 0, void 0, f
 });
 exports.createAdminService = createAdminService;
 const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     // 1. Extract query parameters
     const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
     ;
@@ -57,7 +56,7 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
     //4. setup searching
     let searchQuery = {};
     if (searchTerm) {
-        searchQuery = (0, QueryBuilder_1.makeSearchQuery)(searchTerm, admin_constant_1.AdministratorSearchFields);
+        searchQuery = (0, QueryBuilder_1.makeSearchQuery)(searchTerm, admin_constant_1.AdminSearchFields);
     }
     //5 setup filters
     let filterQuery = {};
@@ -66,75 +65,29 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
     }
     const result = yield user_model_1.default.aggregate([
         {
-            $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "user"
-            }
-        },
-        {
-            $unwind: "$user"
+            $match: Object.assign(Object.assign({ role: "admin" }, searchQuery), filterQuery),
         },
         {
             $project: {
                 _id: 1,
-                userId: 1,
-                access: 1,
-                name: "$user.fullName",
-                email: "$user.email",
-                phone: "$user.phone",
-                profileImg: "$user.profileImg",
-                status: "$user.status",
-                createdAt: "$createdAt",
-                updatedAt: "$updatedAt",
-            }
-        },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
+                fullName: 1,
+                email: 1,
+                phone: 1,
+                gender: 1,
+                status: 1
+            },
         },
         { $sort: { [sortBy]: sortDirection } },
         { $skip: skip },
-        { $limit: Number(limit) }
+        { $limit: Number(limit) },
     ]);
-    //total count
-    const administratorResultCount = yield user_model_1.default.aggregate([
-        {
-            $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "user"
-            }
-        },
-        {
-            $unwind: "$user"
-        },
-        {
-            $project: {
-                _id: 1,
-                userId: 1,
-                access: 1,
-                name: "$user.fullName",
-                email: "$user.email",
-                phone: "$user.phone",
-                profileImg: "$user.profileImg",
-                createdAt: "$createdAt",
-                updatedAt: "$updatedAt",
-            }
-        },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
-        },
-        { $count: "totalCount" }
-    ]);
-    const totalCount = ((_a = administratorResultCount[0]) === null || _a === void 0 ? void 0 : _a.totalCount) || 0;
-    const totalPages = Math.ceil(totalCount / Number(limit));
+    // total count of matching users
+    const totalCount = yield user_model_1.default.countDocuments(Object.assign(Object.assign({ role: "admin" }, searchQuery), filterQuery));
     return {
         meta: {
             page: Number(page), //currentPage
             limit: Number(limit),
-            totalPages,
+            totalPages: Math.ceil(totalCount / Number(limit)),
             total: totalCount,
         },
         data: result,

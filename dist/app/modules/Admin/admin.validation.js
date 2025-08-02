@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateAdministratorSchema = exports.updateAdministratorAccessSchema = exports.createAdminValidationSchema = void 0;
+exports.updateAdminSchema = exports.createAdminValidationSchema = void 0;
 const zod_1 = require("zod");
-const admin_constant_1 = require("./admin.constant");
 const user_validation_1 = require("../User/user.validation");
 exports.createAdminValidationSchema = zod_1.z.object({
     fullName: zod_1.z.string({
@@ -39,10 +38,7 @@ exports.createAdminValidationSchema = zod_1.z.object({
         .max(60, "Password maximum 60 characters long")
         .optional()
 });
-exports.updateAdministratorAccessSchema = zod_1.z.object({
-    access: zod_1.z.array(zod_1.z.enum(admin_constant_1.VALID_ACCESS_VALUES)).default([]),
-});
-exports.updateAdministratorSchema = zod_1.z.object({
+exports.updateAdminSchema = zod_1.z.object({
     fullName: zod_1.z.string({
         required_error: "full Name is required",
     }),

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { VALID_ACCESS_VALUES } from "./admin.constant";
 import { fullNameRegex } from "../User/user.validation";
 
 
@@ -41,11 +40,7 @@ export const createAdminValidationSchema = z.object({
 });
 
 
-export const updateAdministratorAccessSchema = z.object({
-  access: z.array(z.enum(VALID_ACCESS_VALUES)).default([]),
-});
-
-export const updateAdministratorSchema = z.object({
+export const updateAdminSchema = z.object({
   fullName: z.string({
     required_error: "full Name is required",
   }),

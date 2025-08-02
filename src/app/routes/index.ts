@@ -84,6 +84,10 @@ const moduleRoutes = [
     {
         path: '/faq',
         route: FaqRoutes
+    },
+    {
+        path: '/admin',
+        route: AdminRoutes
     }
 ]
 
