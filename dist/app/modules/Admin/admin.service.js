@@ -37,7 +37,7 @@ const createAdminService = (req, payload) => __awaiter(void 0, void 0, void 0, f
         throw new ApiError_1.default(409, 'This Email is already existed');
     }
     if (!password) {
-        payload.password = config_1.default.administrator_default_password;
+        payload.password = config_1.default.admin_default_password;
     }
     //create admin
     const result = yield user_model_1.default.create(Object.assign(Object.assign({}, payload), { role: "admin", isVerified: true }));

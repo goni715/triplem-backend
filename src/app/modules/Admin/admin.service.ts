@@ -16,7 +16,7 @@ const createAdminService = async (req:Request, payload:any) => {
     }
 
     if(!password){
-        payload.password=config.administrator_default_password as string;
+        payload.password=config.admin_default_password as string;
     }
     
     //create admin
