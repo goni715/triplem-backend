@@ -1,4 +1,4 @@
-export const OrderSearchableFields = ['fullName', 'email', 'phone'];
+export const OrderSearchableFields = ['fullName', 'email', 'phone', 'token'];
 
 export const UserOrderValidFields: string[] = [
   "page",

@@ -13,6 +13,8 @@ import hasDuplicates from '../../utils/hasDuplicates';
 import ObjectId from '../../utils/ObjectId';
 import FavouriteModel from '../Favourite/favourite.model';
 import cloudinary from '../../helper/cloudinary';
+import OrderModel from '../Order/Order.model';
+import CartModel from '../Cart/Cart.model';
 
 
 const createProductService = async (
@@ -820,6 +822,17 @@ const deleteProductService = async (productId: string) => {
   if(!product){
     throw new ApiError(404, "Product Not Found");
   }
+
+  //check product is associated with order
+  const associateWithOrder = await OrderModel.findOne({
+    'products.productId': productId
+  });
+
+  if(associateWithOrder) {
+    throw new ApiError(409, 'Failled to delete, This product is associated with Order');
+  }
+
+
    //transaction & rollback
   const session = await mongoose.startSession();
 
@@ -833,7 +846,7 @@ const deleteProductService = async (productId: string) => {
     );
 
     //delete from cart list
-    await FavouriteModel.deleteMany(
+    await CartModel.deleteMany(
       { productId: new ObjectId(productId) },
       { session }
     );

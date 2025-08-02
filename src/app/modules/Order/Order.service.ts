@@ -360,6 +360,7 @@ const getSingleOrderService = async (orderId: string) => {
     {
       $group: {
         _id: "$_id",
+        token: { $first: "$token" },
         userId: { $first: "$userId" },
         totalPrice: { $first: "$totalPrice" },
         paymentStatus: { $first: "$paymentStatus" },

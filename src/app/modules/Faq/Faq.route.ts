@@ -14,7 +14,6 @@ router.post(
 );
 router.get(
   '/get-user-faqs',
-  AuthMiddleware("user"),
   FaqController.getUserFaqs
 );
 router.get(

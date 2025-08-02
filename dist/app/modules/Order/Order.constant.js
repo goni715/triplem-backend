@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderValidFields = exports.UserOrderValidFields = exports.OrderSearchableFields = void 0;
-exports.OrderSearchableFields = ['fullName', 'email', 'phone'];
+exports.OrderSearchableFields = ['fullName', 'email', 'phone', 'token'];
 exports.UserOrderValidFields = [
     "page",
     "limit",

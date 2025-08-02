@@ -70,6 +70,8 @@ const hasDuplicates_1 = __importDefault(require("../../utils/hasDuplicates"));
 const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
 const favourite_model_1 = __importDefault(require("../Favourite/favourite.model"));
 const cloudinary_1 = __importDefault(require("../../helper/cloudinary"));
+const Order_model_1 = __importDefault(require("../Order/Order.model"));
+const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
 const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(reqBody);
     let images = [];
@@ -738,6 +740,13 @@ const deleteProductService = (productId) => __awaiter(void 0, void 0, void 0, fu
     if (!product) {
         throw new ApiError_1.default(404, "Product Not Found");
     }
+    //check product is associated with order
+    const associateWithOrder = yield Order_model_1.default.findOne({
+        'products.productId': productId
+    });
+    if (associateWithOrder) {
+        throw new ApiError_1.default(409, 'Failled to delete, This product is associated with Order');
+    }
     //transaction & rollback
     const session = yield mongoose_1.default.startSession();
     try {
@@ -745,7 +754,7 @@ const deleteProductService = (productId) => __awaiter(void 0, void 0, void 0, fu
         //delete favourite list
         yield favourite_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
         //delete from cart list
-        yield favourite_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
+        yield Cart_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
         //delete the reviews
         // await ReviewModel.deleteMany(
         //   { restaurantId: new ObjectId(restaurant._id) },

@@ -368,6 +368,7 @@ const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, fun
         {
             $group: {
                 _id: "$_id",
+                token: { $first: "$token" },
                 userId: { $first: "$userId" },
                 totalPrice: { $first: "$totalPrice" },
                 paymentStatus: { $first: "$paymentStatus" },
