@@ -56,7 +56,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteOrderService = exports.updateOrderService = exports.getSingleOrderService = exports.getAllOrdersService = exports.getUserOrdersService = exports.createOrderService = void 0;
+exports.verifySessionService = exports.deleteOrderService = exports.updateOrderService = exports.getSingleOrderService = exports.getAllOrdersService = exports.getUserOrdersService = exports.createOrderService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const Order_constant_1 = require("./Order.constant");
 const Order_model_1 = __importDefault(require("./Order.model"));
@@ -64,7 +64,11 @@ const QueryBuilder_1 = require("../../helper/QueryBuilder");
 const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
 const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
 const mongoose_1 = __importStar(require("mongoose"));
-const createOrderService = (loginUserId) => __awaiter(void 0, void 0, void 0, function* () {
+const generateTransactionId_1 = __importDefault(require("../../utils/generateTransactionId"));
+const stripe_1 = __importDefault(require("stripe"));
+const config_1 = __importDefault(require("../../config"));
+const stripe = new stripe_1.default(config_1.default.stripe_secret_key);
+const createOrderService = (loginUserId, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     const carts = yield Cart_model_1.default.aggregate([
         {
             $match: {
@@ -86,26 +90,55 @@ const createOrderService = (loginUserId) => __awaiter(void 0, void 0, void 0, fu
     //count totalPrice
     const totalPrice = carts === null || carts === void 0 ? void 0 : carts.reduce((total, currentValue) => total + (currentValue.price * currentValue.quantity), 0);
     const cartProducts = carts === null || carts === void 0 ? void 0 : carts.map((cv) => (Object.assign(Object.assign({}, cv), { total: Number(cv.price) * Number(cv.quantity) })));
+    const lineItems = cartProducts === null || cartProducts === void 0 ? void 0 : cartProducts.map((product) => ({
+        price_data: {
+            currency: "usd",
+            product_data: {
+                name: product.name,
+            },
+            unit_amount: product.price * 100, // price in cents
+        },
+        quantity: product.quantity,
+    }));
     //generate token
     const token = Math.floor(100000 + Math.random() * 900000);
+    //generate transactionId
+    const transactionId = (0, generateTransactionId_1.default)();
     //transaction & rollback
     const session = yield mongoose_1.default.startSession();
     try {
         session.startTransaction();
         //delete from cart list
         yield Cart_model_1.default.deleteMany({ userId: new ObjectId_1.default(loginUserId) }, { session });
-        const result = yield Order_model_1.default.create([
+        const order = yield Order_model_1.default.create([
             {
                 userId: loginUserId,
                 token,
                 products: cartProducts,
-                totalPrice
+                totalPrice,
+                transactionId
             }
         ], { session });
+        //create payment session
+        const paymentSession = yield stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: lineItems,
+            mode: "payment",
+            metadata: {
+                orderId: (order[0]._id).toString(),
+                userId: loginUserId
+            },
+            customer_email: userEmail,
+            client_reference_id: (order[0]._id).toString(),
+            success_url: `${config_1.default.frontend_url}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${config_1.default.frontend_url}/cancel`,
+        });
         //transaction success
         yield session.commitTransaction();
         yield session.endSession();
-        return result;
+        return {
+            url: paymentSession.url
+        };
     }
     catch (err) {
         yield session.abortTransaction();
@@ -424,6 +457,9 @@ const updateOrderService = (orderId, payload) => __awaiter(void 0, void 0, void 
     }
     //if status==="delivered"
     if (payload.status === "delivered") {
+        if (order.paymentStatus !== "paid") {
+            throw new ApiError_1.default(403, "This order has not been paid for yet.");
+        }
         payload.deliveryAt = new Date();
     }
     const result = yield Order_model_1.default.updateOne({ _id: orderId }, payload);
@@ -439,3 +475,31 @@ const deleteOrderService = (orderId) => __awaiter(void 0, void 0, void 0, functi
     return result;
 });
 exports.deleteOrderService = deleteOrderService;
+const verifySessionService = (sessionId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!sessionId) {
+        throw new ApiError_1.default(400, "sessionId is required");
+    }
+    try {
+        const session = yield stripe.checkout.sessions.retrieve(sessionId);
+        //payment_status = "no_payment_required", "paid", "unpaid"
+        if (session.payment_status !== "paid") {
+            throw new ApiError_1.default(403, "Payment Failled");
+        }
+        const metadata = session === null || session === void 0 ? void 0 : session.metadata;
+        if (!metadata) {
+            throw new ApiError_1.default(400, "Invalid Session Id");
+        }
+        //update database base on metadata = session.metadata
+        const result = yield Order_model_1.default.updateOne({
+            _id: metadata.orderId,
+            userId: metadata.userId
+        }, {
+            paymentStatus: "paid"
+        });
+        return result;
+    }
+    catch (err) {
+        throw new Error(err);
+    }
+});
+exports.verifySessionService = verifySessionService;

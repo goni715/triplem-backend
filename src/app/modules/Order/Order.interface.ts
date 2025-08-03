@@ -19,6 +19,7 @@ export interface IOrder {
   userId: Types.ObjectId;
   products: IOrderItem[];
   totalPrice: number;
+  transactionId: string;
   paymentMethod?: string;
   paymentStatus?: TPaymentStatus,
   status: TDeliveryStatus

@@ -19,7 +19,8 @@ const Order_constant_1 = require("./Order.constant");
 const Order_service_1 = require("./Order.service");
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const loginUserId = req.headers.id;
-    const result = yield (0, Order_service_1.createOrderService)(loginUserId);
+    const userEmail = req.headers.email;
+    const result = yield (0, Order_service_1.createOrderService)(loginUserId, userEmail);
     (0, sendResponse_1.default)(res, {
         statusCode: 201,
         success: true,
@@ -80,6 +81,16 @@ const deleteOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
         data: result,
     });
 }));
+const verifySession = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { sessionId } = req.query;
+    const result = yield (0, Order_service_1.verifySessionService)(sessionId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Payment Successful',
+        data: result,
+    });
+}));
 const OrderController = {
     createOrder,
     getSingleOrder,
@@ -87,5 +98,6 @@ const OrderController = {
     getAllOrders,
     updateOrder,
     deleteOrder,
+    verifySession
 };
 exports.default = OrderController;

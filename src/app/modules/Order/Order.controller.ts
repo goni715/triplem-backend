@@ -2,11 +2,12 @@ import catchAsync from '../../utils/catchAsync';
 import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
 import { OrderValidFields, UserOrderValidFields } from './Order.constant';
-import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService } from './Order.service';
+import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService, verifySessionService } from './Order.service';
 
 const createOrder = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createOrderService(loginUserId as string);
+  const userEmail = req.headers.email;
+  const result = await createOrderService(loginUserId as string, userEmail as string);
 
   sendResponse(res, {
     statusCode: 201,
@@ -79,6 +80,20 @@ const deleteOrder = catchAsync(async (req, res) => {
   });
 });
 
+
+
+const verifySession = catchAsync(async (req, res) => {
+  const { sessionId } = req.query;
+  const result = await verifySessionService(sessionId as string);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Payment Successful',
+    data: result,
+  });
+});
+
 const OrderController = {
   createOrder,
   getSingleOrder,
@@ -86,5 +101,6 @@ const OrderController = {
   getAllOrders,
   updateOrder,
   deleteOrder,
+  verifySession
 };
 export default OrderController;

@@ -6,10 +6,18 @@ import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import CartModel from '../Cart/Cart.model';
 import ObjectId from '../../utils/ObjectId';
 import mongoose, { Types } from "mongoose";
+import generateTransactionId from '../../utils/generateTransactionId';
+import Stripe from 'stripe';
+import config from '../../config';
+
+const stripe = new Stripe(config.stripe_secret_key as string);
+
 
 const createOrderService = async (
-  loginUserId: string
+  loginUserId: string,
+  userEmail: string
 ) => {
+
 
   const carts = await CartModel.aggregate([
     {
@@ -38,8 +46,25 @@ const createOrderService = async (
     total: Number(cv.price) * Number(cv.quantity)
   }))
 
+  
+
+     const lineItems = cartProducts?.map((product) => ({
+       price_data: {
+         currency: "usd",
+         product_data: {
+           name: product.name,
+         },
+         unit_amount: product.price * 100, // price in cents
+       },
+       quantity: product.quantity,
+     }));
+
    //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
+
+  //generate transactionId
+  const transactionId = generateTransactionId();
+  
 
      //transaction & rollback
     const session = await mongoose.startSession();
@@ -53,19 +78,37 @@ const createOrderService = async (
         { session }
       );
   
-      const result = await OrderModel.create([
+      const order = await OrderModel.create([
         {
           userId: loginUserId,
           token,
           products: cartProducts,
-          totalPrice
+          totalPrice,
+          transactionId
         }
       ], {session});
+
+      //create payment session
+        const paymentSession = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: lineItems,
+          mode: "payment",
+          metadata: {
+            orderId: (order[0]._id).toString(),
+            userId: loginUserId
+          },
+          customer_email: userEmail,
+          client_reference_id: (order[0]._id).toString(),
+          success_url: `${config.frontend_url}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${config.frontend_url}/cancel`,
+        });
   
       //transaction success
       await session.commitTransaction();
       await session.endSession();
-      return result;
+      return {
+        url: paymentSession.url
+      };
     } catch (err: any) {
       await session.abortTransaction();
       await session.endSession();
@@ -421,6 +464,9 @@ const updateOrderService = async (orderId: string, payload: Partial<IOrder>) => 
 
   //if status==="delivered"
   if(payload.status==="delivered"){
+    if(order.paymentStatus !=="paid"){
+      throw new ApiError(403, "This order has not been paid for yet.")
+    }
     payload.deliveryAt=new Date()
   }
 
@@ -441,6 +487,39 @@ const deleteOrderService = async (orderId: string) => {
   return result;
 };
 
+
+
+const verifySessionService = async (sessionId: string) => {
+  if (!sessionId) {
+    throw new ApiError(400, "sessionId is required");
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    //payment_status = "no_payment_required", "paid", "unpaid"
+    if (session.payment_status !== "paid") {
+      throw new ApiError(403, "Payment Failled");
+    }
+
+    const metadata = session?.metadata;
+    if(!metadata){
+      throw new ApiError(400, "Invalid Session Id")
+    }
+    
+    //update database base on metadata = session.metadata
+    const result = await OrderModel.updateOne({
+      _id: metadata.orderId,
+      userId: metadata.userId
+    }, {
+      paymentStatus: "paid"
+    })
+
+    return result;
+  } catch (err:any) {
+    throw new Error(err)
+  }
+};
+
 export {
   createOrderService,
   getUserOrdersService,
@@ -448,4 +527,5 @@ export {
   getSingleOrderService,
   updateOrderService,
   deleteOrderService,
+  verifySessionService
 };

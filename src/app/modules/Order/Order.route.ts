@@ -39,5 +39,7 @@ router.get(
   OrderController.getAllOrders,
 );
 
+router.get('/verify-session', OrderController.verifySession);
+
 const OrderRoutes = router;
 export default OrderRoutes;
