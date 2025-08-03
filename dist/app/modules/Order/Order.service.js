@@ -422,6 +422,10 @@ const updateOrderService = (orderId, payload) => __awaiter(void 0, void 0, void 
     if (!order) {
         throw new ApiError_1.default(404, "Order Not Found");
     }
+    //if status==="delivered"
+    if (payload.status === "delivered") {
+        payload.deliveryAt = new Date();
+    }
     const result = yield Order_model_1.default.updateOne({ _id: orderId }, payload);
     return result;
 });
