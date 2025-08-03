@@ -8,5 +8,6 @@ const AuthMiddleware_1 = __importDefault(require("../../middlewares/AuthMiddlewa
 const Payment_controller_1 = __importDefault(require("./Payment.controller"));
 const router = express_1.default.Router();
 router.post('/create-checkout-session', (0, AuthMiddleware_1.default)('user'), Payment_controller_1.default.createCheckoutSession);
+router.get('/verify-checkout', Payment_controller_1.default.verifyCheckout);
 const PaymentRoutes = router;
 exports.default = PaymentRoutes;

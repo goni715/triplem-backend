@@ -14,8 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const Payment_service_1 = require("./Payment.service");
 const createCheckoutSession = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield createCheckoutSessionServiceService(req.body);
+    const result = yield (0, Payment_service_1.createCheckoutSessionService)(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -23,7 +24,18 @@ const createCheckoutSession = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: result,
     });
 }));
+const verifyCheckout = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { sessionId } = req.query;
+    const result = yield (0, Payment_service_1.verifyCheckoutService)(sessionId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Payment Successful',
+        data: result,
+    });
+}));
 const PaymentController = {
-    createCheckoutSession
+    createCheckoutSession,
+    verifyCheckout
 };
 exports.default = PaymentController;

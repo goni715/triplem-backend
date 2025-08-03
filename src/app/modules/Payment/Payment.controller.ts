@@ -1,8 +1,9 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { createCheckoutSessionService, verifyCheckoutService } from "./Payment.service";
 
 const createCheckoutSession = catchAsync(async (req, res) => {
-  const result = await createCheckoutSessionServiceService(req.body);
+  const result = await createCheckoutSessionService(req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -12,7 +13,22 @@ const createCheckoutSession = catchAsync(async (req, res) => {
   });
 });
 
+
+const verifyCheckout = catchAsync(async (req, res) => {
+  const { sessionId } = req.query;
+  const result = await verifyCheckoutService(sessionId as string);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Payment Successful',
+    data: result,
+  });
+});
+
+
 const PaymentController = {
-  createCheckoutSession
+  createCheckoutSession,
+  verifyCheckout
 };
 export default PaymentController;
