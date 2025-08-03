@@ -1,6 +1,6 @@
 import ApiError from '../../errors/ApiError';
 import { OrderSearchableFields } from './Order.constant';
-import { TOrderQuery, TUserOrderQuery } from './Order.interface';
+import { IOrder, TOrderQuery, TUserOrderQuery } from './Order.interface';
 import OrderModel from './Order.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import CartModel from '../Cart/Cart.model';
@@ -409,7 +409,7 @@ const getSingleOrderService = async (orderId: string) => {
   return result[0];
 };
 
-const updateOrderService = async (orderId: string, payload: any) => {
+const updateOrderService = async (orderId: string, payload: Partial<IOrder>) => {
   if (!Types.ObjectId.isValid(orderId)) {
     throw new ApiError(400, "orderId must be a valid ObjectId")
   }
@@ -418,6 +418,12 @@ const updateOrderService = async (orderId: string, payload: any) => {
   if (!order) {
     throw new ApiError(404, "Order Not Found");
   }
+
+  //if status==="delivered"
+  if(payload.status==="delivered"){
+    payload.deliveryAt=new Date()
+  }
+
   const result = await OrderModel.updateOne(
     { _id: orderId },
     payload,
