@@ -26,10 +26,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSingleAdminService = exports.deleteAdminService = exports.getAdminsService = exports.updateAdminService = exports.createAdminService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const user_model_1 = __importDefault(require("../User/user.model"));
-const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = __importDefault(require("../../config"));
 const QueryBuilder_1 = require("../../helper/QueryBuilder");
 const admin_constant_1 = require("./admin.constant");
+const mongoose_1 = require("mongoose");
 const createAdminService = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = payload;
     const user = yield user_model_1.default.findOne({ email });
@@ -67,6 +67,7 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
         {
             $match: Object.assign(Object.assign({ role: "admin" }, searchQuery), filterQuery),
         },
+        { $sort: { [sortBy]: sortDirection } },
         {
             $project: {
                 _id: 1,
@@ -77,7 +78,6 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
                 status: 1
             },
         },
-        { $sort: { [sortBy]: sortDirection } },
         { $skip: skip },
         { $limit: Number(limit) },
     ]);
@@ -94,33 +94,16 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
     };
 });
 exports.getAdminsService = getAdminsService;
-const deleteAdminService = (administratorId) => __awaiter(void 0, void 0, void 0, function* () {
-    const administrator = yield user_model_1.default.findById(administratorId);
-    if (!administrator) {
-        throw new ApiError_1.default(404, "Administrator Not found");
+const deleteAdminService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.Types.ObjectId.isValid(userId)) {
+        throw new ApiError_1.default(400, "userId must be a valid ObjectId");
     }
-    const session = yield mongoose_1.default.startSession();
-    try {
-        session.startTransaction();
-        //delete the administrator
-        const result = yield user_model_1.default.deleteOne({
-            _id: administratorId
-        }, { session });
-        // //delete the user
-        // await UserModel.deleteOne(
-        //   { _id: administrator.userId},
-        //   { session }
-        //)
-        //transaction success
-        yield session.commitTransaction();
-        yield session.endSession();
-        return result;
+    const adminUser = yield user_model_1.default.findById(userId);
+    if (!adminUser) {
+        throw new ApiError_1.default(404, "userId Not Found");
     }
-    catch (err) {
-        yield session.abortTransaction();
-        yield session.endSession();
-        throw new Error(err);
-    }
+    const result = yield user_model_1.default.deleteOne({ _id: userId });
+    return result;
 });
 exports.deleteAdminService = deleteAdminService;
 const getSingleAdminService = (administratorId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -132,8 +115,8 @@ const getSingleAdminService = (administratorId) => __awaiter(void 0, void 0, voi
 });
 exports.getSingleAdminService = getSingleAdminService;
 const updateAdminService = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const administrator = yield user_model_1.default.findOne({ userId });
-    if (!administrator) {
+    const admin = yield user_model_1.default.findById(userId);
+    if (!admin) {
         throw new ApiError_1.default(404, "Administrator Not Found");
     }
     const result = user_model_1.default.updateOne({ _id: userId }, payload);

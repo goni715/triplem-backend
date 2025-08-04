@@ -19,12 +19,17 @@ router.get("/get-admins",
   AdminController.getAdmins
 )
 
-
 router.patch(
-  "/update-admin/:adminId",
+  "/update-admin/:userId",
   AuthMiddleware(UserRole.super_admin),
   validationMiddleware(updateAdminSchema),
   AdminController.updateAdmin
+);
+
+router.delete(
+  '/delete-admin/:userId',
+  AuthMiddleware('super_admin'),
+  AdminController.deleteAdmin,
 );
 
 const AdminRoutes = router;

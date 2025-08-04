@@ -42,8 +42,14 @@ export const createAdminValidationSchema = z.object({
 
 export const updateAdminSchema = z.object({
   fullName: z.string({
+    invalid_type_error: "Full Name must be string",
     required_error: "full Name is required",
-  }),
+  })
+    .trim()
+    .regex(fullNameRegex, {
+      message:
+        "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
+    }).optional(),
   phone: z.string({
     required_error: "phone number is required",
   }),

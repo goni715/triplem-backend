@@ -45,8 +45,8 @@ const getAdmins = catchAsync(async (req, res) => {
 
 
 const deleteAdmin = catchAsync(async (req, res) => {
-  const { adminId } = req.params;
-  const result = await deleteAdminService(adminId);
+  const { userId } = req.params;
+  const result = await deleteAdminService(userId);
 
   sendResponse(res, {
     statusCode: 200,

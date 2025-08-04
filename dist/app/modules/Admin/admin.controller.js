@@ -48,8 +48,8 @@ const getAdmins = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
     });
 }));
 const deleteAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { adminId } = req.params;
-    const result = yield (0, admin_service_1.deleteAdminService)(adminId);
+    const { userId } = req.params;
+    const result = yield (0, admin_service_1.deleteAdminService)(userId);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,

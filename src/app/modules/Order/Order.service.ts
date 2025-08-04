@@ -291,7 +291,7 @@ const getAllOrdersService = async (query: TOrderQuery) => {
     filterQuery = makeFilterQuery(filters);
   }
   const result = await OrderModel.aggregate([
-     {
+    {
       $lookup: {
         from: "users",
         localField: "userId",
@@ -415,9 +415,40 @@ const getSingleOrderService = async (orderId: string) => {
       }
     },
     {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $lookup: {
+        from: "shippings",
+        localField: "userId",
+        foreignField: "userId",
+        as: "shipping"
+      }
+    },
+    {
+      $unwind: "$shipping"
+    },
+    {
       $project: {
         _id: 1,
         token:1,
+        customerName: "$user.fullName",
+        customerEmail: "$user.email",
+        customerPhone: "$user.phone",
+        shipping: {
+          "streetAddress": "$shipping.streetAddress",
+          "city": "$shipping.city",
+          "state": "$shipping.state",
+          "zipCode": "$shipping.zipCode"
+        },
         totalPrice: 1,
         paymentStatus: 1,
         status: 1,
@@ -441,7 +472,7 @@ const getSingleOrderService = async (orderId: string) => {
           }
         }
       }
-    }
+    },
   ]);
 
 

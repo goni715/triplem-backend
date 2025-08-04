@@ -1,11 +1,12 @@
 import { Request } from "express";
 import ApiError from "../../errors/ApiError";
 import UserModel from "../User/user.model";
-import mongoose from "mongoose";
 import config from "../../config";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { TAdminQuery } from "./admin.interface";
 import { AdminSearchFields } from "./admin.constant";
+import { Types } from 'mongoose'; 
+import { IUser } from "../User/user.interface";
 
 
 const createAdminService = async (req:Request, payload:any) => {
@@ -70,6 +71,7 @@ const getAdminsService = async (query: TAdminQuery) => {
         ...filterQuery, // Apply filters
       },
     },
+    { $sort: { [sortBy]: sortDirection } },
     {
       $project: {
         _id: 1,
@@ -80,7 +82,6 @@ const getAdminsService = async (query: TAdminQuery) => {
         status: 1
       },
     },
-    { $sort: { [sortBy]: sortDirection } },
     { $skip: skip },
     { $limit: Number(limit) },
   ]);
@@ -106,38 +107,16 @@ const getAdminsService = async (query: TAdminQuery) => {
 
 
 
-const deleteAdminService = async (administratorId: string) => {
-  const administrator = await UserModel.findById(administratorId);
-  if(!administrator){
-    throw new ApiError(404, "Administrator Not found");
+const deleteAdminService = async (userId: string) => {
+  if (!Types.ObjectId.isValid(userId)) {
+    throw new ApiError(400, "userId must be a valid ObjectId")
   }
-
-  const session = await mongoose.startSession();
-
-  try{
-    session.startTransaction();
-
-    //delete the administrator
-    const result = await UserModel.deleteOne({
-      _id: administratorId
-    }, { session });
-
-
-    // //delete the user
-    // await UserModel.deleteOne(
-    //   { _id: administrator.userId},
-    //   { session }
-    //)
-
-    //transaction success
-    await session.commitTransaction();
-    await session.endSession();
-    return result; 
-  }catch(err:any){
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error(err)
+  const adminUser = await UserModel.findById(userId);
+  if(!adminUser){
+    throw new ApiError(404, "userId Not Found");
   }
+  const result = await UserModel.deleteOne({ _id:userId });
+  return result;
 }
 
 const getSingleAdminService = async (administratorId: string) => {
@@ -149,9 +128,9 @@ const getSingleAdminService = async (administratorId: string) => {
   return administrator;
 }
 
-const updateAdminService = async (userId: string, payload:any) => {
-  const administrator = await UserModel.findOne({ userId });
-  if(!administrator){
+const updateAdminService = async (userId: string, payload: Partial<IUser>) => {
+  const admin = await UserModel.findById(userId);
+  if(!admin){
     throw new ApiError(404, "Administrator Not Found");
   }
   const result = UserModel.updateOne(

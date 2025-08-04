@@ -40,8 +40,13 @@ exports.createAdminValidationSchema = zod_1.z.object({
 });
 exports.updateAdminSchema = zod_1.z.object({
     fullName: zod_1.z.string({
+        invalid_type_error: "Full Name must be string",
         required_error: "full Name is required",
-    }),
+    })
+        .trim()
+        .regex(user_validation_1.fullNameRegex, {
+        message: "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
+    }).optional(),
     phone: zod_1.z.string({
         required_error: "phone number is required",
     }),

@@ -12,6 +12,7 @@ const admin_controller_1 = __importDefault(require("./admin.controller"));
 const router = express_1.default.Router();
 router.post("/create-admin", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin, "admin"), (0, validationMiddleware_1.default)(admin_validation_1.createAdminValidationSchema), admin_controller_1.default.createAdmin);
 router.get("/get-admins", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin), admin_controller_1.default.getAdmins);
-router.patch("/update-admin/:adminId", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin), (0, validationMiddleware_1.default)(admin_validation_1.updateAdminSchema), admin_controller_1.default.updateAdmin);
+router.patch("/update-admin/:userId", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin), (0, validationMiddleware_1.default)(admin_validation_1.updateAdminSchema), admin_controller_1.default.updateAdmin);
+router.delete('/delete-admin/:userId', (0, AuthMiddleware_1.default)('super_admin'), admin_controller_1.default.deleteAdmin);
 const AdminRoutes = router;
 exports.default = AdminRoutes;

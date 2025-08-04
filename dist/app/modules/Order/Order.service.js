@@ -413,9 +413,40 @@ const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, fun
             }
         },
         {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            $lookup: {
+                from: "shippings",
+                localField: "userId",
+                foreignField: "userId",
+                as: "shipping"
+            }
+        },
+        {
+            $unwind: "$shipping"
+        },
+        {
             $project: {
                 _id: 1,
                 token: 1,
+                customerName: "$user.fullName",
+                customerEmail: "$user.email",
+                customerPhone: "$user.phone",
+                shipping: {
+                    "streetAddress": "$shipping.streetAddress",
+                    "city": "$shipping.city",
+                    "state": "$shipping.state",
+                    "zipCode": "$shipping.zipCode"
+                },
                 totalPrice: 1,
                 paymentStatus: 1,
                 status: 1,
@@ -439,7 +470,7 @@ const getSingleOrderService = (orderId) => __awaiter(void 0, void 0, void 0, fun
                     }
                 }
             }
-        }
+        },
     ]);
     if (result.length === 0) {
         throw new ApiError_1.default(404, 'orderId Not Found');
