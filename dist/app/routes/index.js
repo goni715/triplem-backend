@@ -21,6 +21,7 @@ const admin_route_1 = __importDefault(require("../modules/Admin/admin.route"));
 const Policy_route_1 = __importDefault(require("../modules/Policy/Policy.route"));
 const Faq_route_1 = __importDefault(require("../modules/Faq/Faq.route"));
 const Payment_route_1 = __importDefault(require("../modules/Payment/Payment.route"));
+const Newsletter_route_1 = __importDefault(require("../modules/Newsletter/Newsletter.route"));
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -94,6 +95,10 @@ const moduleRoutes = [
     {
         path: '/payment',
         route: Payment_route_1.default
+    },
+    {
+        path: '/newsletter',
+        route: Newsletter_route_1.default
     }
 ];
 moduleRoutes.forEach((item, i) => router.use(item.path, item.route));

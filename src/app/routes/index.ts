@@ -16,6 +16,7 @@ import AdminRoutes from '../modules/Admin/admin.route';
 import PolicyRoutes from '../modules/Policy/Policy.route';
 import FaqRoutes from '../modules/Faq/Faq.route';
 import PaymentRoutes from '../modules/Payment/Payment.route';
+import NewsletterRoutes from '../modules/Newsletter/Newsletter.route';
 
 
 const router = express.Router();
@@ -93,6 +94,10 @@ const moduleRoutes = [
     {
         path: '/payment',
         route: PaymentRoutes
+    },
+    {
+        path: '/newsletter',
+        route: NewsletterRoutes
     }
 ]
 
