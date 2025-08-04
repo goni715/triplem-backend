@@ -13,7 +13,6 @@ const router = express_1.default.Router();
 router.post('/create-review', (0, AuthMiddleware_1.default)(user_constant_1.UserRole.user), (0, validationMiddleware_1.default)(review_validation_1.createReviewValidationSchema), review_controller_1.default.createReview);
 router.delete('/delete-review/:reviewId', (0, AuthMiddleware_1.default)(user_constant_1.UserRole.admin, user_constant_1.UserRole.super_admin), review_controller_1.default.deleteReview);
 router.get('/get-user-product-reviews/:productId', review_controller_1.default.getUserProductReviews);
-router.get('/get-restaurant-reviews/:restaurantId', (0, AuthMiddleware_1.default)(user_constant_1.UserRole.user), review_controller_1.default.getRestaurantReviews);
-router.get('/get-user-restaurant-reviews', (0, AuthMiddleware_1.default)(user_constant_1.UserRole.user), review_controller_1.default.getUserRestaurantReviews);
+router.get('/get-testimonials', review_controller_1.default.getTestimonials);
 const ReviewRoutes = router;
 exports.default = ReviewRoutes;

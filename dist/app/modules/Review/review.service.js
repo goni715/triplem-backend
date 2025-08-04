@@ -56,7 +56,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserRestaurantReviewsService = exports.getUserProductReviewService = exports.getRestaurantReviewsService = exports.deleteReviewService = exports.createReviewService = void 0;
+exports.getTestimonialsService = exports.getUserProductReviewService = exports.deleteReviewService = exports.createReviewService = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const review_model_1 = __importDefault(require("./review.model"));
@@ -208,7 +208,7 @@ const getUserProductReviewService = (productId, query) => __awaiter(void 0, void
         },
         {
             $project: {
-                _id: 1,
+                _id: 0,
                 fullName: "$user.fullName",
                 email: "$user.email",
                 phone: "$user.phone",
@@ -255,35 +255,8 @@ const getUserProductReviewService = (productId, query) => __awaiter(void 0, void
     };
 });
 exports.getUserProductReviewService = getUserProductReviewService;
-const getRestaurantReviewsService = (restaurantId, query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const ObjectId = mongoose_1.Types.ObjectId;
-    // 1. Extract query parameters
-    const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
-    ;
-    // 2. Set up pagination
-    const skip = (Number(page) - 1) * Number(limit);
-    //3. setup sorting
-    const sortDirection = sortOrder === "asc" ? 1 : -1;
-    //4. setup searching
-    let searchQuery = {};
-    if (searchTerm) {
-        searchQuery = (0, QueryBuilder_1.makeSearchQuery)(searchTerm, review_constant_1.ReviewSearchFields);
-    }
-    //5 setup filters
-    let filterQuery = {};
-    if (filters) {
-        filterQuery = (0, QueryBuilder_1.makeFilterQuery)(filters);
-    }
-    //check restaurant not exist
-    const restaurant = yield Product_model_1.default.findById(restaurantId);
-    if (!restaurant) {
-        throw new ApiError_1.default(404, "Restaurant Not Found");
-    }
+const getTestimonialsService = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield review_model_1.default.aggregate([
-        {
-            $match: { restaurantId: new ObjectId(restaurantId) }
-        },
         {
             $lookup: {
                 from: "users",
@@ -295,141 +268,20 @@ const getRestaurantReviewsService = (restaurantId, query) => __awaiter(void 0, v
         {
             $unwind: "$user"
         },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
-        },
+        { $sort: { ratings: -1, createdAt: -1 } },
+        { $skip: 5 },
         {
             $project: {
+                _id: 0,
                 fullName: "$user.fullName",
-                profileImg: "$user.profileImg",
+                email: "$user.email",
+                phone: "$user.phone",
                 star: "$star",
                 comment: "$comment",
                 createdAt: "$createdAt",
-                _id: 0
             }
         },
-        { $sort: { [sortBy]: sortDirection } },
-        { $skip: skip },
-        { $limit: Number(limit) },
     ]);
-    // total count of matching users 
-    const totalReviewResult = yield review_model_1.default.aggregate([
-        {
-            $match: { restaurantId: new ObjectId(restaurantId) }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "user",
-            },
-        },
-        {
-            $unwind: "$user"
-        },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
-        },
-        { $count: "totalCount" }
-    ]);
-    const totalCount = ((_a = totalReviewResult[0]) === null || _a === void 0 ? void 0 : _a.totalCount) || 0;
-    const totalPages = Math.ceil(totalCount / Number(limit));
-    return {
-        meta: {
-            page: Number(page), //currentPage
-            limit: Number(limit),
-            totalPages,
-            total: totalCount,
-        },
-        data: result,
-    };
+    return result;
 });
-exports.getRestaurantReviewsService = getRestaurantReviewsService;
-const getUserRestaurantReviewsService = (loginUserId, query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const ObjectId = mongoose_1.Types.ObjectId;
-    // 1. Extract query parameters
-    const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
-    ;
-    // 2. Set up pagination
-    const skip = (Number(page) - 1) * Number(limit);
-    //3. setup sorting
-    const sortDirection = sortOrder === "asc" ? 1 : -1;
-    //4. setup searching
-    let searchQuery = {};
-    if (searchTerm) {
-        searchQuery = (0, QueryBuilder_1.makeSearchQuery)(searchTerm, review_constant_1.ReviewSearchFields);
-    }
-    //5 setup filters
-    let filterQuery = {};
-    if (filters) {
-        filterQuery = (0, QueryBuilder_1.makeFilterQuery)(filters);
-    }
-    const result = yield review_model_1.default.aggregate([
-        {
-            $match: { userId: new ObjectId(loginUserId) }
-        },
-        {
-            $lookup: {
-                from: "restaurants",
-                localField: "restaurantId",
-                foreignField: "_id",
-                as: "restaurant",
-            },
-        },
-        {
-            $unwind: "$restaurant"
-        },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
-        },
-        {
-            $project: {
-                restaurantId: 1,
-                restaurantName: "$restaurant.name",
-                restaurantImg: "$restaurant.restaurantImg",
-                star: "$star",
-                comment: "$comment",
-                createdAt: "$createdAt",
-                _id: 0
-            }
-        },
-        { $sort: { [sortBy]: sortDirection } },
-        { $skip: skip },
-        { $limit: Number(limit) },
-    ]);
-    // total count of matching users 
-    const totalReviewResult = yield review_model_1.default.aggregate([
-        {
-            $match: { userId: new ObjectId(loginUserId) }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "user",
-            },
-        },
-        {
-            $unwind: "$user"
-        },
-        {
-            $match: Object.assign(Object.assign({}, searchQuery), filterQuery)
-        },
-        { $count: "totalCount" }
-    ]);
-    const totalCount = ((_a = totalReviewResult[0]) === null || _a === void 0 ? void 0 : _a.totalCount) || 0;
-    const totalPages = Math.ceil(totalCount / Number(limit));
-    return {
-        meta: {
-            page: Number(page), //currentPage
-            limit: Number(limit),
-            totalPages,
-            total: totalCount,
-        },
-        data: result,
-    };
-});
-exports.getUserRestaurantReviewsService = getUserRestaurantReviewsService;
+exports.getTestimonialsService = getTestimonialsService;

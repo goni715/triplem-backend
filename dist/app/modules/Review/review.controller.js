@@ -50,35 +50,19 @@ const getUserProductReviews = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: result.data,
     });
 }));
-const getRestaurantReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { restaurantId } = req.params;
-    const validatedQuery = (0, pickValidFields_1.default)(req.query, review_constant_1.ReviewValidFields);
-    const result = yield (0, review_service_1.getRestaurantReviewsService)(restaurantId, validatedQuery);
+const getTestimonials = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, review_service_1.getTestimonialsService)();
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Restaurant's reviews are retrived successfully",
-        meta: result.meta,
-        data: result.data,
-    });
-}));
-const getUserRestaurantReviews = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const loginUserId = req.headers.id;
-    const validatedQuery = (0, pickValidFields_1.default)(req.query, review_constant_1.ReviewValidFields);
-    const result = yield (0, review_service_1.getUserRestaurantReviewsService)(loginUserId, validatedQuery);
-    (0, sendResponse_1.default)(res, {
-        statusCode: 200,
-        success: true,
-        message: "Restaurant's reviews are retrived successfully",
-        meta: result.meta,
-        data: result.data,
+        message: "Testimonials are retrived successfully",
+        data: result
     });
 }));
 const ReviewController = {
     createReview,
     deleteReview,
     getUserProductReviews,
-    getRestaurantReviews,
-    getUserRestaurantReviews
+    getTestimonials
 };
 exports.default = ReviewController;
