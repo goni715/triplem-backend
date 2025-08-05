@@ -40,6 +40,7 @@ router.get(
 );
 
 router.get('/verify-session', OrderController.verifySession);
+router.get('/get-income-overview/:year', OrderController.getIncomeOverview);
 
 const OrderRoutes = router;
 export default OrderRoutes;
