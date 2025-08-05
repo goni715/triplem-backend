@@ -307,6 +307,7 @@ const getAllOrdersService = async (query: TOrderQuery) => {
       $project: {
         _id: 1,
         token:1,
+        totalPrice:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
