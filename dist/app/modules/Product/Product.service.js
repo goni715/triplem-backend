@@ -73,7 +73,6 @@ const cloudinary_1 = __importDefault(require("../../helper/cloudinary"));
 const Order_model_1 = __importDefault(require("../Order/Order.model"));
 const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
 const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(reqBody);
     //destructuring the reqBody
     if (!reqBody) {
         throw new ApiError_1.default(400, "name is required!");
@@ -136,6 +135,10 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
             if (!mongoose_1.Types.ObjectId.isValid(colors)) {
                 throw new ApiError_1.default(400, "colors must be valid ObjectId");
             }
+            const color = yield Color_model_1.default.findById(colors);
+            if (!color) {
+                throw new ApiError_1.default(400, `This '${colors}' sizeId not found`);
+            }
             payload.colors = [colors];
         }
         if (Array.isArray(colors)) {
@@ -147,6 +150,14 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
             if ((0, hasDuplicates_1.default)(colors)) {
                 throw new ApiError_1.default(400, "colors can not be duplicate value");
             }
+            if (colors && (colors === null || colors === void 0 ? void 0 : colors.length) > 0) {
+                for (let i = 0; i < colors.length; i++) {
+                    const color = yield Color_model_1.default.findById(colors[i]);
+                    if (!color) {
+                        throw new ApiError_1.default(400, `This '${colors[i]}' colorId not found`);
+                    }
+                }
+            }
             payload.colors = colors;
         }
     }
@@ -156,6 +167,10 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
             //check ObjectId
             if (!mongoose_1.Types.ObjectId.isValid(sizes)) {
                 throw new ApiError_1.default(400, "sizes must be valid ObjectId");
+            }
+            const size = yield Size_model_1.default.findById(sizes);
+            if (!size) {
+                throw new ApiError_1.default(400, `This '${sizes}' sizeId not found`);
             }
             payload.sizes = [sizes];
         }
@@ -167,6 +182,14 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
             }
             if ((0, hasDuplicates_1.default)(sizes)) {
                 throw new ApiError_1.default(400, "sizes can not be duplicate value");
+            }
+            if (sizes && (sizes === null || sizes === void 0 ? void 0 : sizes.length) > 0) {
+                for (let i = 0; i < sizes.length; i++) {
+                    const size = yield Size_model_1.default.findById(sizes[i]);
+                    if (!size) {
+                        throw new ApiError_1.default(400, `This '${sizes[i]}' sizeId not found`);
+                    }
+                }
             }
             payload.sizes = sizes;
         }
@@ -199,24 +222,6 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
     const existingCategory = yield Category_model_1.default.findById(categoryId);
     if (!existingCategory) {
         throw new ApiError_1.default(404, 'This categoryId not found');
-    }
-    //check color
-    if (colors && (colors === null || colors === void 0 ? void 0 : colors.length) > 0) {
-        for (let i = 0; i < colors.length; i++) {
-            const color = yield Color_model_1.default.findById(colors[i]);
-            if (!color) {
-                throw new ApiError_1.default(400, `This '${colors[i]}' colorId not found`);
-            }
-        }
-    }
-    //check size
-    if (sizes && (sizes === null || sizes === void 0 ? void 0 : sizes.length) > 0) {
-        for (let i = 0; i < sizes.length; i++) {
-            const size = yield Size_model_1.default.findById(sizes[i]);
-            if (!size) {
-                throw new ApiError_1.default(400, `This '${sizes[i]}' sizeId not found`);
-            }
-        }
     }
     let images = [];
     if (req.files && req.files.length > 0) {

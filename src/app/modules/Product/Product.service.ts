@@ -21,7 +21,6 @@ const createProductService = async (
   req: Request,
   reqBody: IProduct,
 ) => {
-  console.log(reqBody)
 
   //destructuring the reqBody
   if(!reqBody){
@@ -98,7 +97,13 @@ const createProductService = async (
       if (!Types.ObjectId.isValid(colors)) {
         throw new ApiError(400, "colors must be valid ObjectId")
       }
-      payload.colors = [colors]
+
+     const color = await ColorModel.findById(colors);
+      if (!color) {
+        throw new ApiError(400, `This '${colors}' sizeId not found`)
+      }
+
+      payload.colors =  [colors];
     }
 
     if (Array.isArray(colors)) {
@@ -107,8 +112,16 @@ const createProductService = async (
           throw new ApiError(400, "colors must be valid ObjectId")
         }
       }
-      if(hasDuplicates(colors)){
+      if (hasDuplicates(colors)) {
         throw new ApiError(400, "colors can not be duplicate value")
+      }
+      if (colors && colors?.length > 0) {
+        for (let i = 0; i < colors.length; i++) {
+          const color = await ColorModel.findById(colors[i]);
+          if (!color) {
+            throw new ApiError(400, `This '${colors[i]}' colorId not found`)
+          }
+        }
       }
       payload.colors = colors
     }
@@ -123,6 +136,10 @@ const createProductService = async (
       if (!Types.ObjectId.isValid(sizes)) {
         throw new ApiError(400, "sizes must be valid ObjectId")
       }
+      const size = await SizeModel.findById(sizes);
+      if (!size) {
+        throw new ApiError(400, `This '${sizes}' sizeId not found`)
+      }
       payload.sizes = [sizes]
     }
 
@@ -132,8 +149,16 @@ const createProductService = async (
           throw new ApiError(400, "sizes must be valid ObjectId")
         }
       }
-      if(hasDuplicates(sizes)){
+      if (hasDuplicates(sizes)) {
         throw new ApiError(400, "sizes can not be duplicate value")
+      }
+      if (sizes && sizes?.length > 0) {
+        for (let i = 0; i < sizes.length; i++) {
+          const size = await SizeModel.findById(sizes[i]);
+          if (!size) {
+            throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
+          }
+        }
       }
       payload.sizes = sizes
     }
@@ -178,25 +203,6 @@ const createProductService = async (
       throw new ApiError(404, 'This categoryId not found');
     }
 
-    //check color
-    if (colors && colors?.length > 0) {
-      for (let i = 0; i < colors.length; i++) {
-        const color = await ColorModel.findById(colors[i]);
-        if (!color) {
-          throw new ApiError(400, `This '${colors[i]}' colorId not found`)
-        }
-      }
-    }
-
-    //check size
-    if (sizes && sizes?.length > 0) {
-      for (let i = 0; i < sizes.length; i++) {
-        const size = await SizeModel.findById(sizes[i]);
-        if (!size) {
-          throw new ApiError(400, `This '${sizes[i]}' sizeId not found`)
-        }
-      }
-    }
 
 
   let images = []
