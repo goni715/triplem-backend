@@ -347,6 +347,7 @@ const getAllOrdersService = (query) => __awaiter(void 0, void 0, void 0, functio
         {
             $project: {
                 _id: 1,
+                token: 1,
                 fullName: "$user.fullName",
                 email: "$user.email",
                 phone: "$user.phone",

@@ -32,6 +32,8 @@ const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
 const uploadImage_1 = __importDefault(require("../../utils/uploadImage"));
 const isValidateYearFormat_1 = __importDefault(require("../../utils/isValidateYearFormat"));
 const ApiError_2 = __importDefault(require("../../errors/ApiError"));
+const Order_model_1 = __importDefault(require("../Order/Order.model"));
+const Product_model_1 = __importDefault(require("../Product/Product.model"));
 const getUsersService = (query) => __awaiter(void 0, void 0, void 0, function* () {
     // 1. Extract query parameters
     const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
@@ -214,9 +216,34 @@ const getUserOverviewService = (year) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getUserOverviewService = getUserOverviewService;
 const getStatsService = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const totalUsers = yield user_model_1.default.countDocuments({
         role: "user"
     });
-    return totalUsers;
+    const completedOrders = yield Order_model_1.default.countDocuments({
+        status: "delivered",
+        paymentStatus: "paid"
+    });
+    const totalIncomeResult = yield Order_model_1.default.aggregate([
+        {
+            $match: {
+                status: "delivered",
+                paymentStatus: "paid"
+            }
+        },
+        {
+            $group: {
+                _id: 0,
+                total: { $sum: "$totalPrice" },
+            }
+        }
+    ]);
+    const totalProducts = yield Product_model_1.default.countDocuments();
+    return {
+        totalUsers,
+        completedOrders,
+        totalIncome: (totalIncomeResult === null || totalIncomeResult === void 0 ? void 0 : totalIncomeResult.length) > 0 ? (_a = totalIncomeResult[0]) === null || _a === void 0 ? void 0 : _a.total : 0,
+        totalProducts
+    };
 });
 exports.getStatsService = getStatsService;

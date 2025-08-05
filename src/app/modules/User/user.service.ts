@@ -8,6 +8,8 @@ import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
 import isValidYearFormat from "../../utils/isValidateYearFormat";
 import ApiError from "../../errors/ApiError";
+import OrderModel from "../Order/Order.model";
+import ProductModel from "../Product/Product.model";
 
 
 const getUsersService = async (query: TUserQuery) => {
@@ -241,7 +243,34 @@ const getStatsService = async () => {
     role: "user"
   })
 
-  return totalUsers
+  const completedOrders = await OrderModel.countDocuments({
+    status: "delivered",
+    paymentStatus: "paid"
+  })
+
+  const totalIncomeResult = await OrderModel.aggregate([
+    {
+      $match: {
+        status: "delivered",
+        paymentStatus: "paid"
+      }
+    },
+    {
+      $group: {
+        _id: 0,
+        total: { $sum: "$totalPrice" },
+      }
+    }
+  ])
+
+  const totalProducts = await ProductModel.countDocuments();
+
+  return {
+    totalUsers,
+    completedOrders,
+    totalIncome: totalIncomeResult?.length > 0 ? totalIncomeResult[0]?.total : 0,
+    totalProducts
+  }
 }
 
 
