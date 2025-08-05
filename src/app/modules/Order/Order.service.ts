@@ -141,7 +141,6 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
         userId: new ObjectId(loginUserId)
       }
     },
-    { $sort: { [sortBy]: sortDirection } },
     { $skip: skip },
     { $limit: Number(limit) },
     { $unwind: "$products" },
@@ -236,7 +235,8 @@ const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery)
           }
         }
       }
-    }
+    },
+    { $sort: { [sortBy]: sortDirection } },
   ]);
 
   // total count
