@@ -74,27 +74,6 @@ const Order_model_1 = __importDefault(require("../Order/Order.model"));
 const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
 const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(reqBody);
-    let images = [];
-    if (req.files && req.files.length > 0) {
-        const files = req.files;
-        // for (const file of files) {
-        //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-        //   images.push(path)
-        // }
-        images = yield Promise.all(files === null || files === void 0 ? void 0 : files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
-            const result = yield cloudinary_1.default.uploader.upload(file.path, {
-                folder: 'MTK-Ecommerce',
-                // width: 300,
-                // crop: 'scale',
-            });
-            // Delete local file (non-blocking)
-            // fs.unlink(file.path);
-            return result.secure_url;
-        })));
-    }
-    else {
-        throw new ApiError_1.default(400, "Minimum one image required");
-    }
     //destructuring the reqBody
     if (!reqBody) {
         throw new ApiError_1.default(400, "name is required!");
@@ -130,7 +109,6 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
     //set required fields
     payload = {
         name,
-        images,
         categoryId,
         introduction,
         description,
@@ -240,7 +218,28 @@ const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0,
             }
         }
     }
-    const result = yield Product_model_1.default.create(payload);
+    let images = [];
+    if (req.files && req.files.length > 0) {
+        const files = req.files;
+        // for (const file of files) {
+        //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+        //   images.push(path)
+        // }
+        images = yield Promise.all(files === null || files === void 0 ? void 0 : files.map((file) => __awaiter(void 0, void 0, void 0, function* () {
+            const result = yield cloudinary_1.default.uploader.upload(file.path, {
+                folder: 'MTK-Ecommerce',
+                // width: 300,
+                // crop: 'scale',
+            });
+            // Delete local file (non-blocking)
+            // fs.unlink(file.path);
+            return result.secure_url;
+        })));
+    }
+    else {
+        throw new ApiError_1.default(400, "Minimum one image required");
+    }
+    const result = yield Product_model_1.default.create(Object.assign(Object.assign({}, payload), { images }));
     return result;
 });
 exports.createProductService = createProductService;

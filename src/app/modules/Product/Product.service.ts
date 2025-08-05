@@ -23,35 +23,6 @@ const createProductService = async (
 ) => {
   console.log(reqBody)
 
-  let images = []
-
-  if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-    const files = req.files as Express.Multer.File[];
-    // for (const file of files) {
-    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-    //   images.push(path)
-    // }
-
-    images = await Promise.all(
-      files?.map(async (file) => {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'MTK-Ecommerce',
-          // width: 300,
-          // crop: 'scale',
-        });
-
-        // Delete local file (non-blocking)
-        // fs.unlink(file.path);
-
-        return result.secure_url;
-      })
-    );
-
-  }
-  else {
-    throw new ApiError(400, "Minimum one image required");
-  }
-
   //destructuring the reqBody
   if(!reqBody){
     throw new ApiError(400, "name is required!");
@@ -93,7 +64,6 @@ const createProductService = async (
   //set required fields
   payload = {
     name,
-    images,
     categoryId,
     introduction,
     description,
@@ -229,7 +199,40 @@ const createProductService = async (
     }
 
 
-    const result = await ProductModel.create(payload);
+  let images = []
+
+  if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+    const files = req.files as Express.Multer.File[];
+    // for (const file of files) {
+    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
+    //   images.push(path)
+    // }
+
+    images = await Promise.all(
+      files?.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'MTK-Ecommerce',
+          // width: 300,
+          // crop: 'scale',
+        });
+
+        // Delete local file (non-blocking)
+        // fs.unlink(file.path);
+
+        return result.secure_url;
+      })
+    );
+
+  }
+  else {
+    throw new ApiError(400, "Minimum one image required");
+  }
+
+
+    const result = await ProductModel.create({
+      ...payload,
+      images
+    });
     return result;
 };
 

@@ -91,7 +91,6 @@ const getSingleUserService = async (userId: string) => {
 }
 
 
-
 const getMeForSuperAdminService = async (userId: string) => {
   const result = await UserModel.aggregate([
     {
