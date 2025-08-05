@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
+import { editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUserOverviewService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const getUsers = catchAsync(async (req, res) => {
@@ -82,13 +82,27 @@ const updateProfileImg = catchAsync(async (req, res) => {
 });
 
 
+const getUserOverview = catchAsync(async (req, res) => {
+  const { year } = req.params;
+  const result = await getUserOverviewService(year);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User overview is retrieved successfully',
+    data: result,
+  });
+});
+
+
 const UserController = {
     getUsers,
     getSingleUser,
     getMe,
     getMeForSuperAdmin,
     editMyProfile,
-    updateProfileImg
+    updateProfileImg,
+    getUserOverview
 }
 
 export default UserController;

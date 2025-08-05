@@ -23,13 +23,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfileImgService = exports.editMyProfileService = exports.getMeService = exports.getMeForSuperAdminService = exports.getSingleUserService = exports.getUsersService = void 0;
+exports.getUserOverviewService = exports.updateProfileImgService = exports.editMyProfileService = exports.getMeService = exports.getMeForSuperAdminService = exports.getSingleUserService = exports.getUsersService = void 0;
 const user_model_1 = __importDefault(require("./user.model"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const QueryBuilder_1 = require("../../helper/QueryBuilder");
 const user_constant_1 = require("./user.constant");
 const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
 const uploadImage_1 = __importDefault(require("../../utils/uploadImage"));
+const isValidateYearFormat_1 = __importDefault(require("../../utils/isValidateYearFormat"));
+const ApiError_2 = __importDefault(require("../../errors/ApiError"));
 const getUsersService = (query) => __awaiter(void 0, void 0, void 0, function* () {
     // 1. Extract query parameters
     const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
@@ -138,3 +140,75 @@ const updateProfileImgService = (req, loginUserId) => __awaiter(void 0, void 0, 
     return result;
 });
 exports.updateProfileImgService = updateProfileImgService;
+const getUserOverviewService = (year) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!(0, isValidateYearFormat_1.default)(year)) {
+        throw new ApiError_2.default(400, "Invalid year, year should be in 'YYYY' format.");
+    }
+    const start = `${year}-01-01T00:00:00.000+00:00`;
+    const end = `${year}-12-31T00:00:00.000+00:00`;
+    const result = yield user_model_1.default.aggregate([
+        {
+            $match: {
+                createdAt: { $gte: new Date(start), $lte: new Date(end) },
+            }
+        },
+        // {
+        //   $group: {
+        //     _id: {
+        //       year: { $year: "$createdAt" },
+        //       month: { $month: "$createdAt" },
+        //     },
+        //     income: { $sum: "$totalPrice" },
+        //   },
+        // },
+        // {
+        //   $sort: {
+        //     "_id.year": 1,
+        //     "_id.month": 1,
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     month: {
+        //       $arrayElemAt: [
+        //         [
+        //           "",
+        //           "Jan",
+        //           "Feb",
+        //           "Mar",
+        //           "Apr",
+        //           "May",
+        //           "Jun",
+        //           "Jul",
+        //           "Aug",
+        //           "Sep",
+        //           "Oct",
+        //           "Nov",
+        //           "Dec",
+        //         ],
+        //         "$_id.month",
+        //       ],
+        //     },
+        //   },
+        // },
+        // {
+        //   $project: {
+        //     _id:0
+        //   }
+        // }
+    ]);
+    // Fill in missing months
+    // const allMonths = [
+    //   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    //   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    // ];
+    // const filledData = allMonths.map((month) => {
+    //   const found = result?.find((item) => item.month === month);
+    //   return {
+    //     month,
+    //     income: found ? found.income : 0
+    //   };
+    // });
+    return result;
+});
+exports.getUserOverviewService = getUserOverviewService;

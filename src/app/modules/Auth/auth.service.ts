@@ -318,6 +318,10 @@ const changePasswordService = async (loginUserId: string, payload: IChangePass) 
     throw new AppError(400, 'Current Password is not correct');
   }
 
+  if(currentPassword===newPassword){
+    throw new ApiError(403, "New password must be different from the current password.");
+  }
+
   //hash the newPassword
   const hashPass = await hashedPassword(newPassword);
 
