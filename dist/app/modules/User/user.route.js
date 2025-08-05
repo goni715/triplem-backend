@@ -18,4 +18,6 @@ router.get("/get-me", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.sup
 router.get("/get-me-for-super-admin", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin), user_controller_1.default.getMeForSuperAdmin);
 router.patch("/edit-my-profile", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin, user_constant_1.UserRole.user, user_constant_1.UserRole.user, user_constant_1.UserRole.admin), upload_1.default.single('file'), (0, validationMiddleware_1.default)(user_validation_1.updateProfileValidationSchema), user_controller_1.default.editMyProfile);
 router.patch("/update-profile-img", (0, AuthMiddleware_1.default)(user_constant_1.UserRole.super_admin, user_constant_1.UserRole.user, user_constant_1.UserRole.user, user_constant_1.UserRole.admin), upload_1.default.single('file'), user_controller_1.default.updateProfileImg);
+router.get('/get-user-overview/:year', (0, AuthMiddleware_1.default)("super_admin", "admin"), user_controller_1.default.getUserOverview);
+router.get('/get-stats', (0, AuthMiddleware_1.default)("super_admin", "admin"), user_controller_1.default.getStats);
 exports.UserRoutes = router;

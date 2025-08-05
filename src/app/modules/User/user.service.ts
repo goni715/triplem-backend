@@ -48,6 +48,7 @@ const getUsersService = async (query: TUserQuery) => {
         ...filterQuery, // Apply filters
       },
     },
+    { $sort: { [sortBy]: sortDirection } },
     {
       $project: {
         _id: 1,
@@ -58,7 +59,6 @@ const getUsersService = async (query: TUserQuery) => {
         status: 1
       },
     },
-    { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);
@@ -171,69 +171,78 @@ const getUserOverviewService = async (year: string) => {
     {
       $match: {
         createdAt: { $gte: new Date(start), $lte: new Date(end) },
+        role: "user"
       }
     },
-    // {
-    //   $group: {
-    //     _id: {
-    //       year: { $year: "$createdAt" },
-    //       month: { $month: "$createdAt" },
-    //     },
-    //     income: { $sum: "$totalPrice" },
-    //   },
-    // },
-    // {
-    //   $sort: {
-    //     "_id.year": 1,
-    //     "_id.month": 1,
-    //   },
-    // },
-    // {
-    //   $addFields: {
-    //     month: {
-    //       $arrayElemAt: [
-    //         [
-    //           "",
-    //           "Jan",
-    //           "Feb",
-    //           "Mar",
-    //           "Apr",
-    //           "May",
-    //           "Jun",
-    //           "Jul",
-    //           "Aug",
-    //           "Sep",
-    //           "Oct",
-    //           "Nov",
-    //           "Dec",
-    //         ],
-    //         "$_id.month",
-    //       ],
-    //     },
-    //   },
-    // },
-    // {
-    //   $project: {
-    //     _id:0
-    //   }
-    // }
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
+        },
+        users: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },
+    {
+      $addFields: {
+        month: {
+          $arrayElemAt: [
+            [
+              "",
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ],
+            "$_id.month",
+          ],
+        },
+      },
+    },
+    {
+      $project: {
+        _id:0
+      }
+    }
   ])
 
-  // Fill in missing months
-  // const allMonths = [
-  //   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  //   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  // ];
+  //Fill in missing months
+  const allMonths = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
 
-  // const filledData = allMonths.map((month) => {
-  //   const found = result?.find((item) => item.month === month);
-  //   return {
-  //     month,
-  //     income: found ? found.income : 0
-  //   };
-  // });
+  const filledData = allMonths.map((month) => {
+    const found = result?.find((item) => item.month === month);
+    return {
+      month,
+      users: found ? found.users : 0
+    };
+  });
  
-  return result;
+  return filledData;
+}
+
+const getStatsService = async () => {
+  const totalUsers = await UserModel.countDocuments({
+    role: "user"
+  })
+
+  return totalUsers
 }
 
 
@@ -244,5 +253,6 @@ export {
   getMeService,
   editMyProfileService,
   updateProfileImgService,
-  getUserOverviewService
+  getUserOverviewService,
+  getStatsService
 };

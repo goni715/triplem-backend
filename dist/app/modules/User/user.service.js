@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserOverviewService = exports.updateProfileImgService = exports.editMyProfileService = exports.getMeService = exports.getMeForSuperAdminService = exports.getSingleUserService = exports.getUsersService = void 0;
+exports.getStatsService = exports.getUserOverviewService = exports.updateProfileImgService = exports.editMyProfileService = exports.getMeService = exports.getMeForSuperAdminService = exports.getSingleUserService = exports.getUsersService = void 0;
 const user_model_1 = __importDefault(require("./user.model"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const QueryBuilder_1 = require("../../helper/QueryBuilder");
@@ -54,6 +54,7 @@ const getUsersService = (query) => __awaiter(void 0, void 0, void 0, function* (
         {
             $match: Object.assign(Object.assign({ role: "user" }, searchQuery), filterQuery),
         },
+        { $sort: { [sortBy]: sortDirection } },
         {
             $project: {
                 _id: 1,
@@ -64,7 +65,6 @@ const getUsersService = (query) => __awaiter(void 0, void 0, void 0, function* (
                 status: 1
             },
         },
-        { $sort: { [sortBy]: sortDirection } },
         { $skip: skip },
         { $limit: Number(limit) },
     ]);
@@ -150,65 +150,73 @@ const getUserOverviewService = (year) => __awaiter(void 0, void 0, void 0, funct
         {
             $match: {
                 createdAt: { $gte: new Date(start), $lte: new Date(end) },
+                role: "user"
             }
         },
-        // {
-        //   $group: {
-        //     _id: {
-        //       year: { $year: "$createdAt" },
-        //       month: { $month: "$createdAt" },
-        //     },
-        //     income: { $sum: "$totalPrice" },
-        //   },
-        // },
-        // {
-        //   $sort: {
-        //     "_id.year": 1,
-        //     "_id.month": 1,
-        //   },
-        // },
-        // {
-        //   $addFields: {
-        //     month: {
-        //       $arrayElemAt: [
-        //         [
-        //           "",
-        //           "Jan",
-        //           "Feb",
-        //           "Mar",
-        //           "Apr",
-        //           "May",
-        //           "Jun",
-        //           "Jul",
-        //           "Aug",
-        //           "Sep",
-        //           "Oct",
-        //           "Nov",
-        //           "Dec",
-        //         ],
-        //         "$_id.month",
-        //       ],
-        //     },
-        //   },
-        // },
-        // {
-        //   $project: {
-        //     _id:0
-        //   }
-        // }
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$createdAt" },
+                    month: { $month: "$createdAt" },
+                },
+                users: { $sum: 1 },
+            },
+        },
+        {
+            $sort: {
+                "_id.year": 1,
+                "_id.month": 1,
+            },
+        },
+        {
+            $addFields: {
+                month: {
+                    $arrayElemAt: [
+                        [
+                            "",
+                            "Jan",
+                            "Feb",
+                            "Mar",
+                            "Apr",
+                            "May",
+                            "Jun",
+                            "Jul",
+                            "Aug",
+                            "Sep",
+                            "Oct",
+                            "Nov",
+                            "Dec",
+                        ],
+                        "$_id.month",
+                    ],
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0
+            }
+        }
     ]);
-    // Fill in missing months
-    // const allMonths = [
-    //   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    //   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-    // ];
-    // const filledData = allMonths.map((month) => {
-    //   const found = result?.find((item) => item.month === month);
-    //   return {
-    //     month,
-    //     income: found ? found.income : 0
-    //   };
-    // });
-    return result;
+    //Fill in missing months
+    const allMonths = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const filledData = allMonths.map((month) => {
+        const found = result === null || result === void 0 ? void 0 : result.find((item) => item.month === month);
+        return {
+            month,
+            users: found ? found.users : 0
+        };
+    });
+    return filledData;
 });
 exports.getUserOverviewService = getUserOverviewService;
+const getStatsService = () => __awaiter(void 0, void 0, void 0, function* () {
+    const totalUsers = yield user_model_1.default.countDocuments({
+        role: "user"
+    });
+    return totalUsers;
+});
+exports.getStatsService = getStatsService;

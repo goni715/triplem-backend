@@ -47,4 +47,8 @@ router.patch(
   UserController.updateProfileImg
 );
 
+router.get('/get-user-overview/:year', AuthMiddleware("super_admin", "admin"), UserController.getUserOverview);
+router.get('/get-stats', AuthMiddleware("super_admin", "admin"), UserController.getStats);
+
+
 export const UserRoutes = router;

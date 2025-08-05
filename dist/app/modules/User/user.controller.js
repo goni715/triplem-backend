@@ -88,6 +88,15 @@ const getUserOverview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
         data: result,
     });
 }));
+const getStats = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, user_service_1.getStatsService)();
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Stats retrieved successfully',
+        data: result,
+    });
+}));
 const UserController = {
     getUsers,
     getSingleUser,
@@ -95,6 +104,7 @@ const UserController = {
     getMeForSuperAdmin,
     editMyProfile,
     updateProfileImg,
-    getUserOverview
+    getUserOverview,
+    getStats
 };
 exports.default = UserController;
