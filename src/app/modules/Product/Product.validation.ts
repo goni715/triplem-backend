@@ -161,7 +161,7 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "colors must be an array",
       required_error: "colors must be at least one value"
     }
-  ).min(1, { message: "colors must be at least one value" }).optional(),
+  ).default([]),
   sizes: z.array(
     z.string()
       .refine((id) => Types.ObjectId.isValid(id), {
@@ -171,7 +171,7 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "sizes must be an array",
       required_error: "sizes must be at least one value"
     }
-  ).min(1, { message: "sizes must be at least one value" }).optional(),
+  ).default([]),
   introduction: z.string({
     invalid_type_error: "introduction must be string",
     required_error: "introduction is required"

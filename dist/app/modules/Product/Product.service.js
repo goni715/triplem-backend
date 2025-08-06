@@ -678,6 +678,7 @@ const getSingleProductService = (productId) => __awaiter(void 0, void 0, void 0,
 });
 exports.getSingleProductService = getSingleProductService;
 const updateProductService = (req, productId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     if (!mongoose_1.Types.ObjectId.isValid(productId)) {
         throw new ApiError_1.default(400, "productId must be a valid ObjectId");
     }
@@ -689,6 +690,24 @@ const updateProductService = (req, productId, payload) => __awaiter(void 0, void
     if (payload.originalPrice) {
         if (product.currentPrice > payload.originalPrice) {
             throw new ApiError_1.default(400, "Original price must be more than current price");
+        }
+    }
+    //check colors
+    if (payload.colors && ((_a = payload.colors) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+        for (let i = 0; i < payload.colors.length; i++) {
+            const color = yield Color_model_1.default.findById(payload.colors[i]);
+            if (!color) {
+                throw new ApiError_1.default(400, `This '${payload.colors[i]}' colorId not found`);
+            }
+        }
+    }
+    //check sizes
+    if (payload.sizes && ((_b = payload.sizes) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+        for (let i = 0; i < payload.sizes.length; i++) {
+            const color = yield Size_model_1.default.findById(payload.sizes[i]);
+            if (!color) {
+                throw new ApiError_1.default(400, `This '${payload.sizes[i]}' colorId not found`);
+            }
         }
     }
     //desctructuring the payload

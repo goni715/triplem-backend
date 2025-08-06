@@ -759,6 +759,25 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     }
   }
 
+  //check colors
+  if (payload.colors && payload.colors?.length > 0) {
+    for (let i = 0; i < payload.colors.length; i++) {
+      const color = await ColorModel.findById(payload.colors[i]);
+      if (!color) {
+        throw new ApiError(400, `This '${payload.colors[i]}' colorId not found`)
+      }
+    }
+  }
+
+  //check sizes
+  if (payload.sizes && payload.sizes?.length > 0) {
+    for (let i = 0; i < payload.sizes.length; i++) {
+      const color = await SizeModel.findById(payload.sizes[i]);
+      if (!color) {
+        throw new ApiError(400, `This '${payload.sizes[i]}' colorId not found`)
+      }
+    }
+  }
   //desctructuring the payload
   const { name } = payload;
  
@@ -776,6 +795,7 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     }
   }
 
+ 
   //update the product
   const result = await ProductModel.updateOne(
     { _id: productId },

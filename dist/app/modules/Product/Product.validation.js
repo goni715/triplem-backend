@@ -132,14 +132,14 @@ exports.updateProductValidationSchema = zod_1.z.object({
     }), {
         invalid_type_error: "colors must be an array",
         required_error: "colors must be at least one value"
-    }).min(1, { message: "colors must be at least one value" }).optional(),
+    }).default([]),
     sizes: zod_1.z.array(zod_1.z.string()
         .refine((id) => mongoose_1.Types.ObjectId.isValid(id), {
         message: "sizes must be an array of valid ObjectId",
     }), {
         invalid_type_error: "sizes must be an array",
         required_error: "sizes must be at least one value"
-    }).min(1, { message: "sizes must be at least one value" }).optional(),
+    }).default([]),
     introduction: zod_1.z.string({
         invalid_type_error: "introduction must be string",
         required_error: "introduction is required"

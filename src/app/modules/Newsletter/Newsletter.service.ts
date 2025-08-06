@@ -2,7 +2,7 @@
 import ApiError from '../../errors/ApiError';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import { NewsletterSearchableFields } from './Newsletter.constant';
-import { INewsletter } from './Newsletter.interface';
+import { INewsletter, TNewsletterQuery } from './Newsletter.interface';
 import NewsletterModel from './Newsletter.model';
 import { Types } from "mongoose";
 
@@ -23,7 +23,7 @@ const subscribeToNewsletterService = async (
 };
 
 
-const getSubscribersService = async (query: any) => {
+const getSubscribersService = async (query: TNewsletterQuery) => {
   const {
     searchTerm, 
     page = 1, 

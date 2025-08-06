@@ -7,11 +7,10 @@ export interface INewsletter {
   status: TNewStatus;
 };
 
-export type TContactQuery = {
+export type TNewsletterQuery = {
   searchTerm?: string;
   page?: string;
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  status?: TNewStatus,
 };
