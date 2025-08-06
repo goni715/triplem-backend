@@ -13,7 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
+const pickValidFields_1 = __importDefault(require("../../utils/pickValidFields"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const Contact_constant_1 = require("./Contact.constant");
 const Contact_service_1 = require("./Contact.service");
 const createContact = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, Contact_service_1.createContactService)(req.body);
@@ -25,7 +27,8 @@ const createContact = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     });
 }));
 const getAllContacts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield (0, Contact_service_1.getAllContactsService)(req.query);
+    const validatedQuery = (0, pickValidFields_1.default)(req.query, Contact_constant_1.ContactValidFields);
+    const result = yield (0, Contact_service_1.getAllContactsService)(validatedQuery);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,

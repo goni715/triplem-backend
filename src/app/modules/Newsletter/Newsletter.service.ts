@@ -1,6 +1,10 @@
 
+import ApiError from '../../errors/ApiError';
+import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
+import { NewsletterSearchableFields } from './Newsletter.constant';
 import { INewsletter } from './Newsletter.interface';
 import NewsletterModel from './Newsletter.model';
+import { Types } from "mongoose";
 
 const subscribeToNewsletterService = async (
   payload: INewsletter,
@@ -18,88 +22,92 @@ const subscribeToNewsletterService = async (
   return result;
 };
 
-// const getAllContactsService = async (query: TContactQuery) => {
-//   const {
-//     searchTerm, 
-//     page = 1, 
-//     limit = 10, 
-//     sortOrder = "desc",
-//     sortBy = "createdAt", 
-//     ...filters  // Any additional filters
-//   } = query;
 
-//   // 2. Set up pagination
-//   const skip = (Number(page) - 1) * Number(limit);
+const getSubscribersService = async (query: any) => {
+  const {
+    searchTerm, 
+    page = 1, 
+    limit = 10, 
+    sortOrder = "desc",
+    sortBy = "createdAt", 
+    ...filters  // Any additional filters
+  } = query;
 
-//   //3. setup sorting
-//   const sortDirection = sortOrder === "asc" ? 1 : -1;
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
 
-//   //4. setup searching
-//   let searchQuery = {};
-//   // if (searchTerm) {
-//   //   searchQuery = makeSearchQuery(searchTerm, ContactSearchableFields);
-//   // }
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
 
-//   //5 setup filters
-//   let filterQuery = {};
-//   if (filters) {
-//     filterQuery = makeFilterQuery(filters);
-//   }
-//   const result = await ContactModel.aggregate([
-//     {
-//       $match: {
-//         ...searchQuery, 
-//         ...filterQuery
-//       },
-//     },
-//     {
-//       $project: {
-//         updatedAt: 0
-//       },
-//     },
-//     { $sort: { [sortBy]: sortDirection } }, 
-//     { $skip: skip }, 
-//     { $limit: Number(limit) }, 
-//   ]);
+  //4. setup searching
+  let searchQuery = {};
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, NewsletterSearchableFields);
+  }
 
-//      // total count
-//   const totalCountResult = await ContactModel.aggregate([
-//     {
-//       $match: {
-//         ...searchQuery,
-//         ...filterQuery
-//       }
-//     },
-//     { $count: "totalCount" }
-//   ])
+  //5 setup filters
+  let filterQuery = {};
+  if (filters) {
+    filterQuery = makeFilterQuery(filters);
+  }
+  const result = await NewsletterModel.aggregate([
+    {
+      $match: {
+        ...searchQuery, 
+        ...filterQuery
+      },
+    },
+     { $sort: { [sortBy]: sortDirection } }, 
+    {
+      $project: {
+        createdAt:0,
+        updatedAt: 0
+      },
+    },
+    { $skip: skip }, 
+    { $limit: Number(limit) }, 
+  ]);
 
-//   const totalCount = totalCountResult[0]?.totalCount || 0;
-//   const totalPages = Math.ceil(totalCount / Number(limit));
+     // total count
+  const totalCountResult = await NewsletterModel.aggregate([
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    { $count: "totalCount" }
+  ])
 
-// return {
-//   meta: {
-//     page: Number(page), //currentPage
-//     limit: Number(limit),
-//     totalPages,
-//     total: totalCount,
-//   },
-//   data: result,
-// };
-// };
+  const totalCount = totalCountResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
+};
 
 
-// const deleteContactService = async (contactId: string) => {
-//   if (!Types.ObjectId.isValid(contactId)) {
-//     throw new ApiError(400, "contactId must be a valid ObjectId")
-//   }
-//   const contact = await ContactModel.findById(contactId);
-//   if(!contact){
-//     throw new ApiError(404, "contactId Not Found");
-//   }
-//   const result = await ContactModel.deleteOne({ _id:contactId });
-//   return result;
-// };
+const deleteSubsciberService = async (subscriberId: string) => {
+  if (!Types.ObjectId.isValid(subscriberId)) {
+    throw new ApiError(400, "subscriberId must be a valid ObjectId")
+  }
+  const subscriber = await NewsletterModel.findById(subscriberId);
+  if(!subscriber){
+    throw new ApiError(404, "subscriberId Not Found");
+  }
+  const result = await NewsletterModel.deleteOne({ _id:subscriberId });
+  return result;
+};
 
 export {
-  subscribeToNewsletterService
+  subscribeToNewsletterService,
+  getSubscribersService,
+  deleteSubsciberService
 };

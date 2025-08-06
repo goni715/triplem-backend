@@ -1,6 +1,8 @@
 import catchAsync from '../../utils/catchAsync';
+import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
-import { subscribeToNewsletterService } from './Newsletter.service';
+import { NewsletterValidFields } from './Newsletter.constant';
+import { deleteSubsciberService, getSubscribersService, subscribeToNewsletterService } from './Newsletter.service';
 
 const subscribeToNewsletter = catchAsync(async (req, res) => {
   const result = await subscribeToNewsletterService(req.body);
@@ -14,44 +16,36 @@ const subscribeToNewsletter = catchAsync(async (req, res) => {
 });
 
 
-// const getAllContacts = catchAsync(async (req, res) => {
-//   const result = await getAllContactsService(req.query);
+const getSubscribers = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, NewsletterValidFields);
+  const result = await getSubscribersService(validatedQuery);
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Contacts are retrieved successfully',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Subscribers are retrieved successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
-// const replyContact = catchAsync(async (req, res) => {
-//   const { contactId } = req.params;
-//   const { replyText } = req.body;
-//   const result = await replyContactService(contactId, replyText);
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Reply sent successfully.',
-//     data: result,
-//   });
-// });
 
-// const deleteContact = catchAsync(async (req, res) => {
-//   const { contactId } = req.params;
-//   const result = await deleteContactService(contactId);
+const deleteSubscriber = catchAsync(async (req, res) => {
+  const { subscriberId } = req.params;
+  const result = await deleteSubsciberService(subscriberId);
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Contact is deleted successfully',
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Subscriber is deleted successfully',
+    data: result,
+  });
+});
 
 const NewsletterController = {
-  subscribeToNewsletter
+  subscribeToNewsletter,
+  getSubscribers,
+  deleteSubscriber
 };
 export default NewsletterController;

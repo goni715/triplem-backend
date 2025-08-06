@@ -1,5 +1,7 @@
 import catchAsync from '../../utils/catchAsync';
+import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
+import { ContactValidFields } from './Contact.constant';
 import { createContactService, getAllContactsService, deleteContactService, replyContactService } from './Contact.service';
 
 const createContact = catchAsync(async (req, res) => {
@@ -15,7 +17,8 @@ const createContact = catchAsync(async (req, res) => {
 
 
 const getAllContacts = catchAsync(async (req, res) => {
-  const result = await getAllContactsService(req.query);
+  const validatedQuery = pickValidFields(req.query, ContactValidFields);
+  const result = await getAllContactsService(validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,

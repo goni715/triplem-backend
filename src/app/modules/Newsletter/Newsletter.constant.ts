@@ -1,4 +1,4 @@
-export const NewsletterSearchableFields = ['email', 'phone'];
+export const NewsletterSearchableFields = ['email'];
 
 export const NewsletterValidFields: string[] = [
   "searchTerm",

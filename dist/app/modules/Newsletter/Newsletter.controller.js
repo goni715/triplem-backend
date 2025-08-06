@@ -13,7 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
+const pickValidFields_1 = __importDefault(require("../../utils/pickValidFields"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
+const Newsletter_constant_1 = require("./Newsletter.constant");
 const Newsletter_service_1 = require("./Newsletter.service");
 const subscribeToNewsletter = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, Newsletter_service_1.subscribeToNewsletterService)(req.body);
@@ -24,38 +26,30 @@ const subscribeToNewsletter = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: result,
     });
 }));
-// const getAllContacts = catchAsync(async (req, res) => {
-//   const result = await getAllContactsService(req.query);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Contacts are retrieved successfully',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
-// const replyContact = catchAsync(async (req, res) => {
-//   const { contactId } = req.params;
-//   const { replyText } = req.body;
-//   const result = await replyContactService(contactId, replyText);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Reply sent successfully.',
-//     data: result,
-//   });
-// });
-// const deleteContact = catchAsync(async (req, res) => {
-//   const { contactId } = req.params;
-//   const result = await deleteContactService(contactId);
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Contact is deleted successfully',
-//     data: result,
-//   });
-// });
+const getSubscribers = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const validatedQuery = (0, pickValidFields_1.default)(req.query, Newsletter_constant_1.NewsletterValidFields);
+    const result = yield (0, Newsletter_service_1.getSubscribersService)(validatedQuery);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Subscribers are retrieved successfully',
+        meta: result.meta,
+        data: result.data,
+    });
+}));
+const deleteSubscriber = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { subscriberId } = req.params;
+    const result = yield (0, Newsletter_service_1.deleteSubsciberService)(subscriberId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Subscriber is deleted successfully',
+        data: result,
+    });
+}));
 const NewsletterController = {
-    subscribeToNewsletter
+    subscribeToNewsletter,
+    getSubscribers,
+    deleteSubscriber
 };
 exports.default = NewsletterController;
