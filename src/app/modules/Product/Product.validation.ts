@@ -161,7 +161,16 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "colors must be an array",
       required_error: "colors must be at least one value"
     }
-  ).default([]),
+  ).default([])
+    .superRefine((arr, ctx) => {
+      const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+      if (duplicates.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "colors array must not contain duplicate values",
+        });
+      }
+    }),
   sizes: z.array(
     z.string()
       .refine((id) => Types.ObjectId.isValid(id), {
@@ -171,7 +180,16 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "sizes must be an array",
       required_error: "sizes must be at least one value"
     }
-  ).default([]),
+  ).default([])
+    .superRefine((arr, ctx) => {
+      const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+      if (duplicates.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "sizes array must not contain duplicate values",
+        });
+      }
+    }),
   introduction: z.string({
     invalid_type_error: "introduction must be string",
     required_error: "introduction is required"
@@ -190,7 +208,7 @@ export const updateProductValidationSchema = z.object({
         message: "description must be valid HTML.",
       }
     ).optional(),
- status: z.string({
+  status: z.string({
     invalid_type_error: "status must be a valid string value.",
   })
     .refine((val) => ['visible', 'hidden'].includes(val), {

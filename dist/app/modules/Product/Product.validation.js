@@ -132,14 +132,32 @@ exports.updateProductValidationSchema = zod_1.z.object({
     }), {
         invalid_type_error: "colors must be an array",
         required_error: "colors must be at least one value"
-    }).default([]),
+    }).default([])
+        .superRefine((arr, ctx) => {
+        const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+        if (duplicates.length > 0) {
+            ctx.addIssue({
+                code: zod_1.z.ZodIssueCode.custom,
+                message: "colors array must not contain duplicate values",
+            });
+        }
+    }),
     sizes: zod_1.z.array(zod_1.z.string()
         .refine((id) => mongoose_1.Types.ObjectId.isValid(id), {
         message: "sizes must be an array of valid ObjectId",
     }), {
         invalid_type_error: "sizes must be an array",
         required_error: "sizes must be at least one value"
-    }).default([]),
+    }).default([])
+        .superRefine((arr, ctx) => {
+        const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+        if (duplicates.length > 0) {
+            ctx.addIssue({
+                code: zod_1.z.ZodIssueCode.custom,
+                message: "sizes array must not contain duplicate values",
+            });
+        }
+    }),
     introduction: zod_1.z.string({
         invalid_type_error: "introduction must be string",
         required_error: "introduction is required"

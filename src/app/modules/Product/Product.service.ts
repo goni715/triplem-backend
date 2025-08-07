@@ -772,12 +772,13 @@ const updateProductService = async (req:Request, productId: string, payload: Par
   //check sizes
   if (payload.sizes && payload.sizes?.length > 0) {
     for (let i = 0; i < payload.sizes.length; i++) {
-      const color = await SizeModel.findById(payload.sizes[i]);
-      if (!color) {
-        throw new ApiError(400, `This '${payload.sizes[i]}' colorId not found`)
+      const size = await SizeModel.findById(payload.sizes[i]);
+      if (!size) {
+        throw new ApiError(400, `This '${payload.sizes[i]}' sizeId not found`)
       }
     }
   }
+
   //desctructuring the payload
   const { name } = payload;
  

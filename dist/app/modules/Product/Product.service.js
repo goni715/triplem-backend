@@ -704,9 +704,9 @@ const updateProductService = (req, productId, payload) => __awaiter(void 0, void
     //check sizes
     if (payload.sizes && ((_b = payload.sizes) === null || _b === void 0 ? void 0 : _b.length) > 0) {
         for (let i = 0; i < payload.sizes.length; i++) {
-            const color = yield Size_model_1.default.findById(payload.sizes[i]);
-            if (!color) {
-                throw new ApiError_1.default(400, `This '${payload.sizes[i]}' colorId not found`);
+            const size = yield Size_model_1.default.findById(payload.sizes[i]);
+            if (!size) {
+                throw new ApiError_1.default(400, `This '${payload.sizes[i]}' sizeId not found`);
             }
         }
     }
