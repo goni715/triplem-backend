@@ -151,7 +151,7 @@ const loginUserService = (payload) => __awaiter(void 0, void 0, void 0, function
     //check password
     const isPasswordMatch = yield (0, checkPassword_1.default)(payload.password, user.password);
     if (!isPasswordMatch) {
-        throw new ApiError_1.default(400, "Password is not correct");
+        throw new ApiError_1.default(400, "Wrong Password");
     }
     //check you are not user
     if (user.role !== "user") {
@@ -187,7 +187,7 @@ const loginAdminService = (payload) => __awaiter(void 0, void 0, void 0, functio
     //check password
     const isPasswordMatch = yield (0, checkPassword_1.default)(payload.password, user.password);
     if (!isPasswordMatch) {
-        throw new ApiError_1.default(400, 'Password is not correct');
+        throw new ApiError_1.default(400, 'Wrong Password');
     }
     //create accessToken
     const accessToken = (0, createToken_1.default)({ email: user.email, id: String(user._id), role: user.role }, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);

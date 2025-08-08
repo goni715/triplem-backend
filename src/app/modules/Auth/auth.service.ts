@@ -127,7 +127,7 @@ const loginUserService = async (payload: ILoginUser) => {
   //check password
   const isPasswordMatch = await checkPassword(payload.password, user.password);
   if (!isPasswordMatch) {
-    throw new AppError(400, "Password is not correct");
+    throw new AppError(400, "Wrong Password");
   }
 
   //check you are not user
@@ -180,7 +180,7 @@ const loginAdminService = async (payload: ILoginUser) => {
   //check password
   const isPasswordMatch = await checkPassword(payload.password, user.password);
   if (!isPasswordMatch) {
-    throw new AppError(400, 'Password is not correct');
+    throw new AppError(400, 'Wrong Password');
   }
 
 
