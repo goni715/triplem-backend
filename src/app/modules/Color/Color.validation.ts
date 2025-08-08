@@ -8,11 +8,10 @@ export const createColorValidationSchema = z.object({
       required_error: "name is required",
     })
     .min(1, "name is required")
-    .regex(
-      categoryRegex,
-      "name only contain letters and valid symbols (' . - & , ( )) are allowed."
-    )
-    .trim(),
+    .trim()
+    .regex(/^[A-Za-z\s]+$/, {
+      message: "name must only contain letters and spaces",
+    }),
   hexCode: z
     .string({
       required_error: "Hex code is required",

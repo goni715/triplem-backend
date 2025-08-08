@@ -10,8 +10,10 @@ exports.createColorValidationSchema = zod_1.z.object({
         required_error: "name is required",
     })
         .min(1, "name is required")
-        .regex(Category_validation_1.categoryRegex, "name only contain letters and valid symbols (' . - & , ( )) are allowed.")
-        .trim(),
+        .trim()
+        .regex(/^[A-Za-z\s]+$/, {
+        message: "name must only contain letters and spaces",
+    }),
     hexCode: zod_1.z
         .string({
         required_error: "Hex code is required",

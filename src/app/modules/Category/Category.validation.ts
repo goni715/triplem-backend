@@ -9,5 +9,11 @@ export const categoryValidationSchema = z.object({
             required_error: "name is required",
         })
         .min(1, "name is required")
-        .trim(),
+        .trim()
+        .regex(/^[^0-9]*$/, {
+            message: "name cannot contain numbers",
+        })
+        .regex(/^[^~!@#$%\^*\+\?><=;:"]*$/, {
+            message: 'name cannot contain special characters: ~ ! @ # $ % ^ * + ? > < = ; : "',
+        }),
 });

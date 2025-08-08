@@ -40,5 +40,9 @@ exports.updateProfileValidationSchema = zod_1.z.object({
         .regex(exports.fullNameRegex, {
         message: "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
     }).optional(),
-    phone: zod_1.z.string().optional(),
+    phone: zod_1.z
+        .string()
+        .regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Invalid phone number format",
+    }),
 });

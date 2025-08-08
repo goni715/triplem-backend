@@ -43,7 +43,11 @@ export const updateProfileValidationSchema = z.object({
       message:
         "fullName can only contain letters, spaces, apostrophes, hyphens, and dots.",
     }).optional(),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, {
+      message: "Invalid phone number format",
+    }),
 });
 
 
