@@ -59,7 +59,6 @@ const createProductService = async (
     throw new ApiError(400, "Current price must be greater than 0");
   }
 
-
   //set required fields
   payload = {
     name,
@@ -749,21 +748,25 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     throw new ApiError(404, "Product Not Found");
   }
 
-  if(payload.originalPrice && !payload.currentPrice){
-    if(product.currentPrice > payload.originalPrice){
-      throw new ApiError(400, "Original price must be more than current price")
+  if(Number(payload.originalPrice) > 0){
+    console.log("log", payload.originalPrice)
+  }
+
+  if((Number(payload.originalPrice) > 0) && !payload.currentPrice){
+    if(product.currentPrice > Number(payload.originalPrice)){
+      throw new ApiError(400, "Original price must be more than current price1")
     }
   }
 
-  if(!payload.originalPrice && payload.currentPrice && product?.originalPrice){
+  if(!payload.originalPrice && payload.currentPrice && Number(product?.originalPrice) > 0){
     if(payload.currentPrice > Number(product?.originalPrice)){
       throw new ApiError(400, "Current price must be less than original price")
     }
   }
 
-  if(payload.originalPrice && payload.currentPrice){
-    if(payload.currentPrice > payload.originalPrice){
-      throw new ApiError(400, "Original price must be more than current price")
+  if(payload.currentPrice && Number(payload.originalPrice) > 0){
+    if(payload.currentPrice > Number(payload.originalPrice)){
+      throw new ApiError(400, "Original price must be more than current price2")
     }
   }
 

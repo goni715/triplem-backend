@@ -687,19 +687,22 @@ const updateProductService = (req, productId, payload) => __awaiter(void 0, void
     if (!product) {
         throw new ApiError_1.default(404, "Product Not Found");
     }
-    if (payload.originalPrice && !payload.currentPrice) {
-        if (product.currentPrice > payload.originalPrice) {
-            throw new ApiError_1.default(400, "Original price must be more than current price");
+    if (Number(payload.originalPrice) > 0) {
+        console.log("log", payload.originalPrice);
+    }
+    if ((Number(payload.originalPrice) > 0) && !payload.currentPrice) {
+        if (product.currentPrice > Number(payload.originalPrice)) {
+            throw new ApiError_1.default(400, "Original price must be more than current price1");
         }
     }
-    if (!payload.originalPrice && payload.currentPrice && (product === null || product === void 0 ? void 0 : product.originalPrice)) {
+    if (!payload.originalPrice && payload.currentPrice && Number(product === null || product === void 0 ? void 0 : product.originalPrice) > 0) {
         if (payload.currentPrice > Number(product === null || product === void 0 ? void 0 : product.originalPrice)) {
             throw new ApiError_1.default(400, "Current price must be less than original price");
         }
     }
-    if (payload.originalPrice && payload.currentPrice) {
-        if (payload.currentPrice > payload.originalPrice) {
-            throw new ApiError_1.default(400, "Original price must be more than current price");
+    if (payload.currentPrice && Number(payload.originalPrice) > 0) {
+        if (payload.currentPrice > Number(payload.originalPrice)) {
+            throw new ApiError_1.default(400, "Original price must be more than current price2");
         }
     }
     //check colors
