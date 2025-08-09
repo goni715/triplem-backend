@@ -89,7 +89,6 @@ const createProductService = async (
   }
  
 
-  
   //check colors
   if (colors) {
     if (typeof colors === "string") {
@@ -127,8 +126,7 @@ const createProductService = async (
     }
   }
 
-
-   
+ 
   //check sizes
   if (sizes) {
     if (typeof sizes === "string") {
@@ -181,27 +179,25 @@ const createProductService = async (
     payload.stockStatus=stockStatus
   }
   
+  //make slug
+  const slug = slugify(name).toLowerCase();
+  payload.slug = slug;
 
 
-    //make slug
-    const slug = slugify(name).toLowerCase();
-    payload.slug=slug;
+  //check product name is already existed
+  const product = await ProductModel.findOne({
+    slug
+  });
 
+  if (product) {
+    throw new ApiError(409, "This name is already taken.")
+  }
 
-    //check product name is already existed
-    const product = await ProductModel.findOne({
-      slug
-    });
-
-    if (product) {
-      throw new ApiError(409, "This name is already taken.")
-    }
-
-    //check categoryId
-    const existingCategory = await CategoryModel.findById(categoryId);
-    if (!existingCategory) {
-      throw new ApiError(404, 'This categoryId not found');
-    }
+  //check categoryId
+  const existingCategory = await CategoryModel.findById(categoryId);
+  if (!existingCategory) {
+    throw new ApiError(404, 'This categoryId not found');
+  }
 
 
 
@@ -753,8 +749,20 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     throw new ApiError(404, "Product Not Found");
   }
 
-  if(payload.originalPrice){
+  if(payload.originalPrice && !payload.currentPrice){
     if(product.currentPrice > payload.originalPrice){
+      throw new ApiError(400, "Original price must be more than current price")
+    }
+  }
+
+  if(!payload.originalPrice && payload.currentPrice && product?.originalPrice){
+    if(payload.currentPrice > Number(product?.originalPrice)){
+      throw new ApiError(400, "Current price must be less than original price")
+    }
+  }
+
+  if(payload.originalPrice && payload.currentPrice){
+    if(payload.currentPrice > payload.originalPrice){
       throw new ApiError(400, "Original price must be more than current price")
     }
   }
