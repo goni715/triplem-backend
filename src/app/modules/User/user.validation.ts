@@ -33,6 +33,8 @@ export const createUserValidationSchema = z.object({
 });
 
 
+//const onlyInternationalFormate = /^\+?[1-9]\d{1,14}$/
+
 export const updateProfileValidationSchema = z.object({
   fullName: z.string({
     invalid_type_error: "Full Name must be string",
@@ -45,9 +47,9 @@ export const updateProfileValidationSchema = z.object({
     }).optional(),
   phone: z
     .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, {
-      message: "Invalid phone number format",
-    }),
+    // .regex(onlyInternationalFormate, {
+    //   message: "Invalid phone number format",
+    // }),
 });
 
 

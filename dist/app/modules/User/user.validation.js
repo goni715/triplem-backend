@@ -31,6 +31,7 @@ exports.createUserValidationSchema = zod_1.z.object({
         .min(6, "Password minimum 6 characters long")
         .max(60, "Password maximum 60 characters long")
 });
+//const onlyInternationalFormate = /^\+?[1-9]\d{1,14}$/
 exports.updateProfileValidationSchema = zod_1.z.object({
     fullName: zod_1.z.string({
         invalid_type_error: "Full Name must be string",
@@ -42,7 +43,7 @@ exports.updateProfileValidationSchema = zod_1.z.object({
     }).optional(),
     phone: zod_1.z
         .string()
-        .regex(/^\+?[1-9]\d{1,14}$/, {
-        message: "Invalid phone number format",
-    }),
+    // .regex(onlyInternationalFormate, {
+    //   message: "Invalid phone number format",
+    // }),
 });
