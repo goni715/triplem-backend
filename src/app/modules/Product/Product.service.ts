@@ -748,9 +748,6 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     throw new ApiError(404, "Product Not Found");
   }
 
-  if(Number(payload.originalPrice) > 0){
-    console.log("log", payload.originalPrice)
-  }
 
   if((Number(payload.originalPrice) > 0) && !payload.currentPrice){
     if(product.currentPrice > Number(payload.originalPrice)){
@@ -790,8 +787,19 @@ const updateProductService = async (req:Request, productId: string, payload: Par
     }
   }
 
+
+
   //desctructuring the payload
-  const { name } = payload;
+  const { name, categoryId } = payload;
+
+  //check categoryId
+  if (categoryId) {
+    const category = await CategoryModel.findById(categoryId)
+    if (!category) {
+      throw new ApiError(404, 'This categoryId not found');
+    }
+  }
+ 
  
   //check product name is already existed
   if (name) {
