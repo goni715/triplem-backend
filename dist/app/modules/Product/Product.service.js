@@ -72,6 +72,7 @@ const favourite_model_1 = __importDefault(require("../Favourite/favourite.model"
 const cloudinary_1 = __importDefault(require("../../helper/cloudinary"));
 const Order_model_1 = __importDefault(require("../Order/Order.model"));
 const Cart_model_1 = __importDefault(require("../Cart/Cart.model"));
+const review_model_1 = __importDefault(require("../Review/review.model"));
 const createProductService = (req, reqBody) => __awaiter(void 0, void 0, void 0, function* () {
     //destructuring the reqBody
     if (!reqBody) {
@@ -804,10 +805,7 @@ const deleteProductService = (productId) => __awaiter(void 0, void 0, void 0, fu
         //delete from cart list
         yield Cart_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
         //delete the reviews
-        // await ReviewModel.deleteMany(
-        //   { restaurantId: new ObjectId(restaurant._id) },
-        //   { session }
-        // );
+        yield review_model_1.default.deleteMany({ productId: new ObjectId_1.default(productId) }, { session });
         //delete product
         const result = yield Product_model_1.default.deleteOne({ _id: new ObjectId_1.default(productId) }, { session });
         //transaction success

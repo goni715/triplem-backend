@@ -52,7 +52,7 @@ const updateSizeService = async (sizeId: string, size: string) => {
         {
             size,
             slug
-        }
+        },
     )
 
     return result;

@@ -15,6 +15,7 @@ import FavouriteModel from '../Favourite/favourite.model';
 import cloudinary from '../../helper/cloudinary';
 import OrderModel from '../Order/Order.model';
 import CartModel from '../Cart/Cart.model';
+import ReviewModel from '../Review/review.model';
 
 
 const createProductService = async (
@@ -910,10 +911,10 @@ const deleteProductService = async (productId: string) => {
     );
 
     //delete the reviews
-    // await ReviewModel.deleteMany(
-    //   { restaurantId: new ObjectId(restaurant._id) },
-    //   { session }
-    // );
+    await ReviewModel.deleteMany(
+      { productId: new ObjectId(productId) },
+      { session }
+    );
 
 
     //delete product
