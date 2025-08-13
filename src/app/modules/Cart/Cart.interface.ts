@@ -1,15 +1,11 @@
 import { Types } from "mongoose";
 
 export interface ICartPayload {
-  userId: Types.ObjectId;
   productId: Types.ObjectId;
-  name: string;
-  price: number;
   quantity: number;
-  image?: string;
   colorId?: Types.ObjectId;
   sizeId?: Types.ObjectId;
-  size?:string;
+  size?: string;
 }
 
 export interface ICart {
