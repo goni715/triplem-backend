@@ -747,6 +747,14 @@ const updateProductService = (req, productId, payload) => __awaiter(void 0, void
 });
 exports.updateProductService = updateProductService;
 const updateProductImgService = (req, productId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.Types.ObjectId.isValid(productId)) {
+        throw new ApiError_1.default(400, "productId must be a valid ObjectId");
+    }
+    //check product
+    const product = yield Product_model_1.default.findById(productId);
+    if (!product) {
+        throw new ApiError_1.default(404, "Product Not Found");
+    }
     let images = [];
     if (req.files && req.files.length > 0) {
         const files = req.files;

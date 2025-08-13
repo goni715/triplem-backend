@@ -827,6 +827,15 @@ const updateProductService = async (req:Request, productId: string, payload: Par
 };
 
 const updateProductImgService = async (req: Request, productId: string) => {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new ApiError(400, "productId must be a valid ObjectId")
+  }
+
+  //check product
+  const product = await ProductModel.findById(productId);
+  if (!product) {
+    throw new ApiError(404, "Product Not Found");
+  }
   let images: string[] = [];
   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
     const files = req.files as Express.Multer.File[];
