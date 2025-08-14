@@ -109,29 +109,20 @@ const getAdminsService = async (query: TAdminQuery) => {
 
 const deleteAdminService = async (userId: string) => {
   if (!Types.ObjectId.isValid(userId)) {
-    throw new ApiError(400, "userId must be a valid ObjectId")
+    throw new ApiError(400, "adminId must be a valid ObjectId")
   }
   const adminUser = await UserModel.findById(userId);
   if(!adminUser){
-    throw new ApiError(404, "userId Not Found");
+    throw new ApiError(404, "adminId Not Found");
   }
   const result = await UserModel.deleteOne({ _id:userId });
   return result;
 }
 
-const getSingleAdminService = async (administratorId: string) => {
-  const administrator = await UserModel.findById(administratorId);
-  if(!administrator){
-    throw new ApiError(404, "Administrator Not found");
-  }
-
-  return administrator;
-}
-
 const updateAdminService = async (userId: string, payload: Partial<IUser>) => {
   const admin = await UserModel.findById(userId);
   if(!admin){
-    throw new ApiError(404, "Administrator Not Found");
+    throw new ApiError(404, "Admin Not Found");
   }
   const result = UserModel.updateOne(
     { _id: userId },
@@ -145,6 +136,5 @@ export {
     createAdminService,
     updateAdminService,
     getAdminsService,
-    deleteAdminService,
-    getSingleAdminService
+    deleteAdminService
 }

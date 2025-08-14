@@ -57,21 +57,10 @@ const deleteAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
         data: result,
     });
 }));
-const getSingleAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { administratorId } = req.params;
-    const result = yield (0, admin_service_1.getSingleAdminService)(administratorId);
-    (0, sendResponse_1.default)(res, {
-        statusCode: 200,
-        success: true,
-        message: "Admin is retrieved successfully",
-        data: result,
-    });
-}));
 const AdminController = {
     createAdmin,
     updateAdmin,
     getAdmins,
-    deleteAdmin,
-    getSingleAdmin
+    deleteAdmin
 };
 exports.default = AdminController;

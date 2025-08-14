@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSingleAdminService = exports.deleteAdminService = exports.getAdminsService = exports.updateAdminService = exports.createAdminService = void 0;
+exports.deleteAdminService = exports.getAdminsService = exports.updateAdminService = exports.createAdminService = void 0;
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const user_model_1 = __importDefault(require("../User/user.model"));
 const config_1 = __importDefault(require("../../config"));
@@ -96,28 +96,20 @@ const getAdminsService = (query) => __awaiter(void 0, void 0, void 0, function* 
 exports.getAdminsService = getAdminsService;
 const deleteAdminService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     if (!mongoose_1.Types.ObjectId.isValid(userId)) {
-        throw new ApiError_1.default(400, "userId must be a valid ObjectId");
+        throw new ApiError_1.default(400, "adminId must be a valid ObjectId");
     }
     const adminUser = yield user_model_1.default.findById(userId);
     if (!adminUser) {
-        throw new ApiError_1.default(404, "userId Not Found");
+        throw new ApiError_1.default(404, "adminId Not Found");
     }
     const result = yield user_model_1.default.deleteOne({ _id: userId });
     return result;
 });
 exports.deleteAdminService = deleteAdminService;
-const getSingleAdminService = (administratorId) => __awaiter(void 0, void 0, void 0, function* () {
-    const administrator = yield user_model_1.default.findById(administratorId);
-    if (!administrator) {
-        throw new ApiError_1.default(404, "Administrator Not found");
-    }
-    return administrator;
-});
-exports.getSingleAdminService = getSingleAdminService;
 const updateAdminService = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const admin = yield user_model_1.default.findById(userId);
     if (!admin) {
-        throw new ApiError_1.default(404, "Administrator Not Found");
+        throw new ApiError_1.default(404, "Admin Not Found");
     }
     const result = user_model_1.default.updateOne({ _id: userId }, payload);
     return result;
