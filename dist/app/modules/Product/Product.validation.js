@@ -1,99 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProductValidationSchema = exports.createProductValidationSchema = void 0;
+exports.updateProductValidationSchema = void 0;
 const zod_1 = require("zod");
-const Category_validation_1 = require("../Category/Category.validation");
 const mongoose_1 = require("mongoose");
-exports.createProductValidationSchema = zod_1.z.object({
-    name: zod_1.z.string({
-        invalid_type_error: "name must be string",
-        required_error: "name is required",
-    })
-        .min(1, "name is required")
-        .regex(Category_validation_1.categoryRegex, "name only contain letters and valid symbols (' . - & , ( )) are allowed.")
-        .trim(),
-    // categoryId: z
-    //   .string({
-    //     invalid_type_error: "categoryId must be a string",
-    //     required_error: "categoryId is required!",
-    //   })
-    //   .refine((id) => Types.ObjectId.isValid(id), {
-    //     message: "categoryId must be a valid ObjectId",
-    //   }),
-    currentPrice: zod_1.z
-        .preprocess((val) => (val === '' || val === undefined || val === null ? undefined : Number(val)), zod_1.z
-        .number({
-        required_error: "Current price is required",
-        invalid_type_error: "Current price must be a number",
-    })
-        .refine((val) => !isNaN(val), { message: "Current price must be a valid number" })
-        .refine((val) => val > 0, { message: "Current price must be greater than 0" })),
-    // originalPrice: z
-    //   .preprocess(
-    //     (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
-    //     z
-    //       .number({
-    //         invalid_type_error: "Original price must be a number",
-    //       })
-    //       .refine((val) => !isNaN(val), {
-    //         message: "Original price must be a valid number",
-    //       })
-    //       .refine((val) => val >= 0, {
-    //         message: "Original price cannot be negative",
-    //       })
-    //   )
-    //   .default(0),
-    discount: zod_1.z.string({
-        invalid_type_error: "discount must be string"
-    }).optional(),
-    colors: zod_1.z.array(zod_1.z.string()
-        .refine((id) => mongoose_1.Types.ObjectId.isValid(id), {
-        message: "colors must be an array of valid ObjectId",
-    }), {
-        invalid_type_error: "colors must be an array",
-        required_error: "colors must be at least one value"
-    }).min(1, { message: "colors must be at least one value" }).optional(),
-    sizes: zod_1.z.array(zod_1.z.string()
-        .refine((id) => mongoose_1.Types.ObjectId.isValid(id), {
-        message: "sizes must be an array of valid ObjectId",
-    }), {
-        invalid_type_error: "sizes must be an array",
-        required_error: "sizes must be at least one value"
-    }).min(1, { message: "sizes must be at least one value" }).optional(),
-    introduction: zod_1.z.string({
-        invalid_type_error: "introduction must be string",
-        required_error: "introduction is required"
-    }),
-    description: zod_1.z
-        .string({
-        invalid_type_error: "description must be string",
-        required_error: "description is required"
-    })
-        .min(1, { message: "description is required" })
-        .refine((val) => /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) ||
-        val.includes("<"), {
-        message: "description must be valid HTML.",
-    }),
-    status: zod_1.z.string({
-        invalid_type_error: "status must be a valid string value.",
-    })
-        .refine((val) => ['visible', 'hidden'].includes(val), {
-        message: "status must be one of: 'visible', 'hidden'",
-    }).default("visible"),
-    stockStatus: zod_1.z.string({
-        invalid_type_error: "Stock Status must be a valid string value.",
-    })
-        .refine((val) => ['In Stock', 'Stock Out', 'Up Coming'].includes(val), {
-        message: "Stock Status must be one of: In Stock', 'Stock Out', 'Up Coming'",
-    }).default("In Stock")
-});
 exports.updateProductValidationSchema = zod_1.z.object({
     name: zod_1.z.string({
         invalid_type_error: "name must be string",
         required_error: "name is required",
     })
         .min(1, "name is required")
-        .regex(Category_validation_1.categoryRegex, "name only contain letters and valid symbols (' . - & , ( )) are allowed.")
         .trim().optional(),
     categoryId: zod_1.z
         .string({
