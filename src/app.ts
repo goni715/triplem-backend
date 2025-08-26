@@ -33,7 +33,7 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('MTK ecommerce server is running...');
+    res.send('MTK ecommerce server is running on 8080 Port...');
 });
 
 
