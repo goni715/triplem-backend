@@ -24,9 +24,6 @@ app.use(
       "http://localhost:3003",
       "http://16.16.183.92:5173",
       "http://16.16.183.92:3000",
-      "https://triplem-website-integration.vercel.app",
-      "https://triplem-dashboard.vercel.app",
-      "https://*.vercel.app",
       "http://10.10.20.24:5173",
       "http://10.10.20.24:3000"
     ],
