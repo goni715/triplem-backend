@@ -12,16 +12,26 @@ import bodyParser from "body-parser";
 const app: Application = express();
 
 
-app.use(cors());
-// app.use(
-//   cors({
-//     //origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
-//     origin: "*",
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-//   }),
-// )
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+      "http://localhost:3003",
+      "http://16.16.183.92:5173",
+      "http://16.16.183.92:3000",
+      "https://triplem-website-integration.vercel.app",
+      "https://triplem-dashboard.vercel.app",
+      "http://10.10.20.24:5173",
+      "http://10.10.20.24:3000"
+    ],
+    credentials: true,
+  }),
+);
 
 
 app.use(cookieParser())
