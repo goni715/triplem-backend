@@ -49,16 +49,16 @@ const createOrderService = async (
 
   
 
-     const lineItems = cartProducts?.map((product) => ({
-       price_data: {
-         currency: "usd",
-         product_data: {
-           name: product.name,
-         },
-         unit_amount: product.price * 100, // price in cents
-       },
-       quantity: product.quantity,
-     }));
+  const lineItems = cartProducts?.map((product) => ({
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: product.name,
+      },
+      unit_amount: product.price * 100, // price in cents
+    },
+    quantity: product.quantity,
+  }));
 
    //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
@@ -88,7 +88,7 @@ const createOrderService = async (
           transactionId
         }
       ], {session});
-      console.log("===========================",config.stripe_secret_key )
+      
       //create payment session
         const paymentSession = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
