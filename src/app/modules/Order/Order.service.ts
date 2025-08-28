@@ -88,7 +88,7 @@ const createOrderService = async (
           transactionId
         }
       ], {session});
-
+      console.log("===========================",config.stripe_secret_key )
       //create payment session
         const paymentSession = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
