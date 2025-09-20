@@ -40,13 +40,6 @@ router.patch(
   UserController.editMyProfile
 );
 
-router.patch(
-  "/update-profile-img",
-   AuthMiddleware(UserRole.super_admin, UserRole.user, UserRole.user, UserRole.admin),
-  upload.single('file'),
-  UserController.updateProfileImg
-);
-
 router.get('/get-user-overview/:year', AuthMiddleware("super_admin", "admin"), UserController.getUserOverview);
 router.get('/get-stats', AuthMiddleware("super_admin", "admin"), UserController.getStats);
 

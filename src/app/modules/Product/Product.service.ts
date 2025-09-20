@@ -213,7 +213,7 @@ const createProductService = async (
     images = await Promise.all(
       files?.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'MTK-Ecommerce',
+          folder: 'Ecommerce',
           // width: 300,
           // crop: 'scale',
         });
@@ -840,25 +840,19 @@ const updateProductImgService = async (req: Request, productId: string) => {
   let images: string[] = [];
   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
     const files = req.files as Express.Multer.File[];
-    // for (const file of files) {
-    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-    //   images.push(path)
-    // }
     images = await Promise.all(
       files?.map(async (file) => {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'MTK-Ecommerce',
+          folder: 'Ecommerce',
           // width: 300,
           // crop: 'scale',
         });
 
         // Delete local file (non-blocking)
         // fs.unlink(file.path);
-
         return result.secure_url;
       })
     );
-
   }
   else {
     throw new ApiError(400, "Minimum one image required");

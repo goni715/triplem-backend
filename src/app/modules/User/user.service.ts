@@ -1,11 +1,9 @@
 import UserModel from "./user.model";
 import { IUser, TUserQuery } from "./user.interface";
 import AppError from "../../errors/ApiError";
-import { Request } from "express";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
 import ObjectId from "../../utils/ObjectId";
-import uploadImage from "../../utils/uploadImage";
 import isValidYearFormat from "../../utils/isValidateYearFormat";
 import ApiError from "../../errors/ApiError";
 import OrderModel from "../Order/Order.model";
@@ -141,25 +139,6 @@ const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>
 }
 
 
-const updateProfileImgService = async (req:Request, loginUserId: string) => {
-
-  if(!req.file){
-    throw new AppError(400, "image is required");
-  }
-
-  //uploaded-image
-  const image = await uploadImage(req);
-  
-  const result = await UserModel.updateOne(
-    { _id: loginUserId },
-    { profileImg : image }
-  )
-
-  return result;
-
-};
-
-
 const getUserOverviewService = async (year: string) => {
   if(!isValidYearFormat(year)){
     throw new ApiError(400, "Invalid year, year should be in 'YYYY' format.")
@@ -280,7 +259,6 @@ export {
   getMeForSuperAdminService,
   getMeService,
   editMyProfileService,
-  updateProfileImgService,
   getUserOverviewService,
   getStatsService
 };

@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getStatsService, getUserOverviewService, getUsersService, updateProfileImgService } from "./user.service";
+import { editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getStatsService, getUserOverviewService, getUsersService } from "./user.service";
 
 
 const getUsers = catchAsync(async (req, res) => {
@@ -69,19 +69,6 @@ const editMyProfile = catchAsync(async (req, res) => {
 });
 
 
-
-const updateProfileImg = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const result = await updateProfileImgService(req, loginUserId as string);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Image is updated successfully",
-    data: result,
-  });
-});
-
-
 const getUserOverview = catchAsync(async (req, res) => {
   const { year } = req.params;
   const result = await getUserOverviewService(year);
@@ -112,7 +99,6 @@ const UserController = {
     getMe,
     getMeForSuperAdmin,
     editMyProfile,
-    updateProfileImg,
     getUserOverview,
     getStats
 }

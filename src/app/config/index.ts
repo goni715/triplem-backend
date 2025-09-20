@@ -19,10 +19,9 @@ export default {
     super_admin_email: process.env.SUPER_ADMIN_EMAIL,
     super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
     admin_default_password: process.env.ADMIN_DEFAULT_PASSWORD,
-    aws_access_key_id: process.env.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,
-    aws_region: process.env.AWS_REGION,
-    aws_s3_bucket_name: process.env.AWS_S3_BUCKET_NAME,
     stripe_secret_key: process.env.STRIPE_SECRET_KEY,
     frontend_url: process.env.FRONTEND_URL,
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET_KEY
 }
