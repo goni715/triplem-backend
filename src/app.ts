@@ -26,7 +26,9 @@ app.use(
       "http://16.16.183.92:4173",
       "http://16.16.183.92:3000",
       "http://10.10.20.24:5173",
-      "http://10.10.20.24:3000"
+      "http://10.10.20.24:3000",
+      "https://triplemcompany.com",
+      "https://dashboard.triplemcompany.com"
     ],
     credentials: true,
   }),
