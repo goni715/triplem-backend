@@ -13,12 +13,6 @@ const sendEmailUtility = async (EmailTo: string, name: string, otp: string) => {
     },
   });
 
-  console.log({
-     user: config.smtp_username,
-     pass: config.smtp_password,
-     smtp_from: config.smtp_from
-  })
-
   const mailOptions = {
     from: `"MTK" <${config.smtp_from}>`,
     to: EmailTo,
