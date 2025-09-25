@@ -1,0 +1,130 @@
+[33m0fc0678[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Remove sensitive Stripe key
+[33m1b407ee[m[33m ([m[1;31mpersonal/main[m[33m)[m update emailservice
+[33m103bf37[m merge issue
+[33mc38b0a3[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m update app.ts
+[33ma784c2f[m update product.service
+[33m47a6ca8[m update product service
+[33m34f0934[m update app.ts
+[33m8e4c1a5[m update product service
+[33m35ac86c[m update cors
+[33m2fe0635[m stripe live key added
+[33m0928fd9[m update stripe
+[33m62e61f4[m update cors
+[33m03439a6[m vercel project's cors allowed
+[33m43c2779[m update cors
+[33m52fbc92[m dist removed
+[33m04e231c[m update package.json
+[33ma963dbe[m update vercel
+[33md0a2fe0[m without-dist
+[33m0406011[m update app
+[33m4ecb0b9[m update review & order
+[33m76b9f8a[m update product validation
+[33mb3fc8f6[m update admin service
+[33mfb0e75d[m deleteProductService
+[33md20f25a[m update cart-inteface
+[33ma7ec3ec[m update product-image service
+[33m6079ab3[m updtae product service
+[33m91f32f5[m update category constant
+[33mbcc379c[m update category route
+[33m3340477[m update category route
+[33m8955022[m update user-validation
+[33ma44ae7d[m edit product service
+[33md587942[m update product service
+[33md1c0e59[m update auth service
+[33m9e62a83[m update validation schema
+[33mad3a0d2[m update product service
+[33me687860[m update product service
+[33me404283[m update newsletter
+[33me621216[m project build
+[33m11c040e[m update order-service
+[33mb2a0c11[m update dashboard
+[33mef09351[m create-product service
+[33md1df7bc[m update product service
+[33md9c9db9[m update user-service
+[33m0874dba[m update change-password service
+[33m0977e94[m get-income-overview
+[33m4d320a3[m isValid year formate utils
+[33mb5f9965[m project build
+[33m48680bb[m newsletter-module set-up
+[33m0014b27[m get Testimonials
+[33m5b7e080[m stripe payment gateway set-up
+[33ma9cfb47[m payment module completed
+[33m778785a[m payment module set-up
+[33m31a1c67[m payment module created
+[33mbfea296[m update env file
+[33mcf05b56[m admin-module
+[33m61f26c8[m update faq routes
+[33mb60ab73[m Faq Completed
+[33m0f2e6e3[m category module created
+[33m0be0e7b[m update verify-url
+[33m9477f2c[m update website url
+[33m70cb0ff[m policy module completed
+[33mb114dd8[m update order service
+[33m922ea5d[m admin module created
+[33m364b86a[m update information
+[33mecb2696[m update information module
+[33mde8a4bb[m update create-order service
+[33m90f2b6b[m update sock validation
+[33m393c187[m update single product
+[33m3871283[m information module completed
+[33mdd1befb[m information module created
+[33md969839[m get product reviews
+[33me36116c[m favourite update
+[33macf7395[m build files
+[33mcdfd62c[m vercel.json added
+[33m105bc71[m create-review
+[33mdff125c[m update category route
+[33me4fb853[m update product route
+[33m9234620[m review module created
+[33m24f9d6b[m update contact service
+[33m74b5e59[m contact module completed
+[33m21e4c59[m update contact route
+[33mf65894d[m create-contact
+[33m6be6edb[m contact module create
+[33m253be17[m order-update
+[33m4ae509b[m create-update shipping
+[33m04184e5[m update shipping service
+[33mab2934e[m dummy order
+[33m68d7add[m order-management
+[33md547504[m cart completed
+[33mf315f3f[m cart added
+[33ma7192ba[m cart interface-model update
+[33mc900b4d[m ddfs
+[33m1d4aa01[m update send-verify-email
+[33mb19fe5f[m cloudinary set-up
+[33m522dbdb[m cloudinary-set-up
+[33mb115aa5[m update server.ts
+[33m0456af4[m cart inteface
+[33mc6fab78[m Cart module created
+[33md6cd5a8[m order module created
+[33m6579710[m filter-products
+[33m8c7dbce[m filter products
+[33m243bf97[m get-user-products
+[33m003ad83[m update create-product service
+[33m2d7a8af[m hasDuplicates function
+[33m9f618fe[m parseJsonDataMiddleware
+[33m18d7f60[m update create-product
+[33m7ab4505[m get favourite ids
+[33m094fbfc[m update color
+[33m8f91542[m get colors
+[33mcffdc01[m favourite module created
+[33m280ee93[m get products
+[33m4a63f86[m update product validation
+[33me6e4057[m Color module created
+[33md47f874[m category module completed
+[33mf5b0740[m category module set-up
+[33mc73f0e9[m product module created
+[33m016f75d[m size created
+[33mc14e099[m Size module created
+[33md4fa209[m Get Users
+[33m0ce254f[m Shipping Module created
+[33mdf8be81[m update get-me
+[33m12db65e[m auth completed
+[33m70da446[m resend verify-email
+[33m0cfc8c1[m register completed
+[33mcf1f657[m update user module
+[33m01a75c3[m Otp Model
+[33m2b49b92[m Auth & User model
+[33m10ba0cd[m middlewares added
+[33m11359c2[m project set-up
+[33m0ee1d17[m starter-files

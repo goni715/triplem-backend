@@ -15,7 +15,7 @@ const sendEmailUtility = async (EmailTo: string, name: string, otp: string) => {
 
   console.log({
      user: config.smtp_username,
-      pass: "config.smtp_password",
+      pass: config.smtp_password,
   })
 
   const mailOptions = {
