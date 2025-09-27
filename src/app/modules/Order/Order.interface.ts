@@ -21,6 +21,9 @@ export interface IOrder {
   totalPrice: number;
   transactionId: string;
   paymentMethod?: string;
+  paymentId: string;
+  stripeFee: number;
+  netAmount: number;
   paymentStatus?: TPaymentStatus,
   status: TDeliveryStatus
   deliveryAt?: Date;

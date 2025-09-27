@@ -71,7 +71,7 @@ const orderSchema = new Schema<IOrder>({
       message: "At least one product is required in the order."
     }
   },
-  totalPrice: {
+  totalPrice: { //amount
     type: Number,
     required: true,
   },
@@ -80,10 +80,24 @@ const orderSchema = new Schema<IOrder>({
     unique: true,
     trim: true
   },
+  paymentId: {
+    type: String,
+    unique: true,
+    sparse: true, // Important for optional unique fields
+    default: '',  // Set default to an empty string
+  },
+  stripeFee: {
+    type: Number,
+    default: 0
+  },
+  netAmount: {
+    type: Number,
+    default: 0
+  },
   paymentStatus: {
     type: String,
-    enum: ["pending", "unpaid", "failled", "refund"],
-    default: 'pending'
+    enum: ["unpaid", "failled", "paid"],
+    default: 'unpaid'
   },
   status: {
     type: String,

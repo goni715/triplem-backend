@@ -536,16 +536,30 @@ const verifySessionService = async (sessionId: string) => {
     }
 
     const metadata = session?.metadata;
-    if(!metadata){
+    if(!metadata || !session?.payment_intent){
       throw new ApiError(400, "Invalid Session Id")
     }
-    
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(session?.payment_intent as string);
+    const charge = await stripe.charges.retrieve(
+      paymentIntent.latest_charge as string
+    );
+    const balanceTx = await stripe.balanceTransactions.retrieve(
+      charge.balance_transaction as string
+    );
+
+    const netAmount = balanceTx?.net / 100
+    const stripeFee = balanceTx.fee / 100
+
     //update database base on metadata = session.metadata
     const result = await OrderModel.updateOne({
       _id: metadata.orderId,
-      userId: metadata.userId
+      userId: metadata.userId,
     }, {
-      paymentStatus: "paid"
+      paymentStatus: "paid",
+      paymentId: session?.payment_intent,
+      stripeFee,
+      netAmount
     })
 
     return result;
