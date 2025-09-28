@@ -82,8 +82,8 @@ const orderSchema = new Schema<IOrder>({
   },
   paymentId: {
     type: String,
-    unique: true,
-    sparse: true, // Important for optional unique fields
+    // unique: true,
+    // sparse: true, // Important for optional unique fields
     default: '',  // Set default to an empty string
   },
   stripeFee: {

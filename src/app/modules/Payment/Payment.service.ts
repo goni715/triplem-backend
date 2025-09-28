@@ -8,7 +8,7 @@ const createCheckoutSessionService = async (payload: any) => {
   const lineItems = [
     {
       price_data: {
-        currency: "usd",
+        currency: "sgd",
         product_data: {
           name: "Basic T-Shirt",
         },
@@ -18,7 +18,7 @@ const createCheckoutSessionService = async (payload: any) => {
     },
     {
       price_data: {
-        currency: "usd",
+        currency: "sgd",
         product_data: {
           name: "Coffee Mug",
         },
@@ -28,7 +28,7 @@ const createCheckoutSessionService = async (payload: any) => {
     },
     {
       price_data: {
-        currency: "usd",
+        currency: "sgd",
         product_data: {
           name: "Wireless Mouse",
         },
@@ -41,7 +41,7 @@ const createCheckoutSessionService = async (payload: any) => {
   const FRONTEND_URL = "https://triplem-website-integration.vercel.app";
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
+    payment_method_types: ["paynow"],
     line_items: lineItems,
     mode: "payment",
     metadata: {
@@ -73,4 +73,24 @@ const verifyCheckoutService = async (sessionId: string) => {
   }
 };
 
-export { createCheckoutSessionService, verifyCheckoutService };
+
+
+const createPaynowPaymentService = async (payload: any) => {
+  const { amount, currency } = payload;
+
+  // Create Payment Intent
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount, // in cents, e.g., $10 = 1000
+    currency: currency || 'usd',
+    payment_method_types: ['paynow'],
+  });
+
+
+  return {
+    paymentIntentId: paymentIntent.id,          // 🔹 Save this in your DB!
+    clientSecret: paymentIntent.client_secret,  // For frontend confirmation if needed
+    qrCodeUrl : (paymentIntent.next_action as any)?.display_qr_code?.image_url
+  }
+}
+
+export { createCheckoutSessionService, verifyCheckoutService, createPaynowPaymentService };
