@@ -2,17 +2,31 @@ import catchAsync from '../../utils/catchAsync';
 import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
 import { OrderValidFields, UserOrderValidFields } from './Order.constant';
-import { createOrderService, getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService, verifySessionService, getIncomeOverviewService } from './Order.service';
+import { getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService, verifySessionService, getIncomeOverviewService, createOrderWithPayNowService, createOrderWithStripeService } from './Order.service';
 
-const createOrder = catchAsync(async (req, res) => {
+const createOrderWithStripe = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
   const userEmail = req.headers.email;
-  const result = await createOrderService(loginUserId as string, userEmail as string);
+  const result = await createOrderWithStripeService(loginUserId as string, userEmail as string);
 
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: 'Order is created successfully',
+    message: 'Order is initiated successfully',
+    data: result,
+  });
+});
+
+
+const createOrderWithPayNow = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const userEmail = req.headers.email;
+  const result = await createOrderWithPayNowService(loginUserId as string, userEmail as string);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Order is initiated successfully',
     data: result,
   });
 });
@@ -80,8 +94,6 @@ const deleteOrder = catchAsync(async (req, res) => {
   });
 });
 
-
-
 const verifySession = catchAsync(async (req, res) => {
   const { sessionId } = req.query;
   const result = await verifySessionService(sessionId as string);
@@ -108,7 +120,8 @@ const getIncomeOverview = catchAsync(async (req, res) => {
 });
 
 const OrderController = {
-  createOrder,
+  createOrderWithStripe,
+  createOrderWithPayNow,
   getSingleOrder,
   getUserOrders,
   getAllOrders,

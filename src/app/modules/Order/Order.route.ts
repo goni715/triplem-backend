@@ -8,9 +8,14 @@ import { UserRole } from '../User/user.constant';
 const router = express.Router();
 
 router.post(
-  '/create-order',
+  '/create-order-with-stripe',
   AuthMiddleware("user"),
-  OrderController.createOrder,
+  OrderController.createOrderWithStripe,
+);
+router.post(
+  '/create-order-with-paynow',
+  AuthMiddleware("user"),
+  OrderController.createOrderWithPayNow,
 );
 router.get(
   '/get-single-order/:orderId',
