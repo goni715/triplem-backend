@@ -16,6 +16,7 @@ import cloudinary from '../../helper/cloudinary';
 import OrderModel from '../Order/Order.model';
 import CartModel from '../Cart/Cart.model';
 import ReviewModel from '../Review/review.model';
+import getStockStatus from '../../utils/getStockStatus';
 
 
 const createProductService = async (
@@ -28,7 +29,7 @@ const createProductService = async (
     throw new ApiError(400, "name is required!");
   }
 
-  const { name, categoryId, introduction, description, currentPrice, originalPrice, discount, colors, sizes, status, stockStatus } = reqBody;
+  const { name, categoryId, introduction, description, currentPrice, originalPrice, quantity, discount, colors, sizes, status, stockStatus } = reqBody;
 
   let payload: Record<string, unknown> ={}
 
@@ -55,9 +56,25 @@ const createProductService = async (
   if (typeof Number(currentPrice) !== "number" || isNaN(Number(currentPrice))) {
     throw new ApiError(400, "current price must be a valid number");
   }
-  // Step 4: Must be greater than 0
+
   if (Number(currentPrice) <= 0) {
     throw new ApiError(400, "Current price must be greater than 0");
+  }
+
+
+   //check quantity
+  if (!quantity) {
+    throw new ApiError(400, "quantity is required!");
+  }
+  if (typeof Number(quantity) !== "number" || isNaN(Number(quantity))) {
+    throw new ApiError(400, "quantity must be a valid number");
+  }
+  if (!(Number(quantity) >= 1)) {
+    throw new ApiError(400, "quantity must be minimum 1");
+  }
+  //check integer value
+  if(!Number.isInteger(Number(quantity))){
+    throw new ApiError(400, "Quantity must be an integer value");
   }
 
   //set required fields
@@ -67,6 +84,7 @@ const createProductService = async (
     introduction,
     description,
     currentPrice: Number(currentPrice),
+    quantity: Number(quantity)
   }
 
 
@@ -75,9 +93,12 @@ const createProductService = async (
     if (typeof Number(originalPrice) !== "number" || isNaN(Number(originalPrice))) {
       throw new ApiError(400, "original price must be a valid number");
     }
-    // Step 4: Must be greater than 0
     if (Number(originalPrice) <= 0) {
       throw new ApiError(400, "original price must be greater than 0");
+    }
+
+    if(Number(currentPrice) > Number(originalPrice)){
+      throw new ApiError(400, "Original price must be greater than currentPrice");
     }
     payload.originalPrice=Number(originalPrice)
   }
@@ -87,7 +108,7 @@ const createProductService = async (
   if(discount){
     payload.discount=discount;
   }
- 
+
 
   //check colors
   if (colors) {
@@ -438,6 +459,11 @@ const getUserProductsService = async (query: TProductQuery) => {
   const totalCount = totalCountResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
+  const modifiedResult = result?.length > 0 ? result?.map((cv) => ({
+    ...cv,
+    stockStatus: getStockStatus(cv?.quantity)
+  })) : []
+
 return {
   meta: {
     page: Number(page), 
@@ -445,7 +471,7 @@ return {
     totalPages,
     total: totalCount,
   },
-  data: result,
+  data: modifiedResult,
 };
 };
 const getProductsService = async (query: TProductQuery) => {
@@ -510,11 +536,10 @@ const getProductsService = async (query: TProductQuery) => {
         originalPrice: "$originalPrice",
         discount: "$discount",
         ratings: "$ratings",
-        createdAt: "$createdAt",
         totalReview: "$totalReview",
         images: "$images",
         status: "$status",
-        stockStatus: "$stockStatus",
+        createdAt: "$createdAt",
       },
     },
     {
@@ -573,6 +598,11 @@ const getProductsService = async (query: TProductQuery) => {
   const totalCount = totalCountResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
+  const modifiedResult = result?.length > 0 ? result?.map((cv) => ({
+    ...cv,
+    stockStatus: getStockStatus(cv?.quantity)
+  })) : []
+
 return {
   meta: {
     page: Number(page), 
@@ -580,7 +610,7 @@ return {
     totalPages,
     total: totalCount,
   },
-  data: result,
+  data: modifiedResult,
 };
 };
 
@@ -789,7 +819,6 @@ const updateProductService = async (req:Request, productId: string, payload: Par
   }
 
 
-
   //desctructuring the payload
   const { name, categoryId } = payload;
 
@@ -828,6 +857,7 @@ const updateProductService = async (req:Request, productId: string, payload: Par
 };
 
 const updateProductImgService = async (req: Request, productId: string) => {
+  
   if (!Types.ObjectId.isValid(productId)) {
     throw new ApiError(400, "productId must be a valid ObjectId")
   }

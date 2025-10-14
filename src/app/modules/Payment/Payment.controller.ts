@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createCheckoutSessionService, createPaynowPaymentService, verifyCheckoutService } from "./Payment.service";
+import { createCheckoutSessionService, createGooglePaymentService, createPaynowPaymentService, verifyCheckoutService } from "./Payment.service";
 
 const createCheckoutSession = catchAsync(async (req, res) => {
   const result = await createCheckoutSessionService(req.body);
@@ -39,9 +39,22 @@ const createPaynowPayment = catchAsync(async (req, res) => {
 });
 
 
+const createGooglePaymentIntent = catchAsync(async (req, res) => {
+  const result = await createGooglePaymentService(req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Google Payment Intent is initiated',
+    data: result,
+  });
+});
+
+
 const PaymentController = {
   createCheckoutSession,
   verifyCheckout,
-  createPaynowPayment
+  createPaynowPayment,
+  createGooglePaymentIntent
 };
 export default PaymentController;

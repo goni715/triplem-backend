@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Types } from "mongoose";
 
 
+
 export const updateProductValidationSchema = z.object({
   name: z.string({
     invalid_type_error: "name must be string",
@@ -44,6 +45,15 @@ export const updateProductValidationSchema = z.object({
         })
     )
     .optional(),
+  quantity: z
+    .number({
+      required_error: "quantity is required",
+      invalid_type_error: "quantity must be a number",
+    })
+    .refine((val) => !isNaN(val), { message: "quantity must be a valid number" })
+    .refine((val) => val > 0, { message: "quantity must be minimum 1" })
+    .refine((val) => Number.isInteger(val), { message: "Quantity must be an integer value" })
+    .optional(),
   discount: z.string({
     invalid_type_error: "discount must be string"
   }).optional(),
@@ -56,14 +66,16 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "colors must be an array",
       required_error: "colors must be at least one value"
     }
-  ).default([])
+  ).optional()
     .superRefine((arr, ctx) => {
-      const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
-      if (duplicates.length > 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "colors array must not contain duplicate values",
-        });
+      if (arr && arr?.length > 0) {
+        const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+        if (duplicates.length > 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "colors array must not contain duplicate values",
+          });
+        }
       }
     }),
   sizes: z.array(
@@ -75,14 +87,16 @@ export const updateProductValidationSchema = z.object({
       invalid_type_error: "sizes must be an array",
       required_error: "sizes must be at least one value"
     }
-  ).default([])
+  ).optional()
     .superRefine((arr, ctx) => {
-      const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
-      if (duplicates.length > 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "sizes array must not contain duplicate values",
-        });
+      if (arr && arr?.length > 0) {
+        const duplicates = arr.filter((item, index) => arr.indexOf(item) !== index);
+        if (duplicates.length > 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "sizes array must not contain duplicate values",
+          });
+        }
       }
     }),
   introduction: z.string({
@@ -95,24 +109,11 @@ export const updateProductValidationSchema = z.object({
       required_error: "description is required"
     })
     .min(1, { message: "description is required" })
-    .refine(
-      (val) =>
-        /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) ||
-        val.includes("<"),
-      {
-        message: "description must be valid HTML.",
-      }
-    ).optional(),
+    .optional(),
   status: z.string({
     invalid_type_error: "status must be a valid string value.",
   })
     .refine((val) => ['visible', 'hidden'].includes(val), {
       message: "status must be one of: 'visible', 'hidden'",
-    }).optional(),
-  stockStatus: z.string({
-    invalid_type_error: "Stock Status must be a valid string value.",
-  })
-    .refine((val) => ['in_stock', 'stock_out', 'up_coming'].includes(val), {
-      message: "Stock Status must be one of: in_stock', 'stock_out', 'up_coming'",
     }).optional(),
 });

@@ -8,12 +8,12 @@ export interface IProduct {
   categoryId: Types.ObjectId;
   currentPrice: number;
   originalPrice?: number;
+  quantity: number;
   discount: string;
   ratings: number;
   colors?: Types.ObjectId[];
   sizes?: Types.ObjectId[];
   status: "visible" | "hidden";
-  stockStatus: TStockStatus;
   images: string[];
   introduction: string;
   description: string;

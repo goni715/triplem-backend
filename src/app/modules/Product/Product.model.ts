@@ -29,6 +29,16 @@ const productSchema = new Schema<IProduct>({
     default: 0,
     trim: true
   },
+  quantity: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate: {
+      validator: Number.isInteger,
+      message: "Quantity must be an integer value",
+    },
+    min: [0, "quantity cannot be negative"],
+  },
   discount: {
     type: String,
     default: ""
@@ -65,11 +75,6 @@ const productSchema = new Schema<IProduct>({
     type: String,
     enum: ['visible', 'hidden'],
     default: "visible"
-  },
-  stockStatus: {
-    type: String,
-    enum: ['in_stock', 'stock_out', 'up_coming'],
-    default: "in_stock"
   },
   images: {
     type: [String],
