@@ -29,7 +29,7 @@ const createProductService = async (
     throw new ApiError(400, "name is required!");
   }
 
-  const { name, categoryId, introduction, description, currentPrice, originalPrice, quantity, discount, colors, sizes, status, stockStatus } = reqBody;
+  const { name, categoryId, introduction, description, currentPrice, originalPrice, quantity, discount, colors, sizes, status } = reqBody;
 
   let payload: Record<string, unknown> ={}
 
@@ -190,14 +190,6 @@ const createProductService = async (
       throw new ApiError(400, "status must be one of: 'visible', 'hidden'");
     }
     payload.status= status;
-  }
-
-  //check stock status
-  if(stockStatus){
-    if(!['in_stock', 'stock_out', 'up_coming'].includes(stockStatus)){
-      throw new ApiError(400, "Stock Status must be one of: in_stock', 'stock_out', 'up_coming'");
-    }
-    payload.stockStatus=stockStatus
   }
   
   //make slug

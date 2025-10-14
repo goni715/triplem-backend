@@ -24,9 +24,17 @@ const createCartService = async (
   if(product.status==="hidden"){
     throw new ApiError(404, "This product is hidden")
   }
-  //check stock status
-  if(product.stockStatus !=="in_stock"){
-    throw new ApiError(404, `This product is ${product.stockStatus==="stock_out" ? "out of stock." : "upcoming"} `)
+ 
+  //check product quantity
+  if(product.quantity===0){
+    throw new ApiError(400, "This product is Out of Stock")
+  }
+
+  if (payload.quantity > product.quantity) {
+    throw new ApiError(
+      400,
+      `Only ${product.quantity} item(s) available in stock. Please adjust your quantity.`
+    );
   }
 
   //check colorId
