@@ -218,10 +218,6 @@ const createProductService = async (
 
   if (req.files && (req.files as Express.Multer.File[]).length > 0) {
     const files = req.files as Express.Multer.File[];
-    // for (const file of files) {
-    //   const path = `${req.protocol}://${req.get("host")}/uploads/${file?.filename}`;  //for local machine
-    //   images.push(path)
-    // }
 
     images = await Promise.all(
       files?.map(async (file) => {
@@ -233,7 +229,6 @@ const createProductService = async (
 
         // Delete local file (non-blocking)
         // fs.unlink(file.path);
-
         return result.secure_url;
       })
     );
@@ -389,6 +384,7 @@ const getUserProductsService = async (query: TProductQuery) => {
         categoryName: "$category.name",
         currentPrice: "$currentPrice",
         originalPrice: "$originalPrice",
+        quantity: "$quantity",
         discount: "$discount",
         ratings: "$ratings",
         totalReview: "$totalReview",
@@ -526,6 +522,7 @@ const getProductsService = async (query: TProductQuery) => {
         categoryName: "$category.name",
         currentPrice: "$currentPrice",
         originalPrice: "$originalPrice",
+        quantity: "$quantity",
         discount: "$discount",
         ratings: "$ratings",
         totalReview: "$totalReview",
@@ -606,7 +603,7 @@ return {
 };
 };
 
-const getSingleProductService = async (productId: string) => {
+const getUserSingleProductService = async (productId: string) => {
   if (!Types.ObjectId.isValid(productId)) {
     throw new ApiError(400, "productId must be a valid ObjectId")
   }
@@ -663,6 +660,7 @@ const getSingleProductService = async (productId: string) => {
         categoryName: "$category.name",
         currentPrice: "$currentPrice",
         originalPrice: "$originalPrice",
+        quantity: "$quantity",
         discount: "$discount",
         ratings: "$ratings",
         totalReview: "$totalReview",
@@ -754,10 +752,118 @@ const getSingleProductService = async (productId: string) => {
   ]);
 
 
+  const modifiedResult = product?.length > 0 ? product?.map((cv) => ({
+    ...cv,
+    stockStatus: getStockStatus(cv?.quantity)
+  })) : []
+
   return {
-    product: product[0],
+    product: modifiedResult[0],
     relatedProducts
   };
+};
+
+const getSingleProductService = async (productId: string) => {
+  if (!Types.ObjectId.isValid(productId)) {
+    throw new ApiError(400, "productId must be a valid ObjectId")
+  }
+
+  const product = await ProductModel.aggregate([
+    {
+      $match: { _id: new ObjectId(productId) }
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+    {
+      $unwind: "$category"
+    },
+    {
+      $lookup: {
+        from: "colors",
+        localField: "colors",
+        foreignField: "_id",
+        as: "colors"
+      }
+    },
+     {
+      $lookup: {
+        from: "sizes",
+        localField: "sizes",
+        foreignField: "_id",
+        as: "sizes"
+      }
+    },
+   {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "productId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        categoryId: 1,
+        categoryName: "$category.name",
+        currentPrice: "$currentPrice",
+        originalPrice: "$originalPrice",
+        quantity: "$quantity",
+        discount: "$discount",
+        ratings: "$ratings",
+        totalReview: "$totalReview",
+        images: "$images",
+        colors: {
+          $map: {
+            input: "$colors",
+            as: "color",
+            in: {
+              _id: "$$color._id",
+              name: "$$color.name",
+              hexCode: "$$color.hexCode"
+            }
+          }
+        },
+        sizes: {
+          $map: {
+            input: "$sizes",
+            as: "size",
+            in: {
+              _id: "$$size._id",
+              size: "$$size.size",
+            }
+          }
+        },
+        introduction: "$introduction",
+        description: "$description",
+        status: "$status",
+        stockStatus: "$stockStatus"
+      },
+    },
+  ]);
+
+  if (product.length===0) {
+    throw new ApiError(404, 'Product Not Found');
+  }
+
+  const modifiedResult = product?.length > 0 ? product?.map((cv) => ({
+    ...cv,
+    stockStatus: getStockStatus(cv?.quantity)
+  })) : []
+
+  return modifiedResult[0]
 };
 
 const updateProductService = async (req:Request, productId: string, payload: Partial<IProduct>) => {
@@ -954,6 +1060,7 @@ export {
   createProductService,
   getUserProductsService,
   getProductsService,
+  getUserSingleProductService,
   getSingleProductService,
   updateProductService,
   updateProductImgService,

@@ -10,6 +10,8 @@ import generateTransactionId from '../../utils/generateTransactionId';
 import Stripe from 'stripe';
 import config from '../../config';
 import isValidYearFormat from '../../utils/isValidateYearFormat';
+import ProductModel from '../Product/Product.model';
+import { ICartPayload } from '../Cart/Cart.interface';
 
 const stripe = new Stripe(config.stripe_secret_key as string);
 
@@ -60,6 +62,12 @@ const createOrderWithStripeService = async (
     quantity: product.quantity,
   }));
 
+  //cartProducts for metadata
+  const cartProductsForMetaData = carts?.map((cv)=> ({
+    productId:cv.productId,
+    quantity: cv.quantity
+  }))
+
    //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
 
@@ -96,7 +104,8 @@ const createOrderWithStripeService = async (
           mode: "payment",
           metadata: {
             orderId: (order[0]._id).toString(),
-            userId: loginUserId
+            userId: loginUserId,
+            cartProducts: JSON.stringify(cartProductsForMetaData)
           },
           customer_email: userEmail,
           client_reference_id: (order[0]._id).toString(),
@@ -635,25 +644,33 @@ const deleteOrderService = async (orderId: string) => {
 };
 
 
-
 const verifySessionService = async (sessionId: string) => {
   if (!sessionId) {
     throw new ApiError(400, "sessionId is required");
   }
 
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const paymentSession = await stripe.checkout.sessions.retrieve(sessionId);
     //payment_status = "no_payment_required", "paid", "unpaid"
-    if (session.payment_status !== "paid") {
+    if (paymentSession.payment_status !== "paid") {
       throw new ApiError(403, "Payment Failled");
     }
 
-    const metadata = session?.metadata;
-    if(!metadata || !session?.payment_intent){
+    const metadata = paymentSession?.metadata;
+    if(!metadata || !paymentSession?.payment_intent){
       throw new ApiError(400, "Invalid Session Id")
     }
+    
+    const order = await OrderModel.findOne({
+      _id: metadata.orderId,
+      userId: metadata.userId,
+      paymentStatus: "paid"
+    });
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(session?.payment_intent as string);
+    if (order) {
+      throw new ApiError(400, "Payment already completed");
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentSession?.payment_intent as string);
     const charge = await stripe.charges.retrieve(
       paymentIntent.latest_charge as string
     );
@@ -664,20 +681,61 @@ const verifySessionService = async (sessionId: string) => {
     const netAmount = balanceTx?.net / 100
     const stripeFee = balanceTx.fee / 100
 
+    const cartProducts = JSON.parse(metadata?.cartProducts);
+
+ 
+    //transaction & rollback
+    const session = await mongoose.startSession();
+
+  try {
+    //start transaction
+    session.startTransaction();
+
+    // update product sales in bulk
+    //bulkWrite send one request to MongoDB:
+    await ProductModel.bulkWrite(
+      cartProducts.map((item: ICartPayload) => ({
+        updateOne: {
+          filter: { _id: item.productId },
+          update: [
+            {
+              $set: {
+                quantity: {
+                  $max: [
+                    { $subtract: ["$quantity", item.quantity] }, //quantity can't be negative, but 0
+                    0
+                  ]
+                }
+              }
+            }
+          ],
+        }
+      })),
+      { session }
+    );
+
+
     //update database base on metadata = session.metadata
     const result = await OrderModel.updateOne({
       _id: metadata.orderId,
       userId: metadata.userId,
     }, {
       paymentStatus: "paid",
-      paymentId: session?.payment_intent,
+      paymentId: paymentSession?.payment_intent,
       stripeFee,
       netAmount
+    }, {
+      session
     })
 
+    //transaction success
+    await session.commitTransaction();
+    await session.endSession();
     return result;
-  } catch (err:any) {
-    throw new Error(err)
+  }catch (err:any) {
+      await session.abortTransaction();
+      await session.endSession();
+      throw new Error(err);
   }
 };
 

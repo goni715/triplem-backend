@@ -117,7 +117,7 @@ const getCartsService = async (loginUserId: string) => {
   })) : [];
 };
 
-const updateCartService = async (loginUserId: string, cartId: string, payload: any) => {
+const updateCartService = async (loginUserId: string, cartId: string, quantity: number) => {
   if (!Types.ObjectId.isValid(cartId)) {
     throw new ApiError(400, "cartId must be a valid ObjectId")
   }
@@ -129,13 +129,28 @@ const updateCartService = async (loginUserId: string, cartId: string, payload: a
   if (!cart) {
     throw new ApiError(404, "cartId not found");
   }
+
+  //check product quantity
+  const product = await ProductModel.findById(cart.productId);
+  if (!product) {
+    throw new ApiError(404, "productId not found");
+  }
+
+  if (quantity > product.quantity) {
+    throw new ApiError(
+      400,
+      `Only ${product.quantity} item(s) available in stock.`
+    );
+  }
+
   const result = await CartModel.updateOne(
     { userId: loginUserId, _id: cartId },
-    payload,
+    { quantity },
   );
 
   return result;
 };
+
 
 const deleteCartService = async (loginUserId: string, cartId: string) => {
   if (!Types.ObjectId.isValid(cartId)) {

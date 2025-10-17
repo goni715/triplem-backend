@@ -16,7 +16,12 @@ router.post(
 );
 
 router.get(
+  '/get-user-single-product/:productId',
+  ProductController.getUserSingleProduct,
+);
+router.get(
   '/get-single-product/:productId',
+  AuthMiddleware("admin", "super_admin"),
   ProductController.getSingleProduct,
 );
 
