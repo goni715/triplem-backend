@@ -29,7 +29,7 @@ app.use(
       "http://10.10.20.24:3000",
       "https://triplemcompany.com",
       "https://dashboard.triplemcompany.com",
-      "https://mtk-website-iota.vercel.app",
+      "https://triplem-ecommerce-goni.vercel.app",
       "https://triplem-dashboard.vercel.app",
     ],
     credentials: true,
