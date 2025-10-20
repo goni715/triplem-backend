@@ -50,7 +50,6 @@ const createOrderWithStripeService = async (
   }))
 
   
-
   const lineItems = cartProducts?.map((product) => ({
     price_data: {
       currency: "usd",
@@ -127,108 +126,6 @@ const createOrderWithStripeService = async (
 
 };
 
-const createOrderWithPayNowService = async (
-  loginUserId: string,
-  userEmail: string
-) => {
-
-  const carts = await CartModel.aggregate([
-    {
-      $match: {
-        userId: new ObjectId(loginUserId)
-      }
-    },
-    {
-      $project: {
-        _id:0,
-        userId: 0,
-        createdAt:0,
-        updatedAt:0
-      }
-    }
-  ]);
-
-  if(carts?.length===0){
-    throw new ApiError(404, "No items in cart.")
-  }
-  
-  //count totalPrice
-  const totalPrice = carts?.reduce((total, currentValue)=>total+ (currentValue.price*currentValue.quantity), 0);
-  const cartProducts = carts?.map((cv) => ({
-    ...cv,
-    total: Number(cv.price) * Number(cv.quantity)
-  }))
-
-  
-
-  const lineItems = cartProducts?.map((product) => ({
-    price_data: {
-      currency: "sgd",
-      product_data: {
-        name: product.name,
-      },
-      unit_amount: product.price * 100, // price in cents
-    },
-    quantity: product.quantity,
-  }));
-
-   //generate token
-  const token = Math.floor(100000 + Math.random() * 900000);
-
-  //generate transactionId
-  const transactionId = generateTransactionId();
-  
-
-     //transaction & rollback
-    const session = await mongoose.startSession();
-  
-    try {
-      session.startTransaction();
-  
-      //delete from cart list
-      await CartModel.deleteMany(
-        { userId: new ObjectId(loginUserId) },
-        { session }
-      );
-  
-      const order = await OrderModel.create([
-        {
-          userId: loginUserId,
-          token,
-          products: cartProducts,
-          totalPrice,
-          transactionId
-        }
-      ], {session});
-      
-      //create payment session
-        const paymentSession = await stripe.checkout.sessions.create({
-          payment_method_types: ["paynow"],
-          line_items: lineItems,
-          mode: "payment",
-          metadata: {
-            orderId: (order[0]._id).toString(),
-            userId: loginUserId
-          },
-          customer_email: userEmail,
-          client_reference_id: (order[0]._id).toString(),
-          success_url: `${config.frontend_url}/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${config.frontend_url}/cancel`,
-        });
-  
-      //transaction success
-      await session.commitTransaction();
-      await session.endSession();
-      return {
-        url: paymentSession.url
-      };
-    } catch (err: any) {
-      await session.abortTransaction();
-      await session.endSession();
-      throw new Error(err);
-    }
-
-};
 
 const getUserOrdersService = async (loginUserId: string, query: TUserOrderQuery) => {
   const {
@@ -684,8 +581,8 @@ const verifySessionService = async (sessionId: string) => {
     const cartProducts = JSON.parse(metadata?.cartProducts);
 
  
-    //transaction & rollback
-    const session = await mongoose.startSession();
+  //transaction & rollback
+  const session = await mongoose.startSession();
 
   try {
     //start transaction
@@ -715,7 +612,7 @@ const verifySessionService = async (sessionId: string) => {
     );
 
 
-    //update database base on metadata = session.metadata
+    //update payment status
     const result = await OrderModel.updateOne({
       _id: metadata.orderId,
       userId: metadata.userId,
@@ -820,7 +717,6 @@ const getIncomeOverviewService = async (year: string) => {
 
 export {
   createOrderWithStripeService,
-  createOrderWithPayNowService,
   getUserOrdersService,
   getAllOrdersService,
   getSingleOrderService,

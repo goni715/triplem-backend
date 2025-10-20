@@ -2,7 +2,7 @@ import catchAsync from '../../utils/catchAsync';
 import pickValidFields from '../../utils/pickValidFields';
 import sendResponse from '../../utils/sendResponse';
 import { OrderValidFields, UserOrderValidFields } from './Order.constant';
-import { getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService, verifySessionService, getIncomeOverviewService, createOrderWithPayNowService, createOrderWithStripeService } from './Order.service';
+import { getSingleOrderService, getAllOrdersService, updateOrderService, deleteOrderService, getUserOrdersService, verifySessionService, getIncomeOverviewService, createOrderWithStripeService } from './Order.service';
 
 const createOrderWithStripe = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -17,19 +17,6 @@ const createOrderWithStripe = catchAsync(async (req, res) => {
   });
 });
 
-
-const createOrderWithPayNow = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const userEmail = req.headers.email;
-  const result = await createOrderWithPayNowService(loginUserId as string, userEmail as string);
-
-  sendResponse(res, {
-    statusCode: 201,
-    success: true,
-    message: 'Order is initiated successfully',
-    data: result,
-  });
-});
 
 const getSingleOrder = catchAsync(async (req, res) => {
   const { orderId } = req.params;
@@ -121,7 +108,6 @@ const getIncomeOverview = catchAsync(async (req, res) => {
 
 const OrderController = {
   createOrderWithStripe,
-  createOrderWithPayNow,
   getSingleOrder,
   getUserOrders,
   getAllOrders,

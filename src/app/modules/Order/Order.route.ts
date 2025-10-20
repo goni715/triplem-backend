@@ -12,11 +12,7 @@ router.post(
   AuthMiddleware("user"),
   OrderController.createOrderWithStripe,
 );
-router.post(
-  '/create-order-with-paynow',
-  AuthMiddleware("user"),
-  OrderController.createOrderWithPayNow,
-);
+
 router.get(
   '/get-single-order/:orderId',
   AuthMiddleware(UserRole.admin, UserRole.super_admin),
