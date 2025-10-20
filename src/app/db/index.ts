@@ -6,6 +6,7 @@ const superUser = {
     email: config.super_admin_email,
     password: config.super_admin_password, 
     role: 'super_admin',
+    isVerified:true
 }
 
 

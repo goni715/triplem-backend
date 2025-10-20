@@ -30,7 +30,7 @@ app.use(
       "https://triplemcompany.com",
       "https://dashboard.triplemcompany.com",
       "https://mtk-website-iota.vercel.app",
-      "https://triplem-dashboard.vercel.app"
+      "https://triplem-dashboard.vercel.app",
     ],
     credentials: true,
   }),
