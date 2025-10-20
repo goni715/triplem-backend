@@ -315,7 +315,7 @@ const changePasswordService = async (loginUserId: string, payload: IChangePass) 
   );
 
   if (!isPasswordMatched) {
-    throw new AppError(400, 'Current Password is not correct');
+    throw new AppError(400, 'Wrong Current Password !');
   }
 
   if(currentPassword===newPassword){
