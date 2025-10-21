@@ -13,12 +13,12 @@ const sendVerificationEmail = async (email: string, name: string, token: string)
     },
   });
 
-   const verifyUrl = `https://triplem-website-integration.vercel.app/auth/verification?token=${token}`;
+   const verifyUrl = `${config.frontend_url}/auth/verification?token=${token}`;
 
   const mailOptions = {
-    from: `MTK Ecommerce ${config.smtp_from}`, //sender email address//smtp-username
+    from: `TripleM ${config.smtp_from}`, //sender email address//smtp-username
     to: email, //receiver email address
-    subject: "Verify Your Email - MTK Ecommerce",
+    subject: "Verify Your Email",
   html: `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc;">
       <!-- Header -->
@@ -26,14 +26,14 @@ const sendVerificationEmail = async (email: string, name: string, token: string)
         <div style="background-color: #ffffff; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);">
           <span style="font-size: 36px;">✉️</span>
         </div>
-        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">MTK Ecommerce</h1>
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">TripleM</h1>
         <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 16px;">Email Verification Required</p>
       </div>
       
       <!-- Main Content -->
       <div style="background-color: #ffffff; padding: 40px 30px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
         <h2 style="color: #1f2937; margin: 0 0 16px 0; font-size: 24px; font-weight: 600;">Hello ${name}! 👋</h2>
-        <p style="color: #6b7280; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">Welcome to MTK Ecommerce! Please verify your email address to get started.</p>
+        <p style="color: #6b7280; margin: 0 0 30px 0; font-size: 16px; line-height: 1.6;">Welcome to TripleM! Please verify your email address to get started.</p>
         
         <!-- Verification Button -->
         <div style="text-align: center; margin: 40px 0;">
@@ -69,8 +69,7 @@ const sendVerificationEmail = async (email: string, name: string, token: string)
       
       <!-- Footer -->
       <div style="background-color: #f9fafb; padding: 30px 20px; text-align: center; border-radius: 0 0 12px 12px;">
-        <p style="color: #6b7280; margin: 0 0 16px 0; font-size: 14px;">Need help? Contact <a href="mailto:support@mtkecommerce.com" style="color: #059669; text-decoration: none;">support@mtkecommerce.com</a></p>
-        <p style="color: #9ca3af; margin: 0; font-size: 12px;">© 2024 MTK Ecommerce. All rights reserved.</p>
+        <p style="color: #9ca3af; margin: 0; font-size: 12px;">©TripleM. All rights reserved.</p>
       </div>
     </div>
   `

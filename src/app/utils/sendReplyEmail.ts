@@ -15,9 +15,9 @@ const sendReplyEmail = async (email: string, replyMessage: string) => {
 
 
   const mailOptions = {
-    from: `MTK Ecommerce ${config.smtp_from}`, //sender email address//smtp-username
+    from: `TripleM ${config.smtp_from}`, //sender email address//smtp-username
     to: email, //receiver email address
-    subject: "Reply Message - MTK Ecommerce",
+    subject: "Reply Message",
     html: `
     <!DOCTYPE html>
     <html lang="en">
