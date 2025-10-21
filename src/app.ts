@@ -43,7 +43,7 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
-    res.send(`MTK ecommerce server is running......`);
+    res.send(`TRipleM ecommerce backend is running......`);
 });
 
 
