@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type TStockStatus = 'in_stock' | 'stock_out' | 'up_coming';
+export type TStockStatus = 'in_stock' | 'stock_out' | 'limited_stock';
 
 export interface IProduct {
   name: string;

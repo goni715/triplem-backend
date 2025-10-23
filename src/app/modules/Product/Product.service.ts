@@ -245,7 +245,6 @@ const createProductService = async (
     });
     return result;
 };
-
 const getUserProductsService = async (query: TProductQuery) => {
   const {
     searchTerm, 
@@ -257,6 +256,7 @@ const getUserProductsService = async (query: TProductQuery) => {
     categoryId,
     fromPrice,
     toPrice,
+    stockStatus,
     ...filters  // Any additional filters
   } = query;
 
@@ -277,6 +277,43 @@ const getUserProductsService = async (query: TProductQuery) => {
   if (filters) {
     filterQuery = makeFilterQuery(filters);
   }
+
+
+//check stockStatus
+if(stockStatus){
+  if(!(["in_stock", "stock_out", "limited_stock"].includes(stockStatus))){
+    throw new ApiError(400, `stockStatus must be 'in_stock', 'stock_out', 'limited_stock`)
+  }
+
+  //in_stock ===> quantity > 5
+  if (stockStatus === "in_stock") {
+    filterQuery = {
+      ...filterQuery,
+      quantity: {
+        $gt: 5
+      }
+    }
+  }
+
+  //stock_out ===> quantity = 0
+  if (stockStatus === "stock_out") {
+    filterQuery = {
+      ...filterQuery,
+      quantity: 0
+    }
+  }
+
+  //limited_stock===> quantity 1-5
+  if (stockStatus === "limited_stock") {
+    filterQuery = {
+      ...filterQuery,
+      quantity: {
+        $gte: 1,
+        $lte: 5
+      }
+    }
+  }
+}
 
 
 //filter by category
@@ -397,7 +434,7 @@ const getUserProductsService = async (query: TProductQuery) => {
       $match: {
         ...searchQuery, 
         ...filterQuery,
-        status: "visible"
+        status: "visible",
     },
     },
     { $sort: { createdAt:-1 } },
@@ -426,6 +463,7 @@ const getUserProductsService = async (query: TProductQuery) => {
         categoryName: "$category.name",
         currentPrice: "$currentPrice",
         originalPrice: "$originalPrice",
+        quantity:1,
         discount: "$discount",
         ratings: "$ratings",
         totalReview: "$totalReview",
@@ -462,6 +500,7 @@ return {
   data: modifiedResult,
 };
 };
+
 const getProductsService = async (query: TProductQuery) => {
   const {
     searchTerm, 
