@@ -42,7 +42,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.15",
     "eslint": "^9.31.0",
-    "morgan": "^1.10.1",
+    "morgan": "^1.11.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
